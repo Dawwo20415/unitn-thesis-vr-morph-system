@@ -1,0 +1,3 @@
+[submodule "Packages/vr-bone-morph"]
+	path = Packages/vr-bone-morph
+	url = https://github.com/Dawwo20415/vr-bone-morph.git
