@@ -51,6 +51,6 @@ public class BodyStructureReference : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        shoulder_origin.localRotation = cameraTransform.localRotation;
+        //shoulder_origin.localRotation = cameraTransform.localRotation;
     }
 }

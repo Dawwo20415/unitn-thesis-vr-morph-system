@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace VRArmIK
@@ -55,7 +56,10 @@ namespace VRArmIK
 		public ShoulderTransforms shoulder;
 		public ShoulderPoser shoulderPoser;
 		public Transform target;
+		private Vector3 target_pos;
+		private Quaternion target_rot;
 		public bool left = true;
+		public bool localSpace = false;
 
 		public ArmIKElbowSettings elbowSettings;
 		public BeforePositioningSettings beforePositioningSettings;
@@ -71,6 +75,16 @@ namespace VRArmIK
 
 		void Awake()
 		{
+			if (localSpace)
+			{
+				target_pos = target.localPosition;
+				target_rot = target.localRotation;
+			} else
+			{
+				target_pos = target.position;
+				target_rot = target.rotation;
+			}
+
 			upperArmStartRotation = arm.upperArm.rotation;
 			lowerArmStartRotation = arm.lowerArm.rotation;
 			wristStartRotation = Quaternion.identity;
@@ -143,6 +157,7 @@ namespace VRArmIK
 			}
 
 			eulerAngles.y = innerAngle;
+			
 			nextLowerArmAngle = eulerAngles;
 		}
 
@@ -161,10 +176,15 @@ namespace VRArmIK
 
 
 			Quaternion shoulderRightRotation = Quaternion.FromToRotation(armDirection, targetShoulderDirection);
-			setUpperArmRotation(shoulderRightRotation);
-			arm.upperArm.rotation = Quaternion.AngleAxis(eulerAngles.y, lowerArmRotation * Vector3.up) * arm.upperArm.rotation;
-			setLowerArmLocalRotation(Quaternion.Euler(nextLowerArmAngle));
-		}
+			
+			//ADDED BY DAWWO, original didn't account for the possible rotation of the parent object
+			shoulderRightRotation *= Quaternion.Inverse(upperArmStartRotation);
+
+            setUpperArmRotation(shoulderRightRotation);
+            arm.upperArm.rotation *= Quaternion.AngleAxis(eulerAngles.y, lowerArmRotation * Vector3.up);
+            
+            setLowerArmLocalRotation(Quaternion.Euler(nextLowerArmAngle));
+        }
 
 		float getElbowTargetAngle()
 		{
@@ -270,7 +290,10 @@ namespace VRArmIK
 			Vector3 shoulderHandDirection = (upperArmPos - handPos).normalized;
 
 			Quaternion rotation = Quaternion.AngleAxis(angle, shoulderHandDirection);
-			setUpperArmRotation(rotation * upperArmRotation);
+            //ADDED BY DAWWO, original didn't account for the possible rotation of the parent object
+            rotation *= Quaternion.Inverse(upperArmStartRotation);
+
+            setUpperArmRotation(rotation * upperArmRotation);
 		}
 
 		//source: https://github.com/NickHardeman/ofxIKArm/blob/master/src/ofxIKArm.cpp
