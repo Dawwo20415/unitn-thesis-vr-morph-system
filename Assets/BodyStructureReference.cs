@@ -46,11 +46,11 @@ public class BodyStructureReference : MonoBehaviour
         right_arm_origin.localPosition = shoulder_vec;
         right_arm_origin.localRotation = hmd_origin.localRotation;
 
-    }
+    }  
 
     // Update is called once per frame
     void Update()
     {
-        //shoulder_origin.localRotation = cameraTransform.localRotation;
+        shoulder_origin.localPosition = hmd_origin.localPosition - new Vector3(0, neck_height, 0);
     }
 }
