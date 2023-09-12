@@ -29,7 +29,7 @@ public class ArmIK : MonoBehaviour
     }
 
     float CalcAngle() {
-        float targetDistance = (target_trn.localPosition - obj_origin.position).magnitude;
+        float targetDistance = (target_trn.position - obj_origin.position).magnitude;
 
         if ( targetDistance > descriptor.total_length) { return 0.0f; };
         
@@ -48,7 +48,7 @@ public class ArmIK : MonoBehaviour
         float angle = CalcAngle();
         angle = descriptor.direction == 0 ? angle : -angle;
         direction *= Quaternion.Euler(0, -angle / 2, 0);
-        elbow_angle *= Quaternion.Euler(0, (angle) + 90, 0);
+        elbow_angle *= Quaternion.Euler(0, (angle), 0);
         
 
         descriptor.SetArmRotation(direction);

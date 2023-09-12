@@ -17,6 +17,8 @@ public class ArmDescriptor : MonoBehaviour
     public GameObject hand;
     private Transform hand_trn;
     private Quaternion hand_base;
+    private Transform parent_trn;
+    private Quaternion parent_base;
 
     public float arm_length;
     public float forearm_length;
@@ -32,6 +34,9 @@ public class ArmDescriptor : MonoBehaviour
         hand_trn = hand.transform;
         hand_base = hand.transform.rotation;
 
+        parent_trn = gameObject.GetComponentInParent<Transform>();
+        parent_base = Quaternion.Inverse(parent_trn.rotation);
+
         total_length = arm_length + forearm_length;
     }
 
@@ -40,6 +45,6 @@ public class ArmDescriptor : MonoBehaviour
     }
 
     public void SetForearmRotation(Quaternion new_rotation) {
-        forearm_trn.localRotation = forearm_base * new_rotation;
+        forearm_trn.localRotation = parent_base * forearm_base * new_rotation;
     }
 }
