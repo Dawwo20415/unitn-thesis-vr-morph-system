@@ -699,9 +699,11 @@ MonoBehaviour:
   displacement_references:
   - {fileID: 1774518595}
   - {fileID: 1774518595}
+  - {fileID: 1774518595}
   operations:
   - {fileID: 11400000, guid: 4ad03f8e35bf1ef488316c30aa5426be, type: 2}
-  - {fileID: 11400000, guid: 518ffea701b8b5944895cddcd8c0c91c, type: 2}
+  - {fileID: 11400000, guid: 9112f7ec59b65f74bbd84dca4fd3a6e3, type: 2}
+  - {fileID: 11400000, guid: 9beda3522094008448a5e9b502792c9f, type: 2}
 --- !u!1 &304184175
 GameObject:
   m_ObjectHideFlags: 0
