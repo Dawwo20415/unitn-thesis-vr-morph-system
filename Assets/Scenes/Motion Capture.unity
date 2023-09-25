@@ -814,15 +814,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1.1699404
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.0005003214
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.48127294
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
       propertyPath: m_LocalRotation.w
@@ -856,11 +856,46 @@ PrefabInstance:
       propertyPath: m_Name
       value: Armature
       objectReference: {fileID: 0}
+    - target: {fileID: 4885301371922852569, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 5ce5ad0496fae974e96ecf8351292851, type: 2}
+    - target: {fileID: 4885301371922852569, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
+      propertyPath: m_Materials.Array.data[1]
+      value: 
+      objectReference: {fileID: 2100000, guid: 32c651844ea3e8848af97d93fc55e0d3, type: 2}
+    - target: {fileID: 4885301371922852569, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
+      propertyPath: m_Materials.Array.data[2]
+      value: 
+      objectReference: {fileID: 2100000, guid: 32c651844ea3e8848af97d93fc55e0d3, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1985061548}
   m_SourcePrefab: {fileID: 100100000, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
+--- !u!1 &1985061547 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
+  m_PrefabInstance: {fileID: 1985061546}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1985061548
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1985061547}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6226842a13d56fc4b9f6ffc41f7ef0ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  StreamingClient: {fileID: 1715696273}
+  SkeletonAssetName: Skeleton1
+  DestinationAvatar: {fileID: 9000000, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
