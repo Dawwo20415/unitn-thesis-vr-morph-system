@@ -695,15 +695,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8db337669f3b5f44bb2c171e4a8d6373, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  reference_object: {fileID: 1812827020}
+  reference_object: {fileID: 242805571}
   displacement_references:
-  - {fileID: 1774518595}
+  - {fileID: 0}
   - {fileID: 1774518595}
   - {fileID: 1774518595}
   operations:
   - {fileID: 11400000, guid: 4ad03f8e35bf1ef488316c30aa5426be, type: 2}
   - {fileID: 11400000, guid: 9112f7ec59b65f74bbd84dca4fd3a6e3, type: 2}
-  - {fileID: 11400000, guid: 9beda3522094008448a5e9b502792c9f, type: 2}
+  - {fileID: 11400000, guid: 9112f7ec59b65f74bbd84dca4fd3a6e3, type: 2}
 --- !u!1 &304184175
 GameObject:
   m_ObjectHideFlags: 0
@@ -2722,7 +2722,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1220334076
 Transform:
   m_ObjectHideFlags: 0
