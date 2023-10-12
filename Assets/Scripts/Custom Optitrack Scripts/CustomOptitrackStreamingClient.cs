@@ -51,6 +51,11 @@ public class CustomOptitrackStreamingClient : MonoBehaviour
     [Tooltip("Skips getting data descriptions. Skeletons will not work with this feature turned on, but it will reduce network usage with a large number of rigid bodies.")]
     public bool SkipDataDescriptions = false;
 
+    [Header("\nCustom Fields")]
+
+    [SerializeField]
+    [Tooltip("Prefab that gets instantiated and scalen on each marker position sent by motive")]
+    private GameObject marker_prefab;   
 
     #region Private fields
     //private UInt16 ServerCommandPort = NatNetConstants.DefaultCommandPort;
@@ -118,17 +123,7 @@ public class CustomOptitrackStreamingClient : MonoBehaviour
                     }
                     else
                     {
-                        var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                        sphere.transform.parent = this.transform;
-                        sphere.transform.localScale = new Vector3(markerEntry.Value.Size, markerEntry.Value.Size, markerEntry.Value.Size);
-                        sphere.transform.position = markerEntry.Value.Position;
-                        sphere.name = markerEntry.Value.Name;
-                        if (markerEntry.Value.IsActive)
-                        {
-                            // Make active markers cyan colored
-                            sphere.GetComponent<Renderer>().material.SetColor("_Color", Color.cyan);
-                        }
-                        m_latestMarkerSpheres[markerEntry.Key] = sphere;
+                        InstantiateMarkerPrefab(markerEntry);
                     }
                     markerIds.Add(markerEntry.Key);
                 }
@@ -233,6 +228,21 @@ public class CustomOptitrackStreamingClient : MonoBehaviour
 
     }
 
+    public void InstantiateMarkerPrefab(KeyValuePair<Int32, OptitrackMarkerState> markerEntry)
+    {
+        var sphere = Instantiate(marker_prefab);
+        sphere.transform.parent = this.transform;
+        sphere.transform.localScale = new Vector3(markerEntry.Value.Size, markerEntry.Value.Size, markerEntry.Value.Size);
+        sphere.transform.position = markerEntry.Value.Position;
+        sphere.name = markerEntry.Value.Name;
+        if (markerEntry.Value.IsActive)
+        {
+            // Make active markers cyan colored
+            //NOTE: Don't really like that i need to do a GetComponent in the Update() loop
+            sphere.GetComponent<Renderer>().material.SetColor("_EmissionColor", Color.cyan);
+        }
+        m_latestMarkerSpheres[markerEntry.Key] = sphere;
+    }
 
     /// <summary>
     /// Returns the first <see cref="OptitrackStreamingClient"/> component located in the scene.
