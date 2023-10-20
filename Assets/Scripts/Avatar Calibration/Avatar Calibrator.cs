@@ -14,6 +14,8 @@ public class AvatarCalibrator : MonoBehaviour
     public Transform target1;
     public Transform target2;
     public Mesh capsuleMesh;
+    [Range(0.0f,0.3f)]
+    public float capsule_thickness;
 
 
     [ContextMenu("Generate Calibration Objects")]
@@ -102,6 +104,11 @@ public class AvatarCalibrator : MonoBehaviour
         MeshRenderer mesh_renderer = cal_capsule.AddComponent<MeshRenderer>();
         mesh_renderer.material = meshMaterial;
         mesh_filter.mesh = capsuleMesh;
-        cal_capsule.transform.position = (target1.position + target2.position) / 2;
+        Vector3 position = (target1.position + target2.position) / 2;
+        float distance = (target2.position - target1.position).magnitude;
+        Vector3 rotation = (target1.position - position).normalized;
+        cal_capsule.transform.position = position;
+        cal_capsule.transform.localScale = new Vector3(capsule_thickness, distance, capsule_thickness);
+        cal_capsule.transform.rotation = Quaternion.LookRotation(target2.localPosition);
     }  
 }
