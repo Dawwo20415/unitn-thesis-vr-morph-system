@@ -4,6 +4,13 @@ using UnityEngine;
 
 public class AvatarCalibrationMesh : ScriptableObject
 {
-    public List<Vector3> points;
-    public CalibrationMeshDescriptor triangles;
+    List<string> avatar_reference_points;
+
+    public Vector3 position_offset;
+    public Quaternion rotation_offset;
+
+    public virtual Mesh getMesh()
+    {
+        return new Mesh();
+    }
 }

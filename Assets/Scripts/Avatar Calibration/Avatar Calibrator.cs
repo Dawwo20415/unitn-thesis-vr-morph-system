@@ -11,8 +11,7 @@ public class AvatarCalibrator : MonoBehaviour
 
     [Header("To Generate Arms Cylinders")]
     [Tooltip("Target object to generate empty references for the arms and legs")]
-    public Transform target1;
-    public Transform target2;
+    public List<Transform> targets;
     public Mesh capsuleMesh;
     [Range(0.0f,0.3f)]
     public float capsule_thickness;
@@ -23,7 +22,7 @@ public class AvatarCalibrator : MonoBehaviour
     {
         foreach (GameObject parentObj in meshPoints)
         {
-            AvatarCalibrationMesh asset = ScriptableObject.CreateInstance<AvatarCalibrationMesh>();
+            CustomAvatarCalibrationMesh asset = ScriptableObject.CreateInstance<CustomAvatarCalibrationMesh>();
             CalibrationMeshDescriptor descriptor = parentObj.GetComponent<CalibrationMeshAsync>().descriptor;
             string assetPath = "Assets/Scriptable Objects/Calibration_" + parentObj.name + ".asset";
 
@@ -73,10 +72,8 @@ public class AvatarCalibrator : MonoBehaviour
             cal_mesh.transform.parent = transform;
             MeshFilter mesh_filter = cal_mesh.AddComponent<MeshFilter>();
             MeshRenderer mesh_renderer = cal_mesh.AddComponent<MeshRenderer>();
-            Mesh mesh = new Mesh();
+            Mesh mesh = calibration.getMesh();
             mesh_filter.mesh = mesh;
-            mesh.vertices = calibration.points.ToArray();
-            mesh.triangles = calibration.triangles.getTrisArray();
             mesh_renderer.material = meshMaterial;
         } 
     }
@@ -98,17 +95,25 @@ public class AvatarCalibrator : MonoBehaviour
         GameObject appendeges = new GameObject("g_" + objName);
         appendeges.transform.parent = transform;
 
-        GameObject cal_capsule = new GameObject("g_CalCapsule_");
-        cal_capsule.transform.parent = appendeges.transform;
-        MeshFilter mesh_filter = cal_capsule.AddComponent<MeshFilter>();
-        MeshRenderer mesh_renderer = cal_capsule.AddComponent<MeshRenderer>();
-        mesh_renderer.material = meshMaterial;
-        mesh_filter.mesh = capsuleMesh;
-        Vector3 position = (target1.position + target2.position) / 2;
-        float distance = (target2.position - target1.position).magnitude;
-        Vector3 rotation = (target1.position - position).normalized;
-        cal_capsule.transform.position = position;
-        cal_capsule.transform.localScale = new Vector3(capsule_thickness, distance, capsule_thickness);
-        cal_capsule.transform.rotation = Quaternion.LookRotation(target2.localPosition);
+        for (int i = 0; i < targets.Count; i+=2)
+        {
+            GameObject cal_capsule = new GameObject("g_CalCapsule_" + targets[i].name);
+            cal_capsule.transform.parent = appendeges.transform;
+
+            MeshFilter mesh_filter = cal_capsule.AddComponent<MeshFilter>();
+            MeshRenderer mesh_renderer = cal_capsule.AddComponent<MeshRenderer>();
+            ObjectBoneFollow follow = cal_capsule.AddComponent<ObjectBoneFollow>();
+            mesh_renderer.material = meshMaterial;
+            mesh_filter.mesh = capsuleMesh;
+
+            Vector3 position = (targets[i].position + targets[i+1].position) / 2;
+            float distance = (targets[i+1].position - targets[i].position).magnitude;
+            Vector3 pointer = (targets[i].position - position).normalized;
+            Quaternion rotation = Quaternion.LookRotation(pointer) * Quaternion.Euler(new Vector3(90, 0, 0));
+            List<Transform> point_list = new List<Transform>() { targets[i], targets[i + 1] };
+            Vector3 scale = new Vector3(capsule_thickness, distance / 2, capsule_thickness);
+
+            follow.calibrate(point_list, position, Quaternion.Euler(new Vector3(90, 0, 0)), scale);
+        }    
     }  
 }
