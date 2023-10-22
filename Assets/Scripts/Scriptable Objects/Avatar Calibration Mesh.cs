@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class AvatarCalibrationMesh : ScriptableObject
 {
-    List<string> avatar_reference_points;
+    public List<string> avatar_reference_points;
 
     public Vector3 position_offset;
     public Quaternion rotation_offset;

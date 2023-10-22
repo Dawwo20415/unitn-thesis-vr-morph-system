@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEditor.VersionControl;
 using UnityEngine;
 
 public class AvatarCalibrator : MonoBehaviour
@@ -8,6 +9,7 @@ public class AvatarCalibrator : MonoBehaviour
     public GameObject[] meshPoints;
     public List<AvatarCalibrationMesh> calibrations;
     public Material meshMaterial;
+    public string EgocentricDescriptionName;
 
     [Header("To Generate Arms Cylinders")]
     [Tooltip("Target object to generate empty references for the arms and legs")]
@@ -115,5 +117,52 @@ public class AvatarCalibrator : MonoBehaviour
 
             follow.calibrate(point_list, position, Quaternion.Euler(new Vector3(90, 0, 0)), scale);
         }    
-    }  
+    }
+
+    List<Vector3> getAsyncMeshPoints (Transform parent)
+    {
+        List<Vector3> tmp = new List<Vector3>();
+        foreach (Transform childTrn in parent)
+        {
+            tmp.Add(childTrn.position);
+        }
+
+        return tmp;
+    }
+
+    [ContextMenu("Create Calibration Object")]
+    void makeEgocentricMapDescription()
+    {
+        //So this is basically an outline of the calibration process, right?
+        //Calibration for an humanoid so it doesn't need to be much flexible, just adapt to the avatar.   
+        EgocentricMappingDescription calibration = ScriptableObject.CreateInstance<EgocentricMappingDescription>();
+        string assetPath = "Assets/Scriptable Objects/EgocentricDescription_" + EgocentricDescriptionName + ".asset";
+        AssetDatabase.CreateAsset(calibration, assetPath);
+        AssetDatabase.SaveAssets();
+
+        //Make Head-Torso Mesh
+        foreach (GameObject parentObj in meshPoints)
+        {
+            CustomAvatarCalibrationMesh asset = ScriptableObject.CreateInstance<CustomAvatarCalibrationMesh>();
+            CalibrationMeshDescriptor descriptor = parentObj.GetComponent<CalibrationMeshAsync>().descriptor;
+            asset.name = "MeshDescription_" + parentObj.name;
+
+            asset.points = getAsyncMeshPoints(parentObj.transform);
+            asset.triangles = descriptor;
+
+            asset.position_offset = Vector3.zero;
+            asset.rotation_offset = Quaternion.identity;
+            asset.avatar_reference_points = parentObj.GetComponent<CalibrationMeshAsync>().getBoneNames();
+
+            calibration.meshes.Add(asset);
+
+            AssetDatabase.AddObjectToAsset(asset, calibration);
+            AssetDatabase.SaveAssets();
+        }
+
+        //Make Appendiges Capsules
+
+        //Construct The calibration Object
+        
+    }
 }
