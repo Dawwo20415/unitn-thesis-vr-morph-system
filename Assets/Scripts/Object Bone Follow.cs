@@ -22,8 +22,6 @@ public class ObjectBoneFollow : MonoBehaviour
             return;
         }
 
-        Debug.Log("Rotation Offset: " + rotation_offset.ToString(), this);
-
         Vector3 midpoint = getMidpoint();
 
         transform.position = midpoint + midpoint_offset;

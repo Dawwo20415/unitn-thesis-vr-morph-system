@@ -161,8 +161,32 @@ public class AvatarCalibrator : MonoBehaviour
         }
 
         //Make Appendiges Capsules
+        for (int i = 0; i < targets.Count; i += 2)
+        {
+            CapsuleAvatarCalibrationMesh asset = ScriptableObject.CreateInstance<CapsuleAvatarCalibrationMesh>();
+            asset.name = "MeshDescription_" + targets[i].name;
+
+            Vector3 position = (targets[i].position + targets[i + 1].position) / 2;
+            float distance = (targets[i + 1].position - targets[i].position).magnitude;
+            Quaternion rotation = Quaternion.Euler(new Vector3(90, 0, 0));
+
+            List<string> name_list = new List<string>() { targets[i].name, targets[i+1].name };
+
+            asset.capsule_mesh = capsuleMesh;
+            asset.length = distance / 2;
+            asset.radius = capsule_thickness;
+            asset.avatar_reference_points = name_list;
+            asset.position_offset = position;
+            asset.rotation_offset = rotation;
+
+            calibration.meshes.Add(asset);
+
+            AssetDatabase.AddObjectToAsset(asset, calibration);
+            AssetDatabase.SaveAssets();
+        }
+
 
         //Construct The calibration Object
-        
+        AssetDatabase.SaveAssets();
     }
 }
