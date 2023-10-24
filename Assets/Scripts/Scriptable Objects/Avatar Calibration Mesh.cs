@@ -13,4 +13,9 @@ public class AvatarCalibrationMesh : ScriptableObject
     {
         return new Mesh();
     }
+
+    public virtual Vector3 getScale()
+    {
+        return Vector3.one;
+    }
 }

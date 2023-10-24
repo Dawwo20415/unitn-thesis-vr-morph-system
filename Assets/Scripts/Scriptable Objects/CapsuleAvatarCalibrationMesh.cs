@@ -14,4 +14,9 @@ public class CapsuleAvatarCalibrationMesh : AvatarCalibrationMesh
     {
         return capsule_mesh;
     }
+
+    public override Vector3 getScale()
+    {
+        return new Vector3(radius, length, radius);
+    }
 }

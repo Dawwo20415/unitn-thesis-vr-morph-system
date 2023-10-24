@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-5902801182541987561
+--- !u!114 &-8928948128204762360
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -10,57 +10,57 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b5db7225ab7409841a9353d50ff35d4f, type: 3}
-  m_Name: MeshDescription_Right_UpperLeg
+  m_Name: MeshDescription_Left_UpperArm
   m_EditorClassIdentifier: 
   avatar_reference_points:
-  - Right_UpperLeg
-  - Right_LowerLeg
-  position_offset: {x: 0.093440585, y: 0.72110146, z: -0.028453147}
-  rotation_offset: {x: 0.70710677, y: 0, z: 0, w: 0.70710677}
-  capsule_mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
-  length: 0.20667207
-  radius: 0.083
---- !u!114 &-5810941682320158978
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5db7225ab7409841a9353d50ff35d4f, type: 3}
-  m_Name: MeshDescription_Left_UpperLeg
-  m_EditorClassIdentifier: 
-  avatar_reference_points:
-  - Left_UpperLeg
-  - Left_LowerLeg
-  position_offset: {x: -0.093440354, y: 0.72110146, z: -0.028453154}
-  rotation_offset: {x: 0.70710677, y: 0, z: 0, w: 0.70710677}
-  capsule_mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
-  length: 0.20667219
-  radius: 0.083
---- !u!114 &-4978722978086788725
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5db7225ab7409841a9353d50ff35d4f, type: 3}
-  m_Name: MeshDescription_Left_LowerArm
-  m_EditorClassIdentifier: 
-  avatar_reference_points:
+  - Left_UpperArm
   - Left_LowerArm
-  - Left_Hand
-  position_offset: {x: -0.3961577, y: 1.1380537, z: 0.03727322}
+  position_offset: {x: -0.25689945, y: 1.3155944, z: -0.055009294}
   rotation_offset: {x: 0.70710677, y: 0, z: 0, w: 0.70710677}
   capsule_mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
-  length: 0.12018109
+  length: 0.14254037
   radius: 0.083
---- !u!114 &-4384557748739801037
+--- !u!114 &-8771440645898945267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5db7225ab7409841a9353d50ff35d4f, type: 3}
+  m_Name: MeshDescription_Right_UpperArm
+  m_EditorClassIdentifier: 
+  avatar_reference_points:
+  - Right_UpperArm
+  - Right_LowerArm
+  position_offset: {x: 0.25689894, y: 1.3155954, z: -0.05500929}
+  rotation_offset: {x: 0.70710677, y: 0, z: 0, w: 0.70710677}
+  capsule_mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+  length: 0.14254248
+  radius: 0.083
+--- !u!114 &-6715067970695421902
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5db7225ab7409841a9353d50ff35d4f, type: 3}
+  m_Name: MeshDescription_Right_LowerArm
+  m_EditorClassIdentifier: 
+  avatar_reference_points:
+  - Right_LowerArm
+  - Right_Hand
+  position_offset: {x: 0.3961574, y: 1.1380506, z: 0.037273057}
+  rotation_offset: {x: 0.70710677, y: 0, z: 0, w: 0.70710677}
+  capsule_mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+  length: 0.120181836
+  radius: 0.083
+--- !u!114 &-3617710003145297788
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -93,7 +93,7 @@ MonoBehaviour:
   - {x: -0.103, y: 0.968, z: -0.132}
   - {x: 0.103, y: 0.968, z: -0.132}
   triangles: {fileID: 11400000, guid: 3a903be21d892b94e8bf50d915a6b15d, type: 2}
---- !u!114 &-3436611135245164990
+--- !u!114 &-3147775936724852206
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -103,15 +103,35 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b5db7225ab7409841a9353d50ff35d4f, type: 3}
-  m_Name: MeshDescription_Left_UpperArm
+  m_Name: MeshDescription_Right_UpperLeg
   m_EditorClassIdentifier: 
   avatar_reference_points:
-  - Left_UpperArm
-  - Left_LowerArm
-  position_offset: {x: -0.25689945, y: 1.3155944, z: -0.055009294}
+  - Right_UpperLeg
+  - Right_LowerLeg
+  position_offset: {x: 0.093440585, y: 0.72110146, z: -0.028453147}
   rotation_offset: {x: 0.70710677, y: 0, z: 0, w: 0.70710677}
   capsule_mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
-  length: 0.14254037
+  length: 0.20667207
+  radius: 0.083
+--- !u!114 &-1119801653055631212
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5db7225ab7409841a9353d50ff35d4f, type: 3}
+  m_Name: MeshDescription_Left_LowerArm
+  m_EditorClassIdentifier: 
+  avatar_reference_points:
+  - Left_LowerArm
+  - Left_Hand
+  position_offset: {x: -0.3961577, y: 1.1380537, z: 0.03727322}
+  rotation_offset: {x: 0.70710677, y: 0, z: 0, w: 0.70710677}
+  capsule_mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+  length: 0.12018109
   radius: 0.083
 --- !u!114 &11400000
 MonoBehaviour:
@@ -126,17 +146,77 @@ MonoBehaviour:
   m_Name: EgocentricDescription_Test_Avatar
   m_EditorClassIdentifier: 
   meshes:
-  - {fileID: 2568333471778148755}
-  - {fileID: -4384557748739801037}
-  - {fileID: -3436611135245164990}
-  - {fileID: -4978722978086788725}
-  - {fileID: 5749670851775951560}
-  - {fileID: 5071610001863979526}
-  - {fileID: -5810941682320158978}
-  - {fileID: 5823186843141812311}
-  - {fileID: -5902801182541987561}
-  - {fileID: 6742502536572531178}
---- !u!114 &2568333471778148755
+  - {fileID: 8426336710425443496}
+  - {fileID: -3617710003145297788}
+  - {fileID: -8928948128204762360}
+  - {fileID: -1119801653055631212}
+  - {fileID: -8771440645898945267}
+  - {fileID: -6715067970695421902}
+  - {fileID: 6729409034075685238}
+  - {fileID: 6485211479104884146}
+  - {fileID: -3147775936724852206}
+  - {fileID: 5973015316086596036}
+--- !u!114 &5973015316086596036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5db7225ab7409841a9353d50ff35d4f, type: 3}
+  m_Name: MeshDescription_Right_LowerLeg
+  m_EditorClassIdentifier: 
+  avatar_reference_points:
+  - Right_LowerLeg
+  - Right_Foot
+  position_offset: {x: 0.108107485, y: 0.308229, z: -0.044696443}
+  rotation_offset: {x: 0.70710677, y: 0, z: 0, w: 0.70710677}
+  capsule_mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+  length: 0.20701985
+  radius: 0.083
+--- !u!114 &6485211479104884146
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5db7225ab7409841a9353d50ff35d4f, type: 3}
+  m_Name: MeshDescription_Left_LowerLeg
+  m_EditorClassIdentifier: 
+  avatar_reference_points:
+  - Left_LowerLeg
+  - Left_Foot
+  position_offset: {x: -0.108107395, y: 0.30822897, z: -0.044696443}
+  rotation_offset: {x: 0.70710677, y: 0, z: 0, w: 0.70710677}
+  capsule_mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+  length: 0.20701978
+  radius: 0.083
+--- !u!114 &6729409034075685238
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5db7225ab7409841a9353d50ff35d4f, type: 3}
+  m_Name: MeshDescription_Left_UpperLeg
+  m_EditorClassIdentifier: 
+  avatar_reference_points:
+  - Left_UpperLeg
+  - Left_LowerLeg
+  position_offset: {x: -0.093440354, y: 0.72110146, z: -0.028453154}
+  rotation_offset: {x: 0.70710677, y: 0, z: 0, w: 0.70710677}
+  capsule_mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+  length: 0.20667219
+  radius: 0.083
+--- !u!114 &8426336710425443496
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -171,83 +251,3 @@ MonoBehaviour:
   - {x: -0.0809, y: 1.6869, z: -0.0118}
   - {x: 0.0809, y: 1.6869, z: -0.0118}
   triangles: {fileID: 11400000, guid: a4c30e6684b5d1f4aae68b27ae0bf6f9, type: 2}
---- !u!114 &5071610001863979526
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5db7225ab7409841a9353d50ff35d4f, type: 3}
-  m_Name: MeshDescription_Right_LowerArm
-  m_EditorClassIdentifier: 
-  avatar_reference_points:
-  - Right_LowerArm
-  - Right_Hand
-  position_offset: {x: 0.3961574, y: 1.1380506, z: 0.037273057}
-  rotation_offset: {x: 0.70710677, y: 0, z: 0, w: 0.70710677}
-  capsule_mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
-  length: 0.120181836
-  radius: 0.083
---- !u!114 &5749670851775951560
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5db7225ab7409841a9353d50ff35d4f, type: 3}
-  m_Name: MeshDescription_Right_UpperArm
-  m_EditorClassIdentifier: 
-  avatar_reference_points:
-  - Right_UpperArm
-  - Right_LowerArm
-  position_offset: {x: 0.25689894, y: 1.3155954, z: -0.05500929}
-  rotation_offset: {x: 0.70710677, y: 0, z: 0, w: 0.70710677}
-  capsule_mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
-  length: 0.14254248
-  radius: 0.083
---- !u!114 &5823186843141812311
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5db7225ab7409841a9353d50ff35d4f, type: 3}
-  m_Name: MeshDescription_Left_LowerLeg
-  m_EditorClassIdentifier: 
-  avatar_reference_points:
-  - Left_LowerLeg
-  - Left_Foot
-  position_offset: {x: -0.108107395, y: 0.30822897, z: -0.044696443}
-  rotation_offset: {x: 0.70710677, y: 0, z: 0, w: 0.70710677}
-  capsule_mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
-  length: 0.20701978
-  radius: 0.083
---- !u!114 &6742502536572531178
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5db7225ab7409841a9353d50ff35d4f, type: 3}
-  m_Name: MeshDescription_Right_LowerLeg
-  m_EditorClassIdentifier: 
-  avatar_reference_points:
-  - Right_LowerLeg
-  - Right_Foot
-  position_offset: {x: 0.108107485, y: 0.308229, z: -0.044696443}
-  rotation_offset: {x: 0.70710677, y: 0, z: 0, w: 0.70710677}
-  capsule_mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
-  length: 0.20701985
-  radius: 0.083

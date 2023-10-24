@@ -18,6 +18,12 @@ public class AvatarCalibrator : MonoBehaviour
     [Range(0.0f,0.3f)]
     public float capsule_thickness;
 
+    [Header("To Apply on Character Avatar")]
+    private string parent_obj_name = "Colliders";
+    public EgocentricMappingDescription egocentric_description;
+    public GameObject avatar_root;
+    public Avatar character_avatar;
+
 
     [ContextMenu("Generate Calibration Objects")]
     void GenerateCalibrationObjects()
@@ -130,6 +136,20 @@ public class AvatarCalibrator : MonoBehaviour
         return tmp;
     }
 
+    Vector3 getMidpoint(List<Vector3> points)
+    {
+        Vector3 midpoint = Vector3.zero;
+
+        foreach (Vector3 point in points)
+        {
+            midpoint += point;
+        }
+
+        midpoint /= points.Count;
+
+        return midpoint;
+    }
+
     [ContextMenu("Create Calibration Object")]
     void makeEgocentricMapDescription()
     {
@@ -150,7 +170,7 @@ public class AvatarCalibrator : MonoBehaviour
             asset.points = getAsyncMeshPoints(parentObj.transform);
             asset.triangles = descriptor;
 
-            asset.position_offset = Vector3.zero;
+            asset.position_offset = getMidpoint(asset.points);
             asset.rotation_offset = Quaternion.identity;
             asset.avatar_reference_points = parentObj.GetComponent<CalibrationMeshAsync>().getBoneNames();
 
@@ -185,8 +205,56 @@ public class AvatarCalibrator : MonoBehaviour
             AssetDatabase.SaveAssets();
         }
 
-
         //Construct The calibration Object
         AssetDatabase.SaveAssets();
+        egocentric_description = calibration;
+    }
+
+    [ContextMenu("Apply Egocentric Description to Avatar")]
+    void ApplyOnAvatar ()
+    {
+        foreach (Transform trn in avatar_root.GetComponentsInChildren<Transform>())
+        {
+            if (trn.name == ("g_" + parent_obj_name))
+            {
+                DestroyImmediate(trn.gameObject);
+                break;
+            }
+        }
+
+        //Make a parent collection under the avatar to collect all colliders
+        GameObject parent_obj = new GameObject("g_" + parent_obj_name);
+        parent_obj.transform.parent = avatar_root.transform;
+
+        foreach (AvatarCalibrationMesh calibration in egocentric_description.meshes)
+        {
+            GameObject obj = new GameObject("g_" + calibration.name);
+            obj.transform.parent = parent_obj.transform;
+
+            MeshFilter mesh_filter = obj.AddComponent<MeshFilter>();
+            MeshRenderer mesh_renderer = obj.AddComponent<MeshRenderer>();
+            ObjectBoneFollow follow = obj.AddComponent<ObjectBoneFollow>();
+
+            mesh_filter.mesh = calibration.getMesh();
+            mesh_renderer.material = meshMaterial;
+
+            List<Transform> anchors = new List<Transform>();
+
+            foreach (string name in calibration.avatar_reference_points)
+            {
+                foreach (Transform trn in avatar_root.GetComponentsInChildren<Transform>())
+                {
+                    if (trn.name == name)
+                    {
+                        anchors.Add(trn);
+                    }
+                }
+            }
+
+            if (anchors.Count != 0)
+                follow.calibrate(anchors, calibration.position_offset, calibration.rotation_offset, calibration.getScale());
+            else
+                Debug.LogError("Have been unable to find string names in parent, for object: " + obj.name, obj);
+        }
     }
 }
