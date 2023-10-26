@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Net;
+using Unity.Tutorials.Core.Editor;
 using UnityEngine;
 
 public class ObjectBoneFollow : MonoBehaviour
@@ -35,7 +36,7 @@ public class ObjectBoneFollow : MonoBehaviour
         Vector3 midpoint = getMidpoint();
 
         midpoint_offset = position - midpoint;
-        rotation_offset = rotation;
+        rotation_offset = Quaternion.Inverse(getRotation(midpoint)) * rotation;
 
         transform.position = position;
         transform.rotation = getRotation(midpoint) * rotation_offset;

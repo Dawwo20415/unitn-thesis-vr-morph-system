@@ -125,6 +125,18 @@ public class AvatarCalibrator : MonoBehaviour
         }    
     }
 
+    List<Vector3> centerPivotToMidpoint(List<Vector3> list, Vector3 midpoint)
+    {
+        List<Vector3> tmp = list;
+
+        for (int i = 0; i < list.Count; i++)
+        {
+            tmp[i] = list[i] - midpoint;
+        }
+
+        return tmp;
+    }
+
     List<Vector3> getAsyncMeshPoints (Transform parent)
     {
         List<Vector3> tmp = new List<Vector3>();
@@ -167,17 +179,19 @@ public class AvatarCalibrator : MonoBehaviour
             CalibrationMeshDescriptor descriptor = parentObj.GetComponent<CalibrationMeshAsync>().descriptor;
             asset.name = "MeshDescription_" + parentObj.name;
 
-            asset.points = getAsyncMeshPoints(parentObj.transform);
+            List<Vector3> vertices = getAsyncMeshPoints(parentObj.transform);
+            Vector3 midpoint = getMidpoint(vertices);
+
+            asset.points = centerPivotToMidpoint(vertices, midpoint);
             asset.triangles = descriptor;
 
-            asset.position_offset = getMidpoint(asset.points);
-            asset.rotation_offset = Quaternion.identity;
+            asset.position_offset = midpoint;
+            asset.rotation_offset = Quaternion.Euler(0,0,0);
             asset.avatar_reference_points = parentObj.GetComponent<CalibrationMeshAsync>().getBoneNames();
-
-            calibration.meshes.Add(asset);
-
-            AssetDatabase.AddObjectToAsset(asset, calibration);
+            
             AssetDatabase.SaveAssets();
+            calibration.meshes.Add(asset);
+            AssetDatabase.AddObjectToAsset(asset, calibration);
         }
 
         //Make Appendiges Capsules
@@ -188,7 +202,8 @@ public class AvatarCalibrator : MonoBehaviour
 
             Vector3 position = (targets[i].position + targets[i + 1].position) / 2;
             float distance = (targets[i + 1].position - targets[i].position).magnitude;
-            Quaternion rotation = Quaternion.Euler(new Vector3(90, 0, 0));
+            Quaternion rot = Quaternion.LookRotation((targets[i].position - position).normalized);
+            Quaternion rotation = rot * Quaternion.Euler(new Vector3(90, 0, 0));
 
             List<string> name_list = new List<string>() { targets[i].name, targets[i+1].name };
 
@@ -199,10 +214,9 @@ public class AvatarCalibrator : MonoBehaviour
             asset.position_offset = position;
             asset.rotation_offset = rotation;
 
-            calibration.meshes.Add(asset);
-
-            AssetDatabase.AddObjectToAsset(asset, calibration);
             AssetDatabase.SaveAssets();
+            calibration.meshes.Add(asset);
+            AssetDatabase.AddObjectToAsset(asset, calibration);
         }
 
         //Construct The calibration Object
