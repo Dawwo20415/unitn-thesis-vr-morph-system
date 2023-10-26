@@ -22,7 +22,6 @@ public class AvatarCalibrator : MonoBehaviour
     private string parent_obj_name = "Colliders";
     public EgocentricMappingDescription egocentric_description;
     public GameObject avatar_root;
-    public Avatar character_avatar;
 
 
     [ContextMenu("Generate Calibration Objects")]
@@ -224,7 +223,7 @@ public class AvatarCalibrator : MonoBehaviour
         egocentric_description = calibration;
     }
 
-    [ContextMenu("Apply Egocentric Description to Avatar")]
+    [ContextMenu("Apply Egocentric Description to Avatar (Only in play mode)")]
     void ApplyOnAvatar ()
     {
         foreach (Transform trn in avatar_root.GetComponentsInChildren<Transform>())
