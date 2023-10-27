@@ -226,6 +226,8 @@ public class AvatarCalibrator : MonoBehaviour
     [ContextMenu("Apply Egocentric Description to Avatar (Only in play mode)")]
     void ApplyOnAvatar ()
     {
+        string prefabPath = "Assets/Prefabs/EgocentricAvatar_" + avatar_root.name + ".prefab";
+
         foreach (Transform trn in avatar_root.GetComponentsInChildren<Transform>())
         {
             if (trn.name == ("g_" + parent_obj_name))
@@ -269,5 +271,7 @@ public class AvatarCalibrator : MonoBehaviour
             else
                 Debug.LogError("Have been unable to find string names in parent, for object: " + obj.name, obj);
         }
+
+        PrefabUtility.SaveAsPrefabAsset(avatar_root, prefabPath);
     }
 }
