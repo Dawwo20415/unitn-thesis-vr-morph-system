@@ -181,6 +181,8 @@ public class AvatarCalibrator : MonoBehaviour
             List<Vector3> vertices = getAsyncMeshPoints(parentObj.transform);
             Vector3 midpoint = getMidpoint(vertices);
 
+            asset.mesh_name = parentObj.name;
+
             asset.points = centerPivotToMidpoint(vertices, midpoint);
             asset.triangles = descriptor;
 

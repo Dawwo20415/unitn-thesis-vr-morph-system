@@ -7,8 +7,11 @@ using UnityEngine;
 
 public class ObjectBoneFollow : MonoBehaviour
 {
+    [SerializeField]
     private List<Transform> points;
+    [SerializeField]
     private Vector3 midpoint_offset;
+    [SerializeField]
     private Quaternion rotation_offset;
 
     // Update is called once per frame
