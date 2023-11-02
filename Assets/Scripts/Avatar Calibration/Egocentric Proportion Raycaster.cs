@@ -40,6 +40,8 @@ public class EgocentricProportionRaycaster : MonoBehaviour
     [Header("Debugging")]
     public bool show_normals;
     public bool show_projections;
+    public bool do_capsules;
+    public bool show_only_projections_inside_face;
 
     void Start()
     {
@@ -147,7 +149,7 @@ public class EgocentricProportionRaycaster : MonoBehaviour
 
                     if (show_projections)
                     {
-                        if (w1 > 0.0f && w2 > 0.0f && (w1 + w2) < 1.0f)
+                        if (!show_only_projections_inside_face || (w1 > 0.0f && w2 > 0.0f && (w1 + w2) < 1.0f))
                         {
                             Debug.DrawLine(projection, joint.position, Color.green, Time.deltaTime, true);
                             Debug.DrawLine(a, a + (v1 * w2), Color.red, Time.deltaTime, true);
@@ -159,6 +161,8 @@ public class EgocentricProportionRaycaster : MonoBehaviour
 
                 }
             }
+
+            if (!do_capsules) {return;}
 
             foreach (BodyShape shape in capsule_meshes)
             {
@@ -206,7 +210,7 @@ public class EgocentricProportionRaycaster : MonoBehaviour
 
                     if (show_projections)
                     {
-                        if (w1 > 0.0f && w2 > 0.0f && (w1 + w2) < 1.0f)
+                        if (!show_only_projections_inside_face || (w1 > 0.0f && w2 > 0.0f && (w1 + w2) < 1.0f))
                         {
                             Debug.DrawLine(projection, joint.position, Color.green, Time.deltaTime, true);
                             Debug.DrawLine(a, a + (v1 * w2), Color.red, Time.deltaTime, true);
