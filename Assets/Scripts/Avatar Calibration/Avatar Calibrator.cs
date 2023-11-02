@@ -107,6 +107,7 @@ public class AvatarCalibrator : MonoBehaviour
             GameObject cal_capsule = new GameObject("g_CalCapsule_" + targets[i].name);
             cal_capsule.transform.parent = appendeges.transform;
 
+
             MeshFilter mesh_filter = cal_capsule.AddComponent<MeshFilter>();
             MeshRenderer mesh_renderer = cal_capsule.AddComponent<MeshRenderer>();
             ObjectBoneFollow follow = cal_capsule.AddComponent<ObjectBoneFollow>();

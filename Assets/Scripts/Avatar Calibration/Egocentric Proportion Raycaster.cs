@@ -54,7 +54,8 @@ public class EgocentricProportionRaycaster : MonoBehaviour
 
         foreach (GameObject obj in capsule_meshes_obj)
         {
-            
+            BodyShape shape = new BodyShape(obj.transform, obj.GetComponent<MeshFilter>().mesh);
+            capsule_meshes.Add(shape);
         }
     }
 
@@ -154,14 +155,69 @@ public class EgocentricProportionRaycaster : MonoBehaviour
                         }
                     }
 
+                    float lambda = 1 / (projection - joint.position).magnitude;
+
                 }
             }
 
-            foreach (BodyShape mesh in capsule_meshes)
+            foreach (BodyShape shape in capsule_meshes)
             {
+                Mesh mesh = shape.mesh;
+                Vector3 pos = shape.transform.position;
+                Quaternion rot = shape.transform.rotation;
 
+                for (int i = 0; i < mesh.triangles.Length / 3; i++)
+                {
+                    Vector3 p1 = mesh.vertices[mesh.triangles[3 * i]];
+                    Vector3 p2 = mesh.vertices[mesh.triangles[(3 * i) + 1]];
+                    Vector3 p3 = mesh.vertices[mesh.triangles[(3 * i) + 2]];
+
+                    p1 = shape.transform.TransformPoint(p1);
+                    p2 = shape.transform.TransformPoint(p2);
+                    p3 = shape.transform.TransformPoint(p3);
+
+                    Vector3 face_normal = Vector3.Cross(p2 - p1, p3 - p1).normalized;
+                    Vector3 midpoint = ((p1 + p2 + p3) / 3);
+
+                    if (show_normals)
+                    {
+                        Debug.DrawLine(midpoint, midpoint + face_normal, Color.magenta, Time.deltaTime, true);
+                    }
+
+                    Vector3 v = joint.position - midpoint;
+                    float n = Vector3.Dot(v, face_normal);
+                    Vector3 projection = joint.position - (face_normal * n);
+
+                    Vector3 p = projection;
+                    Vector3 a = p1;
+                    Vector3 b = p2;
+                    Vector3 c = p3;
+
+                    // Baycentric Coordiante solver from "Christer Ericson's Real-Time Collision Detection"
+                    Vector3 v0 = b - a, v1 = c - a, v2 = p - a;
+                    float d00 = Vector3.Dot(v0, v0);
+                    float d01 = Vector3.Dot(v0, v1);
+                    float d11 = Vector3.Dot(v1, v1);
+                    float d20 = Vector3.Dot(v2, v0);
+                    float d21 = Vector3.Dot(v2, v1);
+                    float denom = d00 * d11 - d01 * d01;
+                    float w1 = (d11 * d20 - d01 * d21) / denom;
+                    float w2 = (d00 * d21 - d01 * d20) / denom;
+
+                    if (show_projections)
+                    {
+                        if (w1 > 0.0f && w2 > 0.0f && (w1 + w2) < 1.0f)
+                        {
+                            Debug.DrawLine(projection, joint.position, Color.green, Time.deltaTime, true);
+                            Debug.DrawLine(a, a + (v1 * w2), Color.red, Time.deltaTime, true);
+                            Debug.DrawLine(a + (v1 * w2), (a + (v1 * w2)) + (v0 * w1), Color.blue, Time.deltaTime, true);
+                        }
+                    }
+
+                    float lambda = 1 / (projection - joint.position).magnitude;
+
+                }
             }
-        }
-             
+        }    
     }
 }
