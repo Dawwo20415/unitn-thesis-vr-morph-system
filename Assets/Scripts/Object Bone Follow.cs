@@ -14,7 +14,12 @@ public class ObjectBoneFollow : MonoBehaviour
     [SerializeField]
     private Quaternion rotation_offset;
 
-    // Update is called once per frame
+    private List<Vector3> references;
+
+    void Start()
+    {
+        SetReferences(getMidpoint());    
+    }
     void Update()
     {
         if (points.Count == 0)
@@ -36,18 +41,42 @@ public class ObjectBoneFollow : MonoBehaviour
         Vector3 midpoint = getMidpoint();
 
         midpoint_offset = position - midpoint;
-        rotation_offset = Quaternion.Inverse(getRotation(midpoint)) * rotation;
+        rotation_offset = rotation;
+        SetReferences(midpoint);
 
         transform.position = position;
-        transform.rotation = getRotation(midpoint) * rotation_offset;
         transform.localScale = scale;
+    }
+
+    void SetReferences(Vector3 midpoint)
+    {
+        references = new List<Vector3>();
+        for (int i = 0; i < points.Count; i++)
+        {
+            references.Add(midpoint - points[i].position);
+        }
     }
 
     Quaternion getRotation(Vector3 midpoint)
     {
-        Vector3 pointer = (points[0].position - midpoint).normalized;
-        Quaternion rotation = Quaternion.LookRotation(pointer);
-        return rotation;
+        Vector3 average = Vector3.zero;
+        float weight = 0.0f;
+        float angle = 0.0f;
+
+        for (int i = 0; i < points.Count; i++)
+        {
+            Vector3 pos = midpoint - points[i].position;
+            Vector3 cross = Vector3.Cross(pos, references[i]);
+
+            average += cross * cross.magnitude;
+            weight += cross.magnitude;
+
+            angle += Mathf.Asin(cross.magnitude / (pos.magnitude * references[i].magnitude));
+        }
+
+        average /= weight;
+        angle /= points.Count;
+        return Quaternion.AngleAxis(-angle * Mathf.Rad2Deg, average);
     }
 
     Vector3 getMidpoint()

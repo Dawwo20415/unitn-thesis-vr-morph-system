@@ -172,6 +172,7 @@ public class AvatarCalibrator : MonoBehaviour
         AssetDatabase.CreateAsset(calibration, assetPath);
         AssetDatabase.SaveAssets();
 
+
         //Make Head-Torso Mesh
         foreach (GameObject parentObj in meshPoints)
         {
