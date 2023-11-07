@@ -1,12 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Mathematics;
 
 public class FollowTest : MonoBehaviour
 {
     public List<Transform> points;
 
     private List<Vector3> references;
+    private float axisL = 0.1f;
     Vector3 getMidpoint()
     {
         Vector3 midpoint = Vector3.zero;
@@ -28,7 +30,7 @@ public class FollowTest : MonoBehaviour
         references = new List<Vector3>();
         for (int i = 0; i < points.Count; i++)
         {
-            references.Add(midpoint - points[i].position);
+            references.Add(points[i].position - midpoint);
         }
     }
 
@@ -36,29 +38,53 @@ public class FollowTest : MonoBehaviour
     {
         Vector3 midpoint = getMidpoint();
 
-        transform.position = midpoint;
+        Vector3 A = midpoint + references[0];
+        Vector3 B = midpoint + references[1];
+        Vector3 C = midpoint + references[2];
 
-        Vector3 weighted_average = Vector3.zero;
-        float weight = 0.0f;
+        Vector3 nA = points[0].position;
+        Vector3 nB = points[1].position;
+        Vector3 nC = points[2].position;
 
-        float average_dot = 0.0f;
+        Vector3 AB = B - A;
+        Vector3 AC = C - A;
+
+        Vector3 nAB = nB - nA;
+        Vector3 nAC = nC - nA;
+
+        Vector3 N1 = Vector3.Cross(AB, AC).normalized;
+        Vector3 N2 = Vector3.Cross(nAB, nAC).normalized;
+
+        Debug.DrawLine(nA, nA + AB, Color.white, Time.deltaTime, false);
+        Debug.DrawLine(nA, nA + AC, Color.white, Time.deltaTime, false);
+        Debug.DrawLine(nA, nA + N1, Color.white, Time.deltaTime, false);
+
+        Debug.DrawLine(nA, nA + nAB, Color.green, Time.deltaTime, false);
+        Debug.DrawLine(nA, nA + nAC, Color.green, Time.deltaTime, false);
+        Debug.DrawLine(nA, nA + N2, Color.green, Time.deltaTime, false);
+
+        Vector3 M = Vector3.Cross(N1, N2);
+
+        
+        Debug.DrawLine(Vector3.zero, AB, Color.red, Time.deltaTime, false);
+        Debug.DrawLine(Vector3.zero, nAB, Color.red, Time.deltaTime, false);
+        Debug.DrawLine(Vector3.zero, N1, Color.red, Time.deltaTime, false);
+
+        Quaternion rotation = Quaternion.FromToRotation(N1,N2);
+
+        float angle = Vector3.SignedAngle(rotation * AB, rotation * nAB, N1);
+
+        rotation *= Quaternion.AngleAxis(-angle, N1);
+
+        Debug.DrawLine(nA, nA + (rotation * AB), Color.magenta, Time.deltaTime, false);
+        Debug.DrawLine(nA, nA + (rotation * AC), Color.magenta, Time.deltaTime, false);
+        Debug.DrawLine(nA, nA + (rotation * N1), Color.magenta, Time.deltaTime, false);
+
         for (int i = 0; i < points.Count; i++)
         {
-            Vector3 cross = Vector3.Cross(midpoint - points[i].position, references[i]);
-            weighted_average += cross * cross.magnitude;
-            weight += cross.magnitude;
-
-            average_dot += Mathf.Asin(cross.magnitude / ((midpoint - points[i].position).magnitude * references[i].magnitude));
-
+            //Debug.DrawLine(midpoint, midpoint + (rotation * references[i]), Color.magenta, Time.deltaTime, false);
             //Debug.DrawLine(midpoint, points[i].position, Color.red, Time.deltaTime, false);
-            //Debug.DrawLine(midpoint, midpoint + references[i], Color.blue, Time.deltaTime, false);
-            //Debug.DrawLine(midpoint, midpoint + cross, Color.green, Time.deltaTime, false);
+            Debug.DrawLine(midpoint, midpoint + references[i], Color.blue, Time.deltaTime, false);
         }
-
-        weighted_average /= weight;
-        //Debug.DrawLine(midpoint, midpoint + weighted_average.normalized, Color.white, Time.deltaTime, false);
-
-        average_dot /= points.Count;
-        transform.rotation = Quaternion.AngleAxis(-average_dot * Mathf.Rad2Deg, weighted_average);    
     }
 }

@@ -30,8 +30,10 @@ public class ObjectBoneFollow : MonoBehaviour
 
         Vector3 midpoint = getMidpoint();
 
-        transform.position = midpoint + midpoint_offset;
-        transform.rotation = getRotation(midpoint) * rotation_offset;
+        Quaternion rot = getRotation(midpoint) * rotation_offset;
+        transform.rotation = rot;
+        transform.position = midpoint + (rot * midpoint_offset);
+        Debug.DrawLine(midpoint, midpoint + (rot * midpoint_offset), UnityEngine.Color.cyan, Time.deltaTime, false);
     }
 
     public void calibrate(List<Transform> point_list, Vector3 position, Quaternion rotation, Vector3 scale)
@@ -53,7 +55,7 @@ public class ObjectBoneFollow : MonoBehaviour
         references = new List<Vector3>();
         for (int i = 0; i < points.Count; i++)
         {
-            references.Add(midpoint - points[i].position);
+            references.Add(points[i].position - midpoint);
         }
     }
 
@@ -72,11 +74,16 @@ public class ObjectBoneFollow : MonoBehaviour
             weight += cross.magnitude;
 
             angle += Mathf.Asin(cross.magnitude / (pos.magnitude * references[i].magnitude));
+
+            Debug.DrawLine(midpoint, points[i].position, UnityEngine.Color.red, Time.deltaTime, false);
+            Debug.DrawLine(midpoint, midpoint + references[i], UnityEngine.Color.blue, Time.deltaTime, false);
+            Debug.DrawLine(midpoint, midpoint + cross, UnityEngine.Color.green, Time.deltaTime, false);
         }
 
         average /= weight;
         angle /= points.Count;
-        return Quaternion.AngleAxis(-angle * Mathf.Rad2Deg, average);
+        Debug.DrawLine(midpoint, midpoint + average, UnityEngine.Color.white, Time.deltaTime, false);
+        return Quaternion.AngleAxis(angle * Mathf.Rad2Deg, average);
     }
 
     Vector3 getMidpoint()

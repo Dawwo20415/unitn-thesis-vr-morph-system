@@ -2708,17 +2708,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   custom_meshes_obj:
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 1414802465}
+  - {fileID: 1227288791}
   capsule_meshes_obj:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 1674377497}
+  - {fileID: 511780710}
+  - {fileID: 1497001449}
+  - {fileID: 1349469666}
+  - {fileID: 777678162}
+  - {fileID: 1674872069}
+  - {fileID: 1882140264}
+  - {fileID: 649797133}
   joints:
   - {fileID: 1985061549}
   do_customs: 0
