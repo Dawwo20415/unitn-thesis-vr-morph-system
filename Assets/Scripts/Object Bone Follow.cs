@@ -18,6 +18,12 @@ public class ObjectBoneFollow : MonoBehaviour
 
     void Start()
     {
+        if (references.Count < 3)
+        {
+            Debug.LogError("Not enough reference points", this);
+            Debug.Break();
+        }
+            
         SetReferences(getMidpoint());    
     }
     void Update()
@@ -61,29 +67,27 @@ public class ObjectBoneFollow : MonoBehaviour
 
     Quaternion getRotation(Vector3 midpoint)
     {
-        Vector3 average = Vector3.zero;
-        float weight = 0.0f;
-        float angle = 0.0f;
+        Vector3 A = midpoint + references[0];
+        Vector3 B = midpoint + references[1];
+        Vector3 C = midpoint + references[2];
 
-        for (int i = 0; i < points.Count; i++)
-        {
-            Vector3 pos = midpoint - points[i].position;
-            Vector3 cross = Vector3.Cross(pos, references[i]);
+        Vector3 nA = points[0].position;
+        Vector3 nB = points[1].position;
+        Vector3 nC = points[2].position;
 
-            average += cross * cross.magnitude;
-            weight += cross.magnitude;
+        Vector3 AB = B - A;
+        Vector3 AC = C - A;
 
-            angle += Mathf.Asin(cross.magnitude / (pos.magnitude * references[i].magnitude));
+        Vector3 nAB = nB - nA;
+        Vector3 nAC = nC - nA;
 
-            Debug.DrawLine(midpoint, points[i].position, UnityEngine.Color.red, Time.deltaTime, false);
-            Debug.DrawLine(midpoint, midpoint + references[i], UnityEngine.Color.blue, Time.deltaTime, false);
-            Debug.DrawLine(midpoint, midpoint + cross, UnityEngine.Color.green, Time.deltaTime, false);
-        }
+        Vector3 N1 = Vector3.Cross(AB, AC).normalized;
+        Vector3 N2 = Vector3.Cross(nAB, nAC).normalized;
 
-        average /= weight;
-        angle /= points.Count;
-        Debug.DrawLine(midpoint, midpoint + average, UnityEngine.Color.white, Time.deltaTime, false);
-        return Quaternion.AngleAxis(angle * Mathf.Rad2Deg, average);
+        Quaternion rotation1 = Quaternion.FromToRotation(N1, N2);
+        Quaternion rotation2 = Quaternion.FromToRotation(rotation1 * AB, nAB);
+
+        return rotation2 * rotation1;
     }
 
     Vector3 getMidpoint()
