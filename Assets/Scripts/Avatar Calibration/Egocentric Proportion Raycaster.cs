@@ -36,6 +36,9 @@ public class EgocentricProportionRaycaster : MonoBehaviour
     private List<BodyShape> capsule_meshes;
     public List<Transform> joints;
 
+    public List<Transform> ground_projecters;
+    public float max_ray_dist;
+    public LayerMask layer_mask;
 
     [Header("Debugging")]
     public bool do_customs;
@@ -178,6 +181,22 @@ public class EgocentricProportionRaycaster : MonoBehaviour
                 Debug.DrawLine(p, projection_on_line + to_projection, Color.blue, Time.deltaTime, false);
 
             }
-        }    
+            
+        }
+
+        //Unique
+        foreach (Transform joint in ground_projecters)
+        {
+            Ray spine_ray = new Ray(joint.position, Vector3.down);
+            if (Physics.Raycast(spine_ray, out RaycastHit hit, max_ray_dist, layer_mask))
+            {
+                Vector3 hitpoint = spine_ray.GetPoint(hit.distance);
+                Debug.DrawLine(joint.position, hitpoint, Color.blue, Time.deltaTime, false);
+            }
+            else
+            {
+                Debug.Log("Raycast Not Hit");
+            }
+        }
     }
 }
