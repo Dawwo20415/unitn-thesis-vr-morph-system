@@ -6,10 +6,16 @@ public class FromToLine : MonoBehaviour
 {
 
     public Transform target;
+    private Color col;
+
+    private void Start()
+    {
+        col = Random.ColorHSV();
+    }
 
     // Update is called once per frame
     void Update()
     {
-        Debug.DrawLine(transform.position, target.position, Color.black, Time.deltaTime, false);
+        Debug.DrawLine(transform.position, target.position, col, Time.deltaTime, false);
     }
 }
