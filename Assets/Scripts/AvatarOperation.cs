@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class AvatarOperation : MonoBehaviour
 {
-    void Setup()
+    virtual public void Setup()
     {
 
     }
 
-    void Compute()
+    virtual public void Compute(Dictionary<int, Transform> m_boneObjectMap)
     {
 
     }

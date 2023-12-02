@@ -77,6 +77,12 @@ public class AvatarPipeline : MonoBehaviour
         m_root_obj.transform.localRotation = Quaternion.identity;
 
         PositionBones();
+
+        //Gather operations
+        foreach (GameObject obj in operations_obj)
+        {
+            operations.Add(obj.GetComponent<AvatarOperation>());
+        }
     }
 
     private void Update()
