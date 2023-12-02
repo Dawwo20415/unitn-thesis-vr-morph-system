@@ -19,11 +19,6 @@ public class Test2 : MonoBehaviour
     // 0-1 = Error | 2 = 2 points | 3> = 3 points
     private int mode;
 
-    private void Awake()
-    {
-        
-    }
-
     private void Update()
     {
         mode = references.Count;
@@ -31,7 +26,9 @@ public class Test2 : MonoBehaviour
         Vector3 midpoint = getMidpoint();
         midpoint_offset = transform.position - midpoint;
         Debug.DrawLine(midpoint, midpoint + midpoint_offset, Color.cyan, Time.deltaTime, false);
-        Quaternion rotation = getRotation(midpoint);
+        Quaternion rotation = rotation_offset * getRotation(midpoint);
+        Vector3 up = points[0].position - points[1].position;
+        Debug.DrawLine(midpoint + midpoint_offset, midpoint + midpoint_offset + (rotation * (up)), Color.magenta, Time.deltaTime, false);
     }
 
     void SetReferences(Vector3 midpoint)
@@ -41,6 +38,20 @@ public class Test2 : MonoBehaviour
         {
             references.Add(points[i].position - midpoint);
         }
+    }
+
+    [ContextMenu("Assign Offsets")]
+    void setOffsets()
+    {
+        midpoint_offset = transform.position - getMidpoint();
+        Vector3 newUp = transform.rotation * Vector3.up;
+        Vector3 newFwd = transform.rotation * Vector3.forward;
+        Quaternion q1 = Quaternion.LookRotation(newFwd, newUp);
+        Vector3 up = points[0].position - points[1].position;
+        float c = -(up.x + up.y) / up.z;
+        Vector3 fwd = new Vector3(1, 1, c);
+        Quaternion q2 = Quaternion.LookRotation(fwd, up);
+        rotation_offset = q2 * Quaternion.Inverse(q1);
     }
 
     Quaternion getRotation(Vector3 midpoint)
@@ -55,7 +66,7 @@ public class Test2 : MonoBehaviour
             if (debug)
             {
                 Debug.DrawLine(points[1].position, points[1].position + up, Color.white, Time.deltaTime, false);
-                Debug.DrawLine(midpoint, midpoint + fwd, Color.red, Time.deltaTime, false);
+                Debug.DrawLine(midpoint, midpoint + fwd * 0.1f, Color.red, Time.deltaTime, false);
             }
             rotation = Quaternion.LookRotation(fwd, up);
 

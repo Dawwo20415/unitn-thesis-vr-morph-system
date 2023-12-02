@@ -2148,7 +2148,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1215200265}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8761acf17e610144f9880fa0dfeda304, type: 3}
   m_Name: 
@@ -2166,7 +2166,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1215200265}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0c1868f54bbd2c043ac12048daa23a9f, type: 3}
   m_Name: 
@@ -2175,7 +2175,7 @@ MonoBehaviour:
   points:
   - {fileID: 1985061550}
   - {fileID: 1212690447}
-  midpoint_offset: {x: 0.014158286, y: -0.059362553, z: -0.033170324}
+  midpoint_offset: {x: 0.014158286, y: -0.05936259, z: -0.033170324}
   rotation_offset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!1 &1216432192
 GameObject:
@@ -2625,7 +2625,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1317069970}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8761acf17e610144f9880fa0dfeda304, type: 3}
   m_Name: 
@@ -2643,7 +2643,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1317069970}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0c1868f54bbd2c043ac12048daa23a9f, type: 3}
   m_Name: 
@@ -2652,8 +2652,8 @@ MonoBehaviour:
   points:
   - {fileID: 1212690447}
   - {fileID: 1117383819}
-  midpoint_offset: {x: 0.0044377893, y: -0.014816633, z: 0.0014210567}
-  rotation_offset: {x: 0, y: 0, z: 0, w: 0}
+  midpoint_offset: {x: 0.0044377893, y: -0.014816642, z: 0.0014210567}
+  rotation_offset: {x: 1, y: -0, z: -0, w: 0}
 --- !u!1 &1331971001
 GameObject:
   m_ObjectHideFlags: 0
@@ -3795,7 +3795,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1671731266}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8761acf17e610144f9880fa0dfeda304, type: 3}
   m_Name: 
@@ -3813,7 +3813,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1671731266}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0c1868f54bbd2c043ac12048daa23a9f, type: 3}
   m_Name: 
@@ -3822,7 +3822,7 @@ MonoBehaviour:
   points:
   - {fileID: 1985061554}
   - {fileID: 1957827621}
-  midpoint_offset: {x: -0.0141581595, y: -0.059362583, z: -0.033168107}
+  midpoint_offset: {x: -0.0141581595, y: -0.05936259, z: -0.033168107}
   rotation_offset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!1 &1674377497
 GameObject:
@@ -4581,7 +4581,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1875569526}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8761acf17e610144f9880fa0dfeda304, type: 3}
   m_Name: 
@@ -4599,7 +4599,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1875569526}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0c1868f54bbd2c043ac12048daa23a9f, type: 3}
   m_Name: 
@@ -4608,8 +4608,8 @@ MonoBehaviour:
   points:
   - {fileID: 1957827621}
   - {fileID: 187099157}
-  midpoint_offset: {x: -0.004437864, y: -0.014816574, z: 0.001423426}
-  rotation_offset: {x: 0, y: 0, z: 0, w: 0}
+  midpoint_offset: {x: -0.004437864, y: -0.014816582, z: 0.001423426}
+  rotation_offset: {x: 0.7476608, y: -0.2668774, z: -0.2604113, w: -0.5495141}
 --- !u!1 &1878187569
 GameObject:
   m_ObjectHideFlags: 0
@@ -4861,7 +4861,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.75
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
       propertyPath: m_LocalPosition.z
