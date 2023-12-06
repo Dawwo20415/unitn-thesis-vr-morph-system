@@ -28,12 +28,6 @@ public class AvatarPipeline : MonoBehaviour
     private HumanPoseHandler m_dest_pose_handler;
     private HumanPose m_human_pose = new HumanPose();
 
-    struct Point
-    {
-        Vector3 position;
-        Quaternion orientation;
-    }
-
     /*
      * 0. Creation of Alternative Avatar by Optitrack proportions
      * 1. Setting point positions from optitrack (base)
@@ -61,9 +55,15 @@ public class AvatarPipeline : MonoBehaviour
 
     private void OnEnable()
     {
+        operations = new List<AvatarOperation>();
+
+        if (this.GetComponent<AvatarOperation>())
+            operations.Add(this.GetComponent<AvatarOperation>());
+
         foreach (GameObject obj in operations_obj)
         {
-            operations.Add(obj.GetComponent<AvatarOperation>());
+            if (obj.GetComponent<AvatarOperation>())
+                operations.Add(obj.GetComponent<AvatarOperation>());
         }
     }
 
@@ -87,6 +87,16 @@ public class AvatarPipeline : MonoBehaviour
 
     private void Update()
     {
+        //Compute cycle
+
+        foreach (AvatarOperation op in operations)
+        {
+            if (op.isActiveAndEnabled)
+                op.Compute(m_bone_map);
+        }
+
+        RecalculateIK();
+
         if (m_src_pose_handler != null && m_dest_pose_handler != null)
         {
             // Interpret the streamed pose into Mecanim muscle space representation.
@@ -98,6 +108,11 @@ public class AvatarPipeline : MonoBehaviour
     }
 
     #region private methods
+
+    private void RecalculateIK()
+    {
+        //TODO
+    }
 
     void MechanimSetup(string rootObj)
     {
