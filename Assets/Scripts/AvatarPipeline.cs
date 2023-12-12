@@ -25,9 +25,8 @@ public class AvatarPipeline : MonoBehaviour
     private List<SkeletonBone> m_skeleton_bones_list;
     private Dictionary<int, GameObject> m_bone_map;
 
-    private HumanPoseHandler m_src_pose_handler;
-    private HumanPoseHandler m_dest_pose_handler;
     private HumanPose m_human_pose = new HumanPose();
+    private HumanPoseHandler m_destPoseHandler;
 
     /*
      * 0. Creation of Alternative Avatar by Optitrack proportions
@@ -63,7 +62,8 @@ public class AvatarPipeline : MonoBehaviour
         {
             foreach (AvatarOperation op in own_op)
             {
-                operations.Add(op);
+                if (op.isActiveAndEnabled)
+                    operations.Add(op);
             }
         }
 
@@ -76,6 +76,7 @@ public class AvatarPipeline : MonoBehaviour
 
     private void Start()
     {
+        /*
         GenerateAvatarCopy();
 
         MechanimSetup(m_root_obj.name);
@@ -84,20 +85,26 @@ public class AvatarPipeline : MonoBehaviour
         m_root_obj.transform.localRotation = Quaternion.identity;
 
         PositionBones();
+
+        */
+        m_destPoseHandler = new HumanPoseHandler(destination_avatar, this.transform);
     }
 
     private void Update()
     {
         //Compute cycle
-        /*
+        m_bone_map = new Dictionary<int, GameObject>(destination_avatar.humanDescription.human.Length);
+
         foreach (AvatarOperation op in operations)
         {
             if (op.isActiveAndEnabled)
-                op.Compute(m_bone_map);
+                op.Compute(m_bone_map, ref m_human_pose);
         }
-        */
+
         RecalculateIK();
 
+        m_destPoseHandler.SetHumanPose(ref m_human_pose);
+        /*
         if (m_src_pose_handler != null && m_dest_pose_handler != null)
         {
             // Interpret the streamed pose into Mecanim muscle space representation.
@@ -106,6 +113,7 @@ public class AvatarPipeline : MonoBehaviour
             // Re-target that muscle space pose to the destination avatar.
             m_dest_pose_handler.SetHumanPose(ref m_human_pose);
         }
+        */
     }
 
     #region private methods
@@ -141,9 +149,6 @@ public class AvatarPipeline : MonoBehaviour
             this.enabled = false;
             return;
         }
-
-        m_src_pose_handler = new HumanPoseHandler(m_srcAvatar, m_root_obj.transform);
-        m_dest_pose_handler = new HumanPoseHandler(destination_avatar, this.transform);
     }
 
     void GenerateAvatarCopy()

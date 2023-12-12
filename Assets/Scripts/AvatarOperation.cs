@@ -9,7 +9,7 @@ public class AvatarOperation : MonoBehaviour
 
     }
 
-    virtual public void Compute(Dictionary<int, GameObject> m_boneObjectMap)
+    virtual public void Compute(Dictionary<int, GameObject> m_boneObjectMap, ref HumanPose human_pose)
     {
 
     }
