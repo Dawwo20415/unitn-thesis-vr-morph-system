@@ -45,6 +45,8 @@ public class AvatarOperationOptitrack : AvatarOperation
             this.enabled = false;
             return;
         }
+
+        Debug.Log("Completed Start process", this);
     }
 
     public override void Compute(Dictionary<int, GameObject> m_boneObjectMap)

@@ -14,6 +14,7 @@ public class AvatarPipeline : MonoBehaviour
     [Header("Operations")]
     [Tooltip("This objects need to have the \"AvatarOperation\" or derived component")]
     public List<GameObject> operations_obj;
+    [SerializeField]
     private List<AvatarOperation> operations;
 
     [Header("Debug")]
@@ -57,8 +58,14 @@ public class AvatarPipeline : MonoBehaviour
     {
         operations = new List<AvatarOperation>();
 
-        if (this.GetComponent<AvatarOperation>())
-            operations.Add(this.GetComponent<AvatarOperation>());
+        AvatarOperation[] own_op = this.GetComponents<AvatarOperation>();
+        if (own_op.Length > 0)
+        {
+            foreach (AvatarOperation op in own_op)
+            {
+                operations.Add(op);
+            }
+        }
 
         foreach (GameObject obj in operations_obj)
         {
@@ -77,24 +84,18 @@ public class AvatarPipeline : MonoBehaviour
         m_root_obj.transform.localRotation = Quaternion.identity;
 
         PositionBones();
-
-        //Gather operations
-        foreach (GameObject obj in operations_obj)
-        {
-            operations.Add(obj.GetComponent<AvatarOperation>());
-        }
     }
 
     private void Update()
     {
         //Compute cycle
-
+        /*
         foreach (AvatarOperation op in operations)
         {
             if (op.isActiveAndEnabled)
                 op.Compute(m_bone_map);
         }
-
+        */
         RecalculateIK();
 
         if (m_src_pose_handler != null && m_dest_pose_handler != null)
@@ -188,7 +189,7 @@ public class AvatarPipeline : MonoBehaviour
             SkeletonBone newBone = new SkeletonBone();
             newBone.name = bone.name;
             newBone.position = bone.position;
-            newBone.rotation = bone.rotation;
+            newBone.rotation = remapThumbBones(bone.name, bone.rotation);
             newBone.scale = bone.scale;
 
             m_skeleton_bones_list.Add(newBone);
@@ -238,6 +239,22 @@ public class AvatarPipeline : MonoBehaviour
                 }
             }
         }
+    }
+
+    private Quaternion remapThumbBones(string boneName, Quaternion original)
+    {
+        if (boneName.EndsWith("Right_ThumbProximal"))
+        {
+            // 60 Deg Y-Axis rotation
+            return new Quaternion(0.0f, -0.5000011f, 0.0f, 0.8660248f);
+        }
+        if (boneName.EndsWith("Left_ThumbProximal"))
+        {
+            // 60 Deg Y-Axis rotation
+            return new Quaternion(0.0f, 0.5000011f, 0.0f, 0.8660248f);
+        }
+
+        return original;
     }
 
     #endregion

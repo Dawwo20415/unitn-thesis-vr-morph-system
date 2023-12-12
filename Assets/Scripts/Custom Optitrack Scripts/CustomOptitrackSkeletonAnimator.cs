@@ -16,6 +16,9 @@ public class CustomOptitrackSkeletonAnimator : MonoBehaviour
     [Tooltip("The humanoid avatar model.")]
     public Avatar DestinationAvatar;
 
+    [Header("Debug")]
+    public bool connectBones = true;
+
     #region Private fields
     /// <summary>Used when retrieving and retargeting source pose. Cached and reused for efficiency.</summary>
     private HumanPose m_humanPose = new HumanPose();
@@ -90,6 +93,12 @@ public class CustomOptitrackSkeletonAnimator : MonoBehaviour
             boneObject.transform.parent = boneDef.ParentId == 0 ? m_rootObject.transform : m_boneObjectMap[boneDef.ParentId].transform;
             boneObject.transform.localPosition = boneDef.Offset;
             m_boneObjectMap[boneDef.Id] = boneObject;
+
+            if (connectBones)
+            {
+                FromToLine deb = boneObject.AddComponent<FromToLine>();
+                deb.target = boneDef.ParentId == 0 ? m_rootObject.transform : m_boneObjectMap[boneDef.ParentId].transform;
+            }
         }
 
         // Hook up retargeting between those GameObjects and the destination Avatar.
@@ -133,6 +142,9 @@ public class CustomOptitrackSkeletonAnimator : MonoBehaviour
                     boneObject.transform.localPosition = bonePose.Position;
                     boneObject.transform.localRotation = bonePose.Orientation;
                 }
+
+                string to_print = "boneId: " + boneId + " boneName: " + m_skeletonDef.Bones[i].Name + " objName: " + boneObject.name;
+                Debug.Log(to_print, this);
             }
 
             // Perform Mecanim retargeting.
