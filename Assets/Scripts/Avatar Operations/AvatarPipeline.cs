@@ -74,11 +74,13 @@ public class AvatarPipeline : MonoBehaviour
 
     private void Start()
     {
-        m_destPoseHandler = new HumanPoseHandler(destination_avatar, this.transform);
+        m_destPoseHandler = new HumanPoseHandler(destination_avatar, skeleton_root);
 
         m_bone_map = new Dictionary<int, GameObject>(destination_avatar.humanDescription.human.Length);
 
         mapObjects2Bones();
+
+        m_destPoseHandler.GetHumanPose(ref m_human_pose);
     }
 
     private void Update()

@@ -698,8 +698,7 @@ MonoBehaviour:
   reference_object: {fileID: 242805571}
   displacement_references:
   - {fileID: 0}
-  - {fileID: 1774518595}
-  - {fileID: 1774518595}
+  - {fileID: 0}
   operations:
   - {fileID: 11400000, guid: 4ad03f8e35bf1ef488316c30aa5426be, type: 2}
   - {fileID: 11400000, guid: 9112f7ec59b65f74bbd84dca4fd3a6e3, type: 2}

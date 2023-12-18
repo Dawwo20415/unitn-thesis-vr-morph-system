@@ -20,8 +20,6 @@ public class AvatarOperationOptitrack : AvatarOperation
     public bool connectBones = true;
 
     #region Private fields
-    /// <summary>Used when retrieving and retargeting source pose. Cached and reused for efficiency.</summary>
-    private HumanPose m_humanPose = new HumanPose();
 
     /// <summary>The streamed source skeleton definition.</summary>
     private OptitrackSkeletonDefinition m_skeletonDef;
