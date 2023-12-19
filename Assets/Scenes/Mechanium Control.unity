@@ -638,17 +638,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f3afd5b88f5c1d141862b225e9682598, type: 3}
---- !u!114 &1282230521 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1533038814797041872, guid: f3afd5b88f5c1d141862b225e9682598, type: 3}
-  m_PrefabInstance: {fileID: 856203662}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e51a04bf9317a214f81bc7c045b74995, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1333420130 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7739434412143464913, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
@@ -1017,23 +1006,20 @@ MonoBehaviour:
   operations_obj: []
   operations: []
   add_lines_to_mock_avatar: 1
---- !u!114 &1934692294
+--- !u!114 &1934692301
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1934692287}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 932130ec6d6b85b45a6ba3f890db2e72, type: 3}
+  m_Script: {fileID: 11500000, guid: 18701d02756098c439c3e985f1cc3cec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  StreamingClient: {fileID: 1282230521}
-  SkeletonAssetName: Scheletro
-  DestinationAvatar: {fileID: 9000000, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
-  connectBones: 1
---- !u!114 &1934692295
+  destination_avatar: {fileID: 9000000, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
+--- !u!114 &1934692302
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1047,18 +1033,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displacers:
   - {fileID: 1333420131}
---- !u!114 &1934692298
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1934692287}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18701d02756098c439c3e985f1cc3cec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &1985061546
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1136,13 +1110,10 @@ PrefabInstance:
       addedObject: {fileID: 1934692289}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1934692298}
+      addedObject: {fileID: 1934692301}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1934692294}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1934692295}
+      addedObject: {fileID: 1934692302}
     - targetCorrespondingSourceObject: {fileID: 7739434412143464913, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1333420131}
