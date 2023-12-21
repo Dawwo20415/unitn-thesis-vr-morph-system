@@ -15,8 +15,19 @@ public class AvatarPipeline : MonoBehaviour
     [SerializeField]
     private List<AvatarOperation> operations;
 
-    [Header("Debug")]
-    public bool add_lines_to_mock_avatar;
+    [Header("PlaceHolder")]
+    public List<string> IK_limb;
+    public List<int> IK_limb_id;
+    [Range(0,180)]
+    public float manual_angle;
+    public Vector3 manual_rotation;
+    public Vector3 manual_rotation_2;
+    private Transform tr0;
+    private Transform tr1;
+    private Transform tr2;
+    private float length1;
+    private float length2;
+    
 
     private GameObject m_root_obj;
     private List<HumanBone> m_human_bones_list;
@@ -60,8 +71,7 @@ public class AvatarPipeline : MonoBehaviour
         {
             foreach (AvatarOperation op in own_op)
             {
-                if (op.isActiveAndEnabled)
-                    operations.Add(op);
+                operations.Add(op);    
             }
         }
 
@@ -81,6 +91,12 @@ public class AvatarPipeline : MonoBehaviour
         mapObjects2Bones();
 
         m_destPoseHandler.GetHumanPose(ref m_human_pose);
+
+        tr0 = m_bone_map[IK_limb_id[0]].transform;
+        tr1 = m_bone_map[IK_limb_id[1]].transform;
+        tr2 = m_bone_map[IK_limb_id[2]].transform;
+        length1 = tr1.localPosition.magnitude;
+        length2 = tr2.localPosition.magnitude;
     }
 
     private void Update()
@@ -102,7 +118,64 @@ public class AvatarPipeline : MonoBehaviour
 
     private void RecalculateIK()
     {
-        //TODO
+        Quaternion direction = Quaternion.identity;
+        Quaternion elbow_angle = Quaternion.identity;
+        Quaternion shoulder_angle = Quaternion.identity;
+
+        Vector3 x = tr0.rotation * Vector3.forward * length1;
+        Vector3 y = tr0.rotation * Vector3.right * length1;
+        Vector3 z = tr0.rotation * Vector3.up * length1;
+
+        Debug.DrawLine(tr0.position, tr0.position + x, Color.blue, Time.deltaTime, false);
+        Debug.DrawLine(tr0.position, tr0.position + y, Color.red, Time.deltaTime, false);
+        Debug.DrawLine(tr0.position, tr0.position + z, Color.green, Time.deltaTime, false);
+
+        Vector3 newUp = Vector3.Cross(tr2.position - tr1.position, tr0.position - tr1.position);
+        Vector3 dir = (tr2.position - tr0.position).normalized;
+
+        Quaternion boneOffset = Quaternion.Euler(90,0,0);
+        direction = Quaternion.LookRotation(dir, z) * boneOffset;
+
+        x = direction * Vector3.forward * length1;
+        y = direction * Vector3.right * length1;
+        z = direction * Vector3.up * length1;
+
+        Debug.DrawLine(tr0.position, tr0.position + x, Color.blue, Time.deltaTime, false);
+        Debug.DrawLine(tr0.position, tr0.position + y, Color.red, Time.deltaTime, false);
+        Debug.DrawLine(tr0.position, tr0.position + z, Color.green, Time.deltaTime, false);
+
+        //Calc Angle
+        float angleA, angleB;
+        float target_distance = (tr2.position - tr0.position).magnitude;
+        if (target_distance >= (length1 + length2))
+        {
+            //Debug.DrawLine(tr0.position, tr2.position, Color.white, Time.deltaTime, false);
+            angleA = 0.0f;
+            angleB = 0.0f;
+        }
+        else
+        {
+            float fA = (target_distance * target_distance) + (length1 * length1) - (length2 * length2);
+            float fB = (length1 * length1) + (length2 * length2) - (target_distance * target_distance);
+            float fC = (2 * length1 * target_distance);
+            float fD = (2 * length1 * length2);
+            angleA = Mathf.Acos(fA / fC) * Mathf.Rad2Deg;
+            angleB = Mathf.Acos(fB / fD) * Mathf.Rad2Deg;
+            //Debug.DrawLine(tr0.position, tr2.position, Color.red, Time.deltaTime, false);
+        }
+
+        shoulder_angle = Quaternion.Euler(-angleA, 0, 0);
+        elbow_angle *= direction * Quaternion.Euler(0, 0, 180 - angleA - angleB);
+
+        x = direction * shoulder_angle * Vector3.forward * length1;
+        y = direction * shoulder_angle * Vector3.right * length1;
+        z = direction * shoulder_angle * Vector3.up * length1;
+
+        Debug.DrawLine(tr0.position, tr0.position + x, Color.blue, Time.deltaTime, false);
+        Debug.DrawLine(tr0.position, tr0.position + y, Color.red, Time.deltaTime, false);
+        Debug.DrawLine(tr0.position, tr0.position + z, Color.green, Time.deltaTime, false);
+
+        tr0.rotation = direction * shoulder_angle;
     }
 
     int LookUpBone(string name)

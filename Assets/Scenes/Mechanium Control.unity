@@ -577,67 +577,11 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 6.0000014, y: 2.1336, z: 0.25000006}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!1001 &856203662
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 3691468834895402575, guid: f3afd5b88f5c1d141862b225e9682598, type: 3}
-      propertyPath: m_Name
-      value: Client - OptiTrack Custom
-      objectReference: {fileID: 0}
-    - target: {fileID: 3691468834895402575, guid: f3afd5b88f5c1d141862b225e9682598, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5254278163031108084, guid: f3afd5b88f5c1d141862b225e9682598, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5254278163031108084, guid: f3afd5b88f5c1d141862b225e9682598, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5254278163031108084, guid: f3afd5b88f5c1d141862b225e9682598, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5254278163031108084, guid: f3afd5b88f5c1d141862b225e9682598, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5254278163031108084, guid: f3afd5b88f5c1d141862b225e9682598, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5254278163031108084, guid: f3afd5b88f5c1d141862b225e9682598, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5254278163031108084, guid: f3afd5b88f5c1d141862b225e9682598, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5254278163031108084, guid: f3afd5b88f5c1d141862b225e9682598, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5254278163031108084, guid: f3afd5b88f5c1d141862b225e9682598, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5254278163031108084, guid: f3afd5b88f5c1d141862b225e9682598, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: f3afd5b88f5c1d141862b225e9682598, type: 3}
+--- !u!1 &1167951660 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -7061339561929513925, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
+  m_PrefabInstance: {fileID: 1985061546}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1333420130 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7739434412143464913, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
@@ -657,7 +601,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   reference_object: {fileID: 1333420130}
   displacement_references:
-  - {fileID: 0}
+  - {fileID: 1167951660}
   operations:
   - {fileID: 11400000, guid: 4ad03f8e35bf1ef488316c30aa5426be, type: 2}
 --- !u!4 &1702761448 stripped
@@ -1005,7 +949,12 @@ MonoBehaviour:
   skeleton_root: {fileID: 1702761448}
   operations_obj: []
   operations: []
-  add_lines_to_mock_avatar: 1
+  IK_limb:
+  - LeftUpperArm
+  - LeftLowerArm
+  - LeftHand
+  IK_limb_id: 0d0000000f00000011000000
+  manual_angle: 0
 --- !u!114 &1934692301
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1101,7 +1050,8 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[2]
       value: 
       objectReference: {fileID: 2100000, guid: 32c651844ea3e8848af97d93fc55e0d3, type: 2}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5866666021909216657, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -1128,4 +1078,3 @@ SceneRoots:
   - {fileID: 1985061546}
   - {fileID: 595080527}
   - {fileID: 1902630977}
-  - {fileID: 856203662}
