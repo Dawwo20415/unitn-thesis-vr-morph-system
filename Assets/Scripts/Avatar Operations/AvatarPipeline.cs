@@ -16,6 +16,13 @@ public class AvatarPipeline : MonoBehaviour
     private List<AvatarOperation> operations;
 
     [Header("PlaceHolder")]
+    public bool do_IK;
+    public bool do_DK;
+    [Range(0,100)]
+    public int muscle_id;
+    private float value;
+    [Range(-20.0f,20.0f)]
+    public float modifier = 0.0f;
     public List<string> IK_limb;
     public List<int> IK_limb_id;
     [Range(0,180)]
@@ -97,9 +104,12 @@ public class AvatarPipeline : MonoBehaviour
         tr2 = m_bone_map[IK_limb_id[2]].transform;
         length1 = tr1.localPosition.magnitude;
         length2 = tr2.localPosition.magnitude;
+
+        int id = HumanTrait.MuscleFromBone(IK_limb_id[0], 1);
+        value = m_human_pose.muscles[id];
     }
 
-    private void Update()
+    private void LateUpdate()
     {
         //Compute cycle
 
@@ -109,12 +119,22 @@ public class AvatarPipeline : MonoBehaviour
                 op.Compute(m_bone_map, ref m_human_pose);
         }
 
-        RecalculateIK();
+        if (do_IK)
+            RecalculateIK();
+
+        if (do_DK)
+            DirectKinematic(ref m_human_pose);
 
         m_destPoseHandler.SetHumanPose(ref m_human_pose);
     }
 
     #region private methods
+
+    private void DirectKinematic(ref HumanPose pose)
+    {
+        int id = HumanTrait.MuscleFromBone(IK_limb_id[0], 1);
+        m_human_pose.muscles[id] = value + modifier;
+    }
 
     private void RecalculateIK()
     {
@@ -201,6 +221,7 @@ public class AvatarPipeline : MonoBehaviour
                 if (hb.boneName == child.name)
                 {
                     index = LookUpBone(hb.humanName);
+
                     break;
                 }
             }
