@@ -16,6 +16,7 @@ public class MuscleAnimationTest : MonoBehaviour
     public float modifiery;
     [Range(-1.0f, 1.0f)]
     public float modifierz;
+    public bool modif;
 
     public GameObject root;
     public Transform temp_joint;
@@ -27,6 +28,10 @@ public class MuscleAnimationTest : MonoBehaviour
     private int idy;
     private int idz;
 
+    private float muscle_position_1;
+    private float muscle_position_2;
+    private float muscle_position_3;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -34,12 +39,16 @@ public class MuscleAnimationTest : MonoBehaviour
         avatar = c_animator.avatar;
         m_destPoseHandler = new HumanPoseHandler(avatar, root_obj);
         m_destPoseHandler.GetHumanPose(ref m_human_pose);
-
         int id = HumanTrait.MuscleFromBone(limb_id, axis);
 
         idx = HumanTrait.MuscleFromBone(limb_id, 0);
         idy = HumanTrait.MuscleFromBone(limb_id, 1);
         idz = HumanTrait.MuscleFromBone(limb_id, 2);
+        muscle_position_1 = m_human_pose.muscles[idx];
+        muscle_position_2 = m_human_pose.muscles[idy];
+        muscle_position_3 = m_human_pose.muscles[idz];
+
+        Debug.Log("1[" + muscle_position_1 + "] 2[" + muscle_position_2 + "] 3[" + muscle_position_3 + "]", this);
 
         /*
         bool def = avatar.humanDescription.human[limb_id].limit.useDefaultValues; 
@@ -86,9 +95,8 @@ public class MuscleAnimationTest : MonoBehaviour
         Vector3 localRot = c_animator.GetBoneTransform(HumanBodyBones.LeftUpperArm).localRotation.eulerAngles;
         //Debug.Log("Muscle[" +  muscle + "] - WorldEuler[" + worldRot + "] - LocalEuler[" + localRot + "]", this);
         
-        m_human_pose.muscles[idx] = modifierx;
-        m_human_pose.muscles[idy] = modifiery;
-        m_human_pose.muscles[idz] = modifierz;
+        
+        
     }
 
     private void OnAnimatorIK(int layerIndex)
@@ -109,12 +117,26 @@ public class MuscleAnimationTest : MonoBehaviour
             min = avatar.humanDescription.human[limb_id].limit.min;
         }
 
-        float x_angle = map0(modifierx, -1.0f, 1.0f, min.z, max.z);
-        //Debug.Log("X_Angle - " + modifierx + " " + min.z + " " + max.z + " " + x_angle, this);
-        float y_angle = map0(modifiery, -1.0f, 1.0f, min.y, max.y);
-        //Debug.Log("Y_Angle - " + modifiery + " " + min.y + " " + max.y + " " + y_angle, this);
-        float z_angle = map0(modifierz, -1.0f, 1.0f, min.x, max.x);
-        //Debug.Log("Z_Angle - " + modifierz + " " + min.x + " " + max.x + " " + z_angle, this);
+        float x_angle, y_angle, z_angle;
+
+        if (modif)
+        {
+            x_angle = map0(modifierx, -1.0f, 1.0f, min.z, max.z);
+            //Debug.Log("X_Angle - " + modifierx + " " + min.z + " " + max.z + " " + x_angle, this);
+            y_angle = map0(modifiery, -1.0f, 1.0f, min.y, max.y);
+            //Debug.Log("Y_Angle - " + modifiery + " " + min.y + " " + max.y + " " + y_angle, this);
+            z_angle = map0(modifierz, -1.0f, 1.0f, min.x, max.x);
+            //Debug.Log("Z_Angle - " + modifierz + " " + min.x + " " + max.x + " " + z_angle, this);
+        }
+        else
+        {
+            x_angle = map0(muscle_position_3, -1.0f, 1.0f, min.z, max.z);
+            //Debug.Log("X_Angle - " + modifierx + " " + min.z + " " + max.z + " " + x_angle, this);
+            y_angle = map0(muscle_position_2, -1.0f, 1.0f, min.y, max.y);
+            //Debug.Log("Y_Angle - " + modifiery + " " + min.y + " " + max.y + " " + y_angle, this);
+            z_angle = map0(muscle_position_1, -1.0f, 1.0f, min.x, max.x);
+            //Debug.Log("Z_Angle - " + modifierz + " " + min.x + " " + max.x + " " + z_angle, this);
+        }
 
         Quaternion rotation = Quaternion.AngleAxis(x_angle, Vector3.back) * Quaternion.AngleAxis(y_angle, Vector3.right) * Quaternion.AngleAxis(z_angle, Vector3.up);
 

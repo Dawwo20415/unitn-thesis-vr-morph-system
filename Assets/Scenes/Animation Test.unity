@@ -1035,7 +1035,10 @@ MonoBehaviour:
   root_obj: {fileID: 1985061550}
   limb_id: 13
   axis: 1
-  modifier: 0
+  modifierx: 0
+  modifiery: 0
+  modifierz: 0
+  modif: 1
   root: {fileID: 945944596}
   temp_joint: {fileID: 286576591}
 --- !u!4 &1985061550 stripped
