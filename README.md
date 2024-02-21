@@ -1,4 +1,4 @@
-# VR Distortion/Morph System
+# VR Distortion/Mocap/Morph System
 
 This repository contains [my](https://github.com/Dawwo20415) thesis project at University of Trento.
 
