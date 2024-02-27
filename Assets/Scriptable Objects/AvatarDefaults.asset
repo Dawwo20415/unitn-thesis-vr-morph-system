@@ -1,0 +1,122 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e1b0909f48e875448681e8b899aa322, type: 3}
+  m_Name: AvatarDefaults
+  m_EditorClassIdentifier: 
+  rotations:
+  - {x: 0, y: -0, z: -0, w: 1}
+  - {x: 0.999839, y: -0.01775374, z: 0.00004630041, w: -0.0026075041}
+  - {x: 0.0026075041, y: 0.00004630041, z: 0.01775374, w: 0.999839}
+  - {x: 0.034046065, y: 2.2687323e-19, z: 7.7286215e-21, w: 0.9994203}
+  - {x: 0.034046065, y: 2.2687323e-19, z: 7.7286215e-21, w: 0.9994203}
+  - {x: -0.035700925, y: 0.049957544, z: -0.019575229, w: 0.9979211}
+  - {x: -0.035700925, y: 0.049957544, z: -0.019575229, w: 0.9979211}
+  - {x: 0, y: -0, z: -0, w: 1}
+  - {x: 0, y: -0, z: -0, w: 1}
+  - {x: 0.060688436, y: 0, z: -0, w: 0.9981568}
+  - {x: -0.060688436, y: 0, z: -0, w: 0.9981568}
+  - {x: -0.0049494267, y: -0.113521874, z: 0.043275386, w: 0.99258024}
+  - {x: 0.99258024, y: -0.043275386, z: -0.113521874, w: 0.0049494267}
+  - {x: -0.1494199, y: -0.11009628, z: 0.908746, w: 0.37380916}
+  - {x: 0.17870994, y: 0.027966427, z: 0.90344393, w: 0.38867682}
+  - {x: 0.37416065, y: -8.0436e-17, z: -3.2453263e-17, w: 0.92736393}
+  - {x: 0.37416065, y: -8.0436e-17, z: -3.2453263e-17, w: 0.92736393}
+  - {x: -0.047397237, y: -0.24003564, z: 0.013464748, w: 0.9695128}
+  - {x: -0.047397237, y: -0.24003564, z: 0.013464748, w: 0.9695128}
+  - {x: -0.7071068, y: 0, z: -0, w: 0.7071068}
+  - {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
+  - {x: 0.15949209, y: 0.68888485, z: 0.15949209, w: 0.68888485}
+  - {x: -0.22855468, y: 0.9196341, z: 0.31812128, w: 0.028891642}
+  - {x: 0.12780538, y: 0, z: -0, w: 0.9917993}
+  - {x: 0.17147453, y: 0, z: -0, w: 0.98518854}
+  - {x: 0.13385333, y: -0.6899348, z: 0.20177369, w: 0.6821735}
+  - {x: 0.26077324, y: 0, z: -0, w: 0.9654001}
+  - {x: 0.08318636, y: 0, z: -0, w: 0.996534}
+  - {x: 0.09593409, y: -0.6426922, z: 0.21124882, w: 0.73014885}
+  - {x: 0.3409832, y: 0, z: -0, w: 0.94006944}
+  - {x: 0.03347514, y: 0, z: -0, w: 0.9994396}
+  - {x: 0.035571583, y: -0.5691555, z: 0.3065858, w: 0.76210356}
+  - {x: 0.3907906, y: 0, z: -0, w: 0.9204796}
+  - {x: 0.09052901, y: 0, z: -0, w: 0.99589384}
+  - {x: 0.00660454, y: -0.5050901, z: 0.37113747, w: 0.7791645}
+  - {x: 0.29918617, y: 0, z: -0, w: 0.9541948}
+  - {x: 0.14234784, y: 0, z: -0, w: 0.9898167}
+  - {x: -0.22855468, y: 0.9196341, z: 0.31812128, w: 0.028891642}
+  - {x: 0.12780538, y: 0, z: -0, w: 0.9917993}
+  - {x: 0.17147453, y: 0, z: -0, w: 0.98518854}
+  - {x: 0.13385333, y: -0.6899348, z: 0.20177369, w: 0.6821735}
+  - {x: 0.26077324, y: 0, z: -0, w: 0.9654001}
+  - {x: 0.08318636, y: 0, z: -0, w: 0.996534}
+  - {x: 0.09593409, y: -0.6426922, z: 0.21124882, w: 0.73014885}
+  - {x: 0.3409832, y: 0, z: -0, w: 0.94006944}
+  - {x: 0.03347514, y: 0, z: -0, w: 0.9994396}
+  - {x: 0.035571583, y: -0.5691555, z: 0.3065858, w: 0.76210356}
+  - {x: 0.3907906, y: 0, z: -0, w: 0.9204796}
+  - {x: 0.09052901, y: 0, z: -0, w: 0.99589384}
+  - {x: 0.00660454, y: -0.5050901, z: 0.37113747, w: 0.7791645}
+  - {x: 0.29918617, y: 0, z: -0, w: 0.9541948}
+  - {x: 0.14234784, y: 0, z: -0, w: 0.9898167}
+  - {x: 0, y: -0, z: -0, w: 1}
+  names:
+  - Hips
+  - Left_UpperLeg
+  - Right_UpperLeg
+  - Left_LowerLeg
+  - Right_LowerLeg
+  - Left_Foot
+  - Right_Foot
+  - Spine
+  - Chest
+  - Neck
+  - Head
+  - Left_Shoulder
+  - Right_Shoulder
+  - Left_UpperArm
+  - Right_UpperArm
+  - Left_LowerArm
+  - Right_LowerArm
+  - Left_Hand
+  - Right_Hand
+  - Left_Toes
+  - Right_Toes
+  - Jaw
+  - Left_ThumbProximal
+  - Left_ThumbIntermediate
+  - Left_ThumbDistal
+  - Left_IndexProximal
+  - Left_IndexIntermediate
+  - Left_IndexDistal
+  - Left_MiddleProximal
+  - Left_MiddleIntermediate
+  - Left_MiddleDistal
+  - Left_RingProximal
+  - Left_RingIntermediate
+  - Left_RingDistal
+  - Left_PinkyProximal
+  - Left_PinkyIntermediate
+  - Left_PinkyDistal
+  - Right_ThumbProximal
+  - Right_ThumbIntermediate
+  - Right_ThumbDistal
+  - Right_IndexProximal
+  - Right_IndexIntermediate
+  - Right_IndexDistal
+  - Right_MiddleProximal
+  - Right_MiddleIntermediate
+  - Right_MiddleDistal
+  - Right_RingProximal
+  - Right_RingIntermediate
+  - Right_RingDistal
+  - Right_PinkyProximal
+  - Right_PinkyIntermediate
+  - Right_PinkyDistal
+  - UpperChest

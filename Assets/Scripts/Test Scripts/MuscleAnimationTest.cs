@@ -48,7 +48,7 @@ public class MuscleAnimationTest : MonoBehaviour
         muscle_position_2 = m_human_pose.muscles[idy];
         muscle_position_3 = m_human_pose.muscles[idz];
 
-        Debug.Log("1[" + muscle_position_1 + "] 2[" + muscle_position_2 + "] 3[" + muscle_position_3 + "]", this);
+        //Debug.Log("1[" + muscle_position_1 + "] 2[" + muscle_position_2 + "] 3[" + muscle_position_3 + "]", this);
 
         /*
         bool def = avatar.humanDescription.human[limb_id].limit.useDefaultValues; 
@@ -140,7 +140,8 @@ public class MuscleAnimationTest : MonoBehaviour
 
         Quaternion rotation = Quaternion.AngleAxis(x_angle, Vector3.back) * Quaternion.AngleAxis(y_angle, Vector3.right) * Quaternion.AngleAxis(z_angle, Vector3.up);
 
-        c_animator.SetBoneLocalRotation(HumanBodyBones.LeftUpperArm, center * rotation);
+        //c_animator.SetBoneLocalRotation(HumanBodyBones.LeftUpperArm, center * rotation);
+        c_animator.SetBoneLocalRotation((HumanBodyBones)13, center * rotation);
     }
 
     float map0(float x, float in_min, float in_max, float out_min, float out_max)
