@@ -724,7 +724,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1783572214
 Transform:
   m_ObjectHideFlags: 0
@@ -940,22 +940,6 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -2300648904398533519, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0.37380916
-      objectReference: {fileID: 0}
-    - target: {fileID: -2300648904398533519, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0.1494199
-      objectReference: {fileID: 0}
-    - target: {fileID: -2300648904398533519, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0.11009628
-      objectReference: {fileID: 0}
-    - target: {fileID: -2300648904398533519, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0.908746
-      objectReference: {fileID: 0}
-    - target: {fileID: -2300648904398533519, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: 5.071
       objectReference: {fileID: 0}
@@ -1061,7 +1045,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26fa26646d9d8a743a8cb153ec33c127, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bone: 29
+  bone: 1
   bodyPosition: {x: 0, y: 0, z: 0}
   bodyRotation: {x: 0, y: 0, z: 0, w: 0}
   modify_x: 0
@@ -1075,6 +1059,8 @@ MonoBehaviour:
   midz: 0
   max: {x: 0, y: 0, z: 0}
   min: {x: 0, y: 0, z: 0}
+  orientation: {x: 0, y: 0, z: 0, w: 0}
+  added: {x: 0, y: -0.70710677, z: 0, w: 0.70710677}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
