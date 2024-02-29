@@ -1061,7 +1061,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26fa26646d9d8a743a8cb153ec33c127, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bone: 41
+  bone: 29
   bodyPosition: {x: 0, y: 0, z: 0}
   bodyRotation: {x: 0, y: 0, z: 0, w: 0}
   modify_x: 0
