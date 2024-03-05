@@ -1045,13 +1045,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26fa26646d9d8a743a8cb153ec33c127, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bone: 1
+  bone: 13
   bodyPosition: {x: 0, y: 0, z: 0}
   bodyRotation: {x: 0, y: 0, z: 0, w: 0}
   modify_x: 0
   modify_y: 0
   modify_z: 0
   centers: {fileID: 11400000, guid: 7223540cad20a5644b6645f0e8970baa, type: 2}
+  mapping: {fileID: 11400000, guid: 7b14679ea09098f498e3925ca971d96e, type: 2}
   useless: 0
   default_limits: 0
   midx: 0
@@ -1059,8 +1060,6 @@ MonoBehaviour:
   midz: 0
   max: {x: 0, y: 0, z: 0}
   min: {x: 0, y: 0, z: 0}
-  orientation: {x: 0, y: 0, z: 0, w: 0}
-  added: {x: 0, y: -0.70710677, z: 0, w: 0.70710677}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

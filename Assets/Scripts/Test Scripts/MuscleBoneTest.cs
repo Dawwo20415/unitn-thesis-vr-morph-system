@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MuscleBoneTest : MonoBehaviour
 {
-    [Range(0,55)]
+    [Range(0,54)]
     public int bone;
     public Vector3 bodyPosition;
     public Quaternion bodyRotation;
@@ -15,6 +15,7 @@ public class MuscleBoneTest : MonoBehaviour
     [Range(-1.0f, 1.0f)]
     public float modify_z;
     public HumanoidAvatarDefaults centers;
+    public MechanimBoneMotionMapping mapping;
 
     [Header("Private Peek")]
     public bool useless;
@@ -27,10 +28,7 @@ public class MuscleBoneTest : MonoBehaviour
     private int midx, midy, midz;
     [SerializeField]
     private Vector3 max, min;
-    [SerializeField]
-    private Quaternion orientation;
-    [SerializeField]
-    private Quaternion added;
+    private List<Vector3> axis;
 
     // Start is called before the first frame update
     void Start()
@@ -40,13 +38,18 @@ public class MuscleBoneTest : MonoBehaviour
         default_limits = avatar.humanDescription.human[bone].limit.useDefaultValues;
         center = centers.rotations[bone];
 
+        axis = new List<Vector3>();
+        axis.Add(Vector3.up);
+        axis.Add(Vector3.forward);
+        axis.Add(Vector3.left);
+
         midx = HumanTrait.MuscleFromBone(bone, 0);
         midy = HumanTrait.MuscleFromBone(bone, 1);
         midz = HumanTrait.MuscleFromBone(bone, 2);
 
         Quaternion world = c_animator.GetBoneTransform((HumanBodyBones)bone).rotation;
         Quaternion local = c_animator.GetBoneTransform((HumanBodyBones)bone).localRotation;
-        orientation = Quaternion.Inverse(local) * world;
+        //orientation = Quaternion.Inverse(local) * world;
 
         string to_print = "Bone " + bone + " is " + HumanTrait.BoneName[bone] + 
             " | Muscles[(X/" + midx + "/" + (midx != -1 ? HumanTrait.MuscleName[midx] : "Not Available") + "),(Y/" + midy + "/" + (midy != -1 ? HumanTrait.MuscleName[midy] : "Not Available") + "),(Z/" + midz + "/" + (midz != -1 ? HumanTrait.MuscleName[midz] : "Not Available") + ")]";
@@ -75,7 +78,9 @@ public class MuscleBoneTest : MonoBehaviour
         y_angle = map0(modify_y, -1.0f, 1.0f, min.y, max.y);
         z_angle = map0(modify_z, -1.0f, 1.0f, min.z, max.z);
 
-        Quaternion rotation = Quaternion.AngleAxis(x_angle, added * orientation * Vector3.up) * Quaternion.AngleAxis(y_angle, added * orientation * Vector3.forward) * Quaternion.AngleAxis(z_angle, added * orientation * Vector3.left);
+        Vector3Int indexes = mapping.mappings[bone];
+
+        Quaternion rotation = Quaternion.AngleAxis(x_angle, axis[indexes.x]) * Quaternion.AngleAxis(y_angle, axis[indexes.y]) * Quaternion.AngleAxis(z_angle, axis[indexes.z]);
         c_animator.SetBoneLocalRotation((HumanBodyBones)bone, center * rotation);
         c_animator.bodyPosition = bodyPosition;
         c_animator.bodyRotation = bodyRotation;
@@ -96,22 +101,6 @@ public class MuscleBoneTest : MonoBehaviour
     float map(float x, float in_min, float in_max, float out_min, float out_max)
     {
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-    }
-
-    [ContextMenu("Test")]
-    public void Test()
-    {
-        Quaternion q1 = new Quaternion((float)-0.00494942674, (float)-0.113521874, (float)0.0432753861, (float)0.992580235);
-        Quaternion q2 = new Quaternion((float)0.178709939, (float)0.0279664267, (float)0.903443933, (float)0.388676822);
-
-        if (q2 * q1 == added)
-        {
-            Debug.Log("Equals Added");
-        } else
-        {
-            Debug.Log("DOES NOT EQUAL ADDED");
-        }
-
     }
 
 }
