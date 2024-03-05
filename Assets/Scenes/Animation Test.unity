@@ -660,7 +660,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bone: 1
   bodyPosition: {x: 0, y: 0, z: 0}
-  bodyRotation: {x: 0.4729446, y: -0.52566475, z: -0.4729446, w: 0.52566475}
+  bodyRotation: {x: 0, y: 0, z: 0, w: 1}
   modify_x: 0
   modify_y: 0
   modify_z: 0
