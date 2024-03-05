@@ -28,7 +28,6 @@ public class MuscleBoneTest : MonoBehaviour
     private int midx, midy, midz;
     [SerializeField]
     private Vector3 max, min;
-    private List<Vector3> axis;
 
     // Start is called before the first frame update
     void Start()
@@ -37,11 +36,6 @@ public class MuscleBoneTest : MonoBehaviour
         avatar = c_animator.avatar;
         default_limits = avatar.humanDescription.human[bone].limit.useDefaultValues;
         center = centers.rotations[bone];
-
-        axis = new List<Vector3>();
-        axis.Add(Vector3.up);
-        axis.Add(Vector3.forward);
-        axis.Add(Vector3.left);
 
         midx = HumanTrait.MuscleFromBone(bone, 0);
         midy = HumanTrait.MuscleFromBone(bone, 1);
@@ -78,9 +72,9 @@ public class MuscleBoneTest : MonoBehaviour
         y_angle = map0(modify_y, -1.0f, 1.0f, min.y, max.y);
         z_angle = map0(modify_z, -1.0f, 1.0f, min.z, max.z);
 
-        Vector3Int indexes = mapping.mappings[bone];
+        Quaternion adjustment = mapping.mappings[bone];
 
-        Quaternion rotation = Quaternion.AngleAxis(x_angle, axis[indexes.x]) * Quaternion.AngleAxis(y_angle, axis[indexes.y]) * Quaternion.AngleAxis(z_angle, axis[indexes.z]);
+        Quaternion rotation = Quaternion.AngleAxis(x_angle, adjustment * Vector3.up) * Quaternion.AngleAxis(y_angle, adjustment * Vector3.forward) * Quaternion.AngleAxis(z_angle, adjustment * Vector3.left);
         c_animator.SetBoneLocalRotation((HumanBodyBones)bone, center * rotation);
         c_animator.bodyPosition = bodyPosition;
         c_animator.bodyRotation = bodyRotation;

@@ -5,5 +5,5 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "Mechanim Bone Mapping", menuName = "ScriptableObjects/Mechanim/Bone Mapping")]
 public class MechanimBoneMotionMapping : ScriptableObject
 {
-    public List<Vector3Int> mappings;
+    public List<Quaternion> mappings;
 }
