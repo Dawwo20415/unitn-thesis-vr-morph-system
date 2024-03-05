@@ -1,0 +1,127 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e1b0909f48e875448681e8b899aa322, type: 3}
+  m_Name: SecondRobotDefaults
+  m_EditorClassIdentifier: 
+  rotations:
+  - {x: 0.47294456, y: -0.52566475, z: -0.47294456, w: 0.52566475}
+  - {x: 0.9857396, y: -0.16827792, z: -0.000000029802319, w: 0.000000024214383}
+  - {x: -0.000000022351736, y: -0.000000018626448, z: 0.9857396, w: 0.16827798}
+  - {x: -0.000000023563446, y: -0.000000008292209, z: -0.6282171, w: 0.77803814}
+  - {x: 0.000000014613619, y: -7.126335e-10, z: 0.62821704, w: 0.77803814}
+  - {x: 0.8692545, y: 0.49436498, z: 8.881784e-16, w: 4.440892e-16}
+  - {x: 8.881784e-16, y: -2.220446e-16, z: -0.49436495, w: 0.8692545}
+  - {x: 0.000000015181223, y: 0.000000015039552, z: -0.009375349, w: 0.99995613}
+  - {x: 0, y: 0, z: 0, w: 1}
+  - {x: 0.000000013520439, y: 0.000000058576415, z: -0.15122356, w: 0.9884996}
+  - {x: 0, y: -0, z: -0, w: 1}
+  - {x: -0.41058227, y: 0.4478345, z: 0.5367564, w: 0.5854564}
+  - {x: 0.4478345, y: 0.41058227, z: -0.5854563, w: 0.5367564}
+  - {x: 0.14112522, y: 0.37081558, z: 0.38444713, w: 0.83353454}
+  - {x: 0.0036595128, y: 0.30937925, z: 0.36027172, w: 0.88004285}
+  - {x: -0.23152256, y: 0.5631752, z: -0.48285425, w: 0.6293511}
+  - {x: 0.61271834, y: 0.4689911, z: -0.44562122, w: 0.45392224}
+  - {x: -0.002768129, y: 0.008098006, z: 0.46268016, w: 0.886484}
+  - {x: -0.70512116, y: -0.008242666, z: 0.0129011255, w: 0.7089216}
+  - {x: -0.22729197, y: -0.66958076, z: -0.22729197, w: 0.66958076}
+  - {x: 0.000000020586366, y: -0.00000000698813, z: -0.32143942, w: 0.9469302}
+  - {x: 0, y: 0, z: 0, w: 1}
+  - {x: 0, y: 0, z: 0, w: 1}
+  - {x: 0, y: 0, z: 0, w: 1}
+  - {x: 0.3177507, y: 0.53007, z: -0.15232617, w: 0.77126974}
+  - {x: -0.37554613, y: -0.52573, z: 0.16689101, w: 0.74479556}
+  - {x: 0, y: 0, z: 0, w: 1}
+  - {x: 0.028615572, y: 0.11553845, z: 0.2668792, w: 0.9563512}
+  - {x: 0.016760116, y: 0.039960314, z: 0.32107398, w: 0.94606227}
+  - {x: 0.005085897, y: 0.036247138, z: 0.28904295, w: 0.95661616}
+  - {x: 0.027690588, y: 0.07756085, z: 0.27190426, w: 0.9587939}
+  - {x: 0.016824707, y: 0.039925426, z: 0.32022315, w: 0.94635093}
+  - {x: 0.0053090197, y: 0.03625617, z: 0.29078224, w: 0.95608735}
+  - {x: 0.025439529, y: 0.0019354187, z: 0.28093502, w: 0.9593876}
+  - {x: 0.0167153, y: 0.03998584, z: 0.32168624, w: 0.94585395}
+  - {x: 0.0049260766, y: 0.03624071, z: 0.28779122, w: 0.9569946}
+  - {x: 0.02405815, y: -0.03526124, z: 0.28490335, w: 0.95760536}
+  - {x: 0.016524127, y: 0.04010865, z: 0.32456508, w: 0.94486815}
+  - {x: 0.0041811876, y: 0.03620903, z: 0.281883, w: 0.9587562}
+  - {x: -0.32165286, y: -0.5338441, z: 0.16273823, w: -0.7648963}
+  - {x: -0.08296039, y: 0.16931269, z: -0.47444776, w: -0.85985476}
+  - {x: 0, y: 0, z: 0, w: 1}
+  - {x: -0.032243207, y: -0.123830736, z: -0.25717574, w: -0.95785546}
+  - {x: -0.016761893, y: -0.039960284, z: -0.32107392, w: -0.94606227}
+  - {x: -0.00508767, y: -0.036247134, z: -0.2890429, w: -0.9566162}
+  - {x: -0.030985769, y: -0.08589142, z: -0.26216626, w: -0.96069324}
+  - {x: -0.016822757, y: -0.039925702, z: -0.32022327, w: -0.9463509}
+  - {x: -0.005307082, y: -0.036256418, z: -0.29078236, w: -0.95608735}
+  - {x: -0.02807092, y: -0.0102974735, z: -0.2712117, w: -0.96205527}
+  - {x: -0.016715176, y: -0.039985873, z: -0.32168633, w: -0.94585395}
+  - {x: -0.004925936, y: -0.036240738, z: -0.28779125, w: -0.9569946}
+  - {x: -0.026358085, y: 0.026898548, z: -0.27520505, w: -0.9606477}
+  - {x: -0.016523851, y: -0.04010875, z: -0.32456508, w: -0.9448681}
+  - {x: -0.0041809184, y: -0.036209118, z: -0.281883, w: -0.9587562}
+  - {x: 0, y: 0, z: 0, w: 1}
+  names:
+  - Root
+  - Left_Thigh_Joint_01
+  - Right_Thigh_Joint_01
+  - Left_Knee_Joint_01
+  - Right_Knee_Joint_01
+  - Left_Ankle_Joint_01
+  - Right_Ankle_Joint_01
+  - Ribs
+  - Chest
+  - Neck
+  - Head
+  - Left_Shoulder_Joint_01
+  - Right_Shoulder_Joint_01
+  - Left_Upper_Arm_Joint_01
+  - Right_Upper_Arm_Joint_01
+  - Left_Forearm_Joint_01
+  - Right_Forearm_Joint_01
+  - Left_Wrist_Joint_01
+  - Right_Wrist_Joint_01
+  - Left_Toe_Joint_01
+  - Right_Toe_Joint_01
+  - LeftEye
+  - RightEye
+  - Jaw
+  - Left_Thumb_Joint_01a
+  - Left_Thumb_Joint_01b
+  - Left Thumb Distal
+  - Left_Index_Finger_Joint_01a
+  - Left_Index_Finger_Joint_01b
+  - Left_Index_Finger_Joint_01c
+  - Left_Middle_Finger_Joint_01a
+  - Left_Middle_Finger_Joint_01b
+  - Left_Middle_Finger_Joint_01c
+  - Left_Ring_Finger_Joint_01a
+  - Left_Ring_Finger_Joint_01b
+  - Left_Ring_Finger_Joint_01c
+  - Left_Pinky_Finger_Joint_01a
+  - Left_Pinky_Finger_Joint_01b
+  - Left_Pinky_Finger_Joint_01c
+  - Right_Thumb_Joint_01a
+  - Right_Thumb_Joint_01b
+  - Right Thumb Distal
+  - Right_Index_Finger_Joint_01a
+  - Right_Index_Finger_Joint_01b
+  - Right_Index_Finger_Joint_01c
+  - Right_Middle_Finger_Joint_01a
+  - Right_Middle_Finger_Joint_01b
+  - Right_Middle_Finger_Joint_01c
+  - Right_Ring_Finger_Joint_01a
+  - Right_Ring_Finger_Joint_01b
+  - Right_Ring_Finger_Joint_01c
+  - Right_Pinky_Finger_Joint_01a
+  - Right_Pinky_Finger_Joint_01b
+  - Right_Pinky_Finger_Joint_01c
+  - UpperChest
+  orientations: []

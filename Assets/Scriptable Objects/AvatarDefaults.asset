@@ -34,6 +34,8 @@ MonoBehaviour:
   - {x: -0.047397237, y: -0.24003564, z: 0.013464748, w: 0.9695128}
   - {x: -0.7071068, y: 0, z: -0, w: 0.7071068}
   - {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
+  - {x: 0, y: -0, z: -0, w: 1}
+  - {x: 0, y: -0, z: -0, w: 1}
   - {x: 0.15949209, y: 0.68888485, z: 0.15949209, w: 0.68888485}
   - {x: -0.22855468, y: 0.9196341, z: 0.31812128, w: 0.028891642}
   - {x: 0.12780538, y: 0, z: -0, w: 0.9917993}
@@ -88,6 +90,8 @@ MonoBehaviour:
   - Right_Hand
   - Left_Toes
   - Right_Toes
+  - LeftEye
+  - RightEye
   - Jaw
   - Left_ThumbProximal
   - Left_ThumbIntermediate
@@ -120,3 +124,4 @@ MonoBehaviour:
   - Right_PinkyIntermediate
   - Right_PinkyDistal
   - UpperChest
+  orientations: []
