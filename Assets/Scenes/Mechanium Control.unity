@@ -949,12 +949,18 @@ MonoBehaviour:
   skeleton_root: {fileID: 1702761448}
   operations_obj: []
   operations: []
+  do_IK: 0
+  do_DK: 0
+  muscle_id: 1
+  modifier: 0
   IK_limb:
   - LeftUpperArm
   - LeftLowerArm
   - LeftHand
   IK_limb_id: 0d0000000f00000011000000
   manual_angle: 0
+  manual_rotation: {x: 0, y: 0, z: 0}
+  manual_rotation_2: {x: 0, y: 0, z: 0}
 --- !u!114 &1934692301
 MonoBehaviour:
   m_ObjectHideFlags: 0
