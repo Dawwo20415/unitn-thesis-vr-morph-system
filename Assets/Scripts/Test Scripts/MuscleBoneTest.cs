@@ -20,6 +20,10 @@ public class MuscleBoneTest : MonoBehaviour
     [Header("Target Stuff")]
     public bool switch2Target = false;
     public Transform target;
+    [Header("Axes")]
+    public Vector3 primaryAxis;
+    public Vector3 secondaryAxis;
+    public Quaternion adjustment;
 
     [Header("Private Peek")]
     public bool useless;
@@ -33,9 +37,10 @@ public class MuscleBoneTest : MonoBehaviour
     [SerializeField]
     private Vector3 max, min;
     [SerializeField]
-    private Quaternion adjustment;
     private Quaternion orientation;
     private Vector3 position;
+    private Vector3 tertiaryAxis;
+    private Transform localTrn;
 
     // Start is called before the first frame update
     void Start()
@@ -50,10 +55,14 @@ public class MuscleBoneTest : MonoBehaviour
         midy = HumanTrait.MuscleFromBone(bone, 1);
         midz = HumanTrait.MuscleFromBone(bone, 2);
 
+        localTrn = c_animator.GetBoneTransform((HumanBodyBones)bone);
         Quaternion world = c_animator.GetBoneTransform((HumanBodyBones)bone).rotation;
         Quaternion local = c_animator.GetBoneTransform((HumanBodyBones)bone).localRotation;
         position = c_animator.GetBoneTransform((HumanBodyBones)bone).position;
         orientation = world * Quaternion.Inverse(local);
+        
+
+        tertiaryAxis = Vector3.Cross(primaryAxis, secondaryAxis);
 
         string to_print = "Bone " + bone + " is " + HumanTrait.BoneName[bone] + 
             " | Muscles[(X/" + midx + "/" + (midx != -1 ? HumanTrait.MuscleName[midx] : "Not Available") + "),(Y/" + midy + "/" + (midy != -1 ? HumanTrait.MuscleName[midy] : "Not Available") + "),(Z/" + midz + "/" + (midz != -1 ? HumanTrait.MuscleName[midz] : "Not Available") + ")]";
@@ -84,9 +93,9 @@ public class MuscleBoneTest : MonoBehaviour
 
         if (!switch2Target)
         {
-            Quaternion rotation = Quaternion.AngleAxis(x_angle, orientation * Vector3.forward) * 
-                                  Quaternion.AngleAxis(y_angle, orientation * Vector3.right) * 
-                                  Quaternion.AngleAxis(z_angle, orientation * Vector3.up); // up - forward - left
+            Quaternion rotation = Quaternion.AngleAxis(x_angle, localTrn.forward) * 
+                                  Quaternion.AngleAxis(y_angle, localTrn.right) * 
+                                  Quaternion.AngleAxis(-z_angle, localTrn.up); // up - forward - left
             //Quaternion rotation = Quaternion.Euler(-x_angle, y_angle, -z_angle);
             c_animator.SetBoneLocalRotation((HumanBodyBones)bone, rotation * center);
             c_animator.bodyPosition = bodyPosition;

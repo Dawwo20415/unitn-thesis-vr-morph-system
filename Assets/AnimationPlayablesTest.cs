@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine.Animations;
 using UnityEngine.Playables;
 using UnityEngine;
@@ -7,19 +8,28 @@ using UnityEngine;
 public struct MuscleHandleExampleJob : IAnimationJob {
     
     public MuscleHandle muscleHandle;
+    public float newValue;
 
     public void ProcessRootMotion(AnimationStream stream) { }
     public void ProcessAnimation(AnimationStream stream)
     {
         AnimationHumanStream humanStream = stream.AsHuman();
-
         // Get a muscle value.
         float muscleValue = humanStream.GetMuscle(muscleHandle);
 
-        Debug.Log("muscleHandle | Name[" + muscleHandle.name + "] DoF[" + muscleHandle.dof + "] DoF[" + muscleHandle.humanPartDof + "]");
-        Debug.Log("Human Stream | Value[" + muscleValue + "]");
+        try
+        {
+            //Debug.Log("muscleHandle | Name[" + muscleHandle.name + "] DoF[" + muscleHandle.dof + "] DoF[" + muscleHandle.humanPartDof + "]");
+            Debug.Log("muscleHandle | DoF[" + muscleHandle.dof + "] DoF[" + muscleHandle.humanPartDof + "]");
+            //Debug.Log("Human Stream | Value[" + muscleValue + "]");
+            Debug.Log("NewValue: " + newValue);
+        } catch (Exception e)
+        {
+            Debug.LogWarning(e.Message);
+        }
+        Debug.Log("Inside IAnimation Job");
         // Set a muscle value.
-        humanStream.SetMuscle(muscleHandle, muscleValue);
+        humanStream.SetMuscle(muscleHandle, newValue);
     }
 }
 
@@ -28,7 +38,13 @@ public struct MuscleHandleExampleJob : IAnimationJob {
 public class AnimationPlayablesTest : MonoBehaviour
 {
 
+    [Range(-1.0f, 1.0f)]
+    public float value;
+
     private PlayableGraph graph;
+    private bool start = true;
+    private MuscleHandleExampleJob job;
+    private AnimationScriptPlayable playable;
 
     // Start is called before the first frame update
     void Start()
@@ -36,18 +52,28 @@ public class AnimationPlayablesTest : MonoBehaviour
         graph = PlayableGraph.Create();
         var output = AnimationPlayableOutput.Create(graph, "output", GetComponent<Animator>());
 
-        var job = new MuscleHandleExampleJob();
-        job.muscleHandle = new MuscleHandle(HumanPartDof.LeftArm, ArmDof.HandDownUp);
+        job = new MuscleHandleExampleJob();
+        job.muscleHandle = new MuscleHandle(HumanPartDof.LeftLeg, LegDof.UpperLegFrontBack);
+        job.newValue = value;
 
-        var scriptPlayable = AnimationScriptPlayable.Create(graph, job);
-        output.SetSourcePlayable(scriptPlayable);
+        playable = AnimationScriptPlayable.Create(graph, job);
+        output.SetSourcePlayable(playable);
 
-        graph.Play();
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (start)
+        {
+            graph.Play();
+            start = false;
+        }
+
+        job.newValue = value;
+        playable.SetJobData<MuscleHandleExampleJob>(job);
+
+        /*
         if (graph.IsPlaying())
         {
             Debug.Log("Playing");
@@ -56,7 +82,7 @@ public class AnimationPlayablesTest : MonoBehaviour
         if (graph.IsDone())
         {
             Debug.Log("Done");
-        }
+        }*/
     }
 
     private void OnDestroy()
