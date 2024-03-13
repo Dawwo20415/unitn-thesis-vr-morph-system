@@ -10,7 +10,10 @@ public struct MuscleHandleExampleJob : IAnimationJob {
     public MuscleHandle muscleHandle;
     public float newValue;
 
-    public void ProcessRootMotion(AnimationStream stream) { }
+    public void ProcessRootMotion(AnimationStream stream) 
+    {
+        
+    }
     public void ProcessAnimation(AnimationStream stream)
     {
         AnimationHumanStream humanStream = stream.AsHuman();
@@ -23,7 +26,8 @@ public struct MuscleHandleExampleJob : IAnimationJob {
             Debug.Log("muscleHandle | DoF[" + muscleHandle.dof + "] DoF[" + muscleHandle.humanPartDof + "]");
             //Debug.Log("Human Stream | Value[" + muscleValue + "]");
             Debug.Log("NewValue: " + newValue);
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             Debug.LogWarning(e.Message);
         }
@@ -58,7 +62,6 @@ public class AnimationPlayablesTest : MonoBehaviour
 
         playable = AnimationScriptPlayable.Create(graph, job);
         output.SetSourcePlayable(playable);
-
     }
 
     // Update is called once per frame

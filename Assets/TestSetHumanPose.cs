@@ -13,19 +13,23 @@ public class TestSetHumanPose : MonoBehaviour
     public float modify_y;
     [Range(-1.0f, 1.0f)]
     public float modify_z;
+    public Transform hips;
 
     private Animator c_animator;
     //private Avatar avatar;
     private HumanPose pose = new HumanPose();
     private HumanPoseHandler poseHandler;
+    private Animator animator;
     [SerializeField]
     private int idx, idy, idz;
     [SerializeField]
     private float value;
+    private Vector3 hipsOffset;
+    private Vector3 postHips;
 
     void Start()
     {
-        //c_animator = GetComponent<Animator>();
+        animator = GetComponent<Animator>();
         //avatar = c_animator.avatar;
 
         poseHandler = new HumanPoseHandler(avatar, root);
@@ -50,6 +54,7 @@ public class TestSetHumanPose : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        hipsOffset = hips.position;
         
         if (idx != -1)
             pose.muscles[idx] = modify_x;
@@ -61,12 +66,18 @@ public class TestSetHumanPose : MonoBehaviour
         if (idz != -1)
             pose.muscles[idz] = modify_z;
 
-        pose.bodyPosition = Vector3.zero;
+
     }
 
     private void LateUpdate()
     {
         poseHandler.SetHumanPose(ref pose);
+        postHips = hips.position;
+    }
+
+    private void OnAnimatorIK(int layerIndex)
+    {
+        animator.bodyPosition = postHips - hipsOffset;
     }
 
     private Vector3 calculateCenterOfMass()
