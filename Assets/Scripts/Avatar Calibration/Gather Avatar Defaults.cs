@@ -9,8 +9,9 @@ public class GatherAvatarDefaults : MonoBehaviour
     public Transform skeletonRoot;
     public Avatar avatar;
     public string assetName = "AvatarDefault";
+    public HumanoidAvatarDefaults scriptableObj;
 
-    [ContextMenu("Get Bome Centers")]
+    [ContextMenu("Get Muscle-Bone Centers")]
     public void GatherCenters()
     {
         HumanoidAvatarDefaults asset = ScriptableObject.CreateInstance<HumanoidAvatarDefaults>();
@@ -39,11 +40,61 @@ public class GatherAvatarDefaults : MonoBehaviour
             }
         }
 
-        asset.rotations = defaults;
+        asset.muscleCenters = defaults;
         asset.names = names;
 
         AssetDatabase.CreateAsset(asset, assetPath);
         AssetDatabase.SaveAssets();
+    }
+
+    [ContextMenu("Get TPose-Bone Orientations world")]
+    public void GatherTPoseOrientationsWorld()
+    {
+        List<Quaternion> defaults = new List<Quaternion>(56);
+        for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+        {
+            string objName = LookUpBone(HumanTrait.BoneName[i]);
+            bool found = false;
+            foreach (Transform childTrn in skeletonRoot.GetComponentsInChildren<Transform>())
+            {
+                if (childTrn.gameObject.name == objName)
+                {
+                    defaults.Add(childTrn.rotation);
+                    found = true;
+                }
+            }
+            if (!found)
+            {
+                defaults.Add(Quaternion.identity);
+            }
+        }
+
+        scriptableObj.tPoseOrientations_world = defaults;
+    }
+
+    [ContextMenu("Get TPose-Bone Orientations local")]
+    public void GatherTPoseOrientationsLocal()
+    {
+        List<Quaternion> defaults = new List<Quaternion>(56);
+        for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+        {
+            string objName = LookUpBone(HumanTrait.BoneName[i]);
+            bool found = false;
+            foreach (Transform childTrn in skeletonRoot.GetComponentsInChildren<Transform>())
+            {
+                if (childTrn.gameObject.name == objName)
+                {
+                    defaults.Add(childTrn.localRotation);
+                    found = true;
+                }
+            }
+            if (!found)
+            {
+                defaults.Add(Quaternion.identity);
+            }
+        }
+
+        scriptableObj.tPoseOrientations_local = defaults;
     }
 
     string LookUpBone(string name)

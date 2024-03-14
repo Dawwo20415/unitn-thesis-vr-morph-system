@@ -76,16 +76,7 @@ public class AnimationPlayablesTest : MonoBehaviour
         job.newValue = value;
         playable.SetJobData<MuscleHandleExampleJob>(job);
 
-        /*
-        if (graph.IsPlaying())
-        {
-            Debug.Log("Playing");
-        }
-
-        if (graph.IsDone())
-        {
-            Debug.Log("Done");
-        }*/
+        
     }
 
     private void OnDestroy()

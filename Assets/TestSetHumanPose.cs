@@ -54,7 +54,6 @@ public class TestSetHumanPose : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        hipsOffset = hips.position;
         
         if (idx != -1)
             pose.muscles[idx] = modify_x;
@@ -72,16 +71,12 @@ public class TestSetHumanPose : MonoBehaviour
     private void LateUpdate()
     {
         poseHandler.SetHumanPose(ref pose);
-        postHips = hips.position;
-    }
-
-    private void OnAnimatorIK(int layerIndex)
-    {
-        animator.bodyPosition = postHips - hipsOffset;
     }
 
     private Vector3 calculateCenterOfMass()
     {
+        
+        
         Vector3 center = Vector3.zero;
 
         return center;

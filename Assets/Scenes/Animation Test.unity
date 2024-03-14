@@ -472,7 +472,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &910217045
 Transform:
   m_ObjectHideFlags: 0
@@ -559,7 +559,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5717370821310611589, guid: d079cd0e6137a44b58864c3a91ad119a, type: 3}
       propertyPath: m_ApplyRootMotion
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -867,13 +867,13 @@ MonoBehaviour:
   modify_x: 0
   modify_y: 0
   modify_z: 0
-  centers: {fileID: 11400000, guid: 021d4b6b28560154d96aa61474ff6208, type: 2}
+  centers: {fileID: 11400000, guid: 7223540cad20a5644b6645f0e8970baa, type: 2}
   mapping: {fileID: 11400000, guid: 7ee7ab45d6fcb8a44abdddf7d78d946a, type: 2}
   switch2Target: 0
   target: {fileID: 958183694}
   primaryAxis: {x: 1, y: 0, z: 0}
-  secondaryAxis: {x: 0, y: 1, z: 0}
-  adjustment: {x: 0, y: 0, z: 0, w: 0}
+  secondaryAxis: {x: 0, y: 0, z: 1}
+  tertiaryAxis: {x: 0, y: 1, z: 0}
   useless: 0
   default_limits: 0
   midx: 0
@@ -1796,13 +1796,13 @@ MonoBehaviour:
   modify_x: 0
   modify_y: 0
   modify_z: 0
-  centers: {fileID: 11400000, guid: 7223540cad20a5644b6645f0e8970baa, type: 2}
+  centers: {fileID: 0}
   mapping: {fileID: 11400000, guid: 7b14679ea09098f498e3925ca971d96e, type: 2}
   switch2Target: 0
   target: {fileID: 0}
   primaryAxis: {x: 0, y: 0, z: 0}
   secondaryAxis: {x: 0, y: 0, z: 0}
-  adjustment: {x: 0, y: 0, z: 0, w: 0}
+  tertiaryAxis: {x: 0, y: 0, z: 0}
   useless: 0
   default_limits: 0
   midx: 0

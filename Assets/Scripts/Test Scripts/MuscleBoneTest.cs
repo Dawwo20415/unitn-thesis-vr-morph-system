@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations;
 
+public enum OrietationSpace
+{
+    SO_local, SO_world, skeleton
+}
+
 public class MuscleBoneTest : MonoBehaviour
 {
     [Range(0,54)]
@@ -23,7 +28,9 @@ public class MuscleBoneTest : MonoBehaviour
     [Header("Axes")]
     public Vector3 primaryAxis;
     public Vector3 secondaryAxis;
-    public Quaternion adjustment;
+    public Vector3 tertiaryAxis;
+    [Header("Adjustment")]
+    public OrietationSpace decision;
 
     [Header("Private Peek")]
     public bool useless;
@@ -37,10 +44,12 @@ public class MuscleBoneTest : MonoBehaviour
     [SerializeField]
     private Vector3 max, min;
     [SerializeField]
-    private Quaternion orientation;
+    private Quaternion orientation_fromSO_local;
+    [SerializeField]
+    private Quaternion orientation_fromSO_world;
+    [SerializeField]
+    private Quaternion orientation_fromSkeleton;
     private Vector3 position;
-    private Vector3 tertiaryAxis;
-    private Transform localTrn;
 
     // Start is called before the first frame update
     void Start()
@@ -48,18 +57,20 @@ public class MuscleBoneTest : MonoBehaviour
         c_animator = GetComponent<Animator>();
         avatar = c_animator.avatar;
         default_limits = avatar.humanDescription.human[bone].limit.useDefaultValues;
-        center = centers.rotations[bone];
+        center = centers.muscleCenters[bone];
+        orientation_fromSO_local = centers.tPoseOrientations_local[bone];
+        orientation_fromSO_world = centers.tPoseOrientations_world[bone];
+        orientation_fromSkeleton = avatar.humanDescription.skeleton[bone].rotation;
         bodyPosition = new Vector3((float)-0.00499999989, (float)-0.0549999997, (float)-0.0500000007);
 
         midx = HumanTrait.MuscleFromBone(bone, 0);
         midy = HumanTrait.MuscleFromBone(bone, 1);
         midz = HumanTrait.MuscleFromBone(bone, 2);
 
-        localTrn = c_animator.GetBoneTransform((HumanBodyBones)bone);
         Quaternion world = c_animator.GetBoneTransform((HumanBodyBones)bone).rotation;
         Quaternion local = c_animator.GetBoneTransform((HumanBodyBones)bone).localRotation;
-        position = c_animator.GetBoneTransform((HumanBodyBones)bone).position;
-        orientation = world * Quaternion.Inverse(local);
+        //position = c_animator.GetBoneTransform((HumanBodyBones)bone).position;
+        //orientation_fromSO = world * Quaternion.Inverse(local);
         
 
         tertiaryAxis = Vector3.Cross(primaryAxis, secondaryAxis);
@@ -91,11 +102,28 @@ public class MuscleBoneTest : MonoBehaviour
         y_angle = map0(modify_y, -1.0f, 1.0f, min.y, max.y);
         z_angle = map0(modify_z, -1.0f, 1.0f, min.z, max.z);
 
+        Quaternion orientation_space = Quaternion.identity;
+
+        switch (decision)
+        {
+            case OrietationSpace.SO_local:
+                orientation_space = orientation_fromSO_local;
+                break;
+            case OrietationSpace.SO_world:
+                orientation_space = orientation_fromSO_world;
+                break;
+            case OrietationSpace.skeleton:
+                orientation_space = orientation_fromSkeleton;
+                break;
+            default:
+                break;
+        }
+
         if (!switch2Target)
         {
-            Quaternion rotation = Quaternion.AngleAxis(x_angle, localTrn.forward) * 
-                                  Quaternion.AngleAxis(y_angle, localTrn.right) * 
-                                  Quaternion.AngleAxis(-z_angle, localTrn.up); // up - forward - left
+            Quaternion rotation = Quaternion.AngleAxis(x_angle, orientation_space * primaryAxis) * 
+                                  Quaternion.AngleAxis(y_angle, orientation_space * secondaryAxis) * 
+                                  Quaternion.AngleAxis(z_angle, orientation_space * tertiaryAxis); // up - forward - left
             //Quaternion rotation = Quaternion.Euler(-x_angle, y_angle, -z_angle);
             c_animator.SetBoneLocalRotation((HumanBodyBones)bone, rotation * center);
             c_animator.bodyPosition = bodyPosition;
