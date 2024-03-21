@@ -14,26 +14,13 @@ public struct MuscleHandleExampleJob : IAnimationJob {
 
     public void ProcessRootMotion(AnimationStream stream) 
     {
+
     }
     public void ProcessAnimation(AnimationStream stream)
     {
         AnimationHumanStream humanStream = stream.AsHuman();
-        // Get a muscle value.
-        float muscleValue = humanStream.GetMuscle(muscleHandle);
-
-        try
-        {
-            //Debug.Log("muscleHandle | Name[" + muscleHandle.name + "] DoF[" + muscleHandle.dof + "] DoF[" + muscleHandle.humanPartDof + "]");
-            //Debug.Log("muscleHandle | DoF[" + muscleHandle.dof + "] DoF[" + muscleHandle.humanPartDof + "]");
-            //Debug.Log("Human Stream | Value[" + muscleValue + "]");
-            //Debug.Log("NewValue: " + newValue);
-        }
-        catch (Exception e)
-        {
-            Debug.LogWarning(e.Message);
-        }
-        // Set a muscle value.
         humanStream.SetMuscle(muscleHandle, newValue);
+        humanStream.bodyPosition = position;
     }
 }
 
@@ -44,25 +31,27 @@ public class AnimationPlayablesTest : MonoBehaviour
 
     [Range(-1.0f, 1.0f)]
     public float value;
-    public ushort order;
+    //public ushort order;
     [Range(0.0f, 1.0f)]
     public float weight;
     public Vector3 position;
 
     private PlayableGraph graph;
-    private bool start = true;
+    //private bool start = true;
     private MuscleHandleExampleJob job;
     private AnimationScriptPlayable playable;
     private AnimationPlayableOutput output;
 
     public HumanPartDof human_part_dof;
     public LegDof leg_dof;
+    //public HumanBodyBones rotation_bone;
 
     // Start is called before the first frame update
     void Start()
     {
-        graph = PlayableGraph.Create("Muscle Controll");
-        output = AnimationPlayableOutput.Create(graph, "output", GetComponent<Animator>());
+        Animator animator = GetComponent<Animator>();
+        graph = PlayableGraph.Create("Muscle Controll_" + UnityEngine.Random.Range(0.0f, 1.0f));
+        output = AnimationPlayableOutput.Create(graph, "output", animator);
 
         job = new MuscleHandleExampleJob();
         job.muscleHandle = new MuscleHandle(human_part_dof, leg_dof);
@@ -70,31 +59,29 @@ public class AnimationPlayablesTest : MonoBehaviour
         job.position = position;
 
         playable = AnimationScriptPlayable.Create(graph, job);
-        AnimationPlayableOutputExtensions.SetSortingOrder(output, order);
+        //AnimationPlayableOutputExtensions.SetSortingOrder(output, order);
         output.SetWeight<AnimationPlayableOutput>(weight);
         output.SetSourcePlayable(playable);
+        graph.Play();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (start)
-        {
-            graph.Play();
-            start = false;
-        }
 
         job.newValue = value;
         job.muscleHandle = new MuscleHandle(human_part_dof, leg_dof);
         job.position = position;
         playable.SetJobData<MuscleHandleExampleJob>(job);
         output.SetWeight<AnimationPlayableOutput>(weight);
-        Debug.Log("Sort Order: " + order + " | Weight: " + output.GetWeight<AnimationPlayableOutput>(), this);
     }
 
     private void OnDestroy()
     {
-        graph.Stop();
-        graph.Destroy();
+        if (graph.IsValid())
+        {
+            graph.Stop();
+            graph.Destroy();
+        }     
     }
 }

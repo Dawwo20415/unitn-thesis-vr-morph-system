@@ -440,7 +440,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &735340349
 Transform:
   m_ObjectHideFlags: 0
@@ -472,7 +472,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &910217045
 Transform:
   m_ObjectHideFlags: 0
@@ -551,7 +551,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5717370821310611589, guid: d079cd0e6137a44b58864c3a91ad119a, type: 3}
       propertyPath: m_UpdateMode
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5717370821310611589, guid: d079cd0e6137a44b58864c3a91ad119a, type: 3}
       propertyPath: m_CullingMode
@@ -559,7 +559,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5717370821310611589, guid: d079cd0e6137a44b58864c3a91ad119a, type: 3}
       propertyPath: m_ApplyRootMotion
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -834,7 +834,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb432df0479dbc84b8c501f381370ca9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bone: 1
+  bone: 2
   root: {fileID: 1079019146}
   avatar: {fileID: 9000000, guid: 320b1c2af77554f99a1658df4a6d3d5c, type: 3}
   modify_x: 0
@@ -867,7 +867,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26fa26646d9d8a743a8cb153ec33c127, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bone: 1
+  bone: 2
   bodyPosition: {x: 0, y: 0, z: 0}
   bodyRotation: {x: 0, y: 0, z: 0, w: 0}
   modify_x: 0
@@ -906,7 +906,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1321712565
 Transform:
   m_ObjectHideFlags: 0
@@ -1840,13 +1840,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2010418776}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2c90a41b820a99c458bfd63cdc842e52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   value: 0
-  order: 100
   weight: 1
   position: {x: 0, y: 0, z: 0}
   human_part_dof: 3
@@ -1876,12 +1875,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c90a41b820a99c458bfd63cdc842e52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  value: 0
-  order: 101
-  weight: 0
+  value: 0.009
+  weight: 1
   position: {x: 0, y: 0, z: 0}
   human_part_dof: 3
-  leg_dof: 3
+  leg_dof: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
