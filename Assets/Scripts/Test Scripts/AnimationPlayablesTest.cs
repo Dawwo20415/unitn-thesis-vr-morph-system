@@ -21,6 +21,7 @@ public struct MuscleHandleExampleJob : IAnimationJob {
     {
         AnimationHumanStream humanStream = stream.AsHuman();
         humanStream.SetMuscle(muscleHandle, newValue);
+    
     }
 }
 
