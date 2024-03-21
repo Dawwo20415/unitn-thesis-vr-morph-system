@@ -14,13 +14,13 @@ public struct MuscleHandleExampleJob : IAnimationJob {
 
     public void ProcessRootMotion(AnimationStream stream) 
     {
-
+        AnimationHumanStream humanStream = stream.AsHuman();
+        humanStream.bodyPosition = position;
     }
     public void ProcessAnimation(AnimationStream stream)
     {
         AnimationHumanStream humanStream = stream.AsHuman();
         humanStream.SetMuscle(muscleHandle, newValue);
-        humanStream.bodyPosition = position;
     }
 }
 
