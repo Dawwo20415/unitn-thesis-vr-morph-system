@@ -42,6 +42,10 @@ public struct RawRotationJob : IAnimationJob
     }
 }
 
+public class HandleQuaternion : PlayableBehaviour
+{
+
+}
 
 public class RawRotationTesting : MonoBehaviour
 {
@@ -69,12 +73,7 @@ public class RawRotationTesting : MonoBehaviour
 
             int skeleton_index = LookUpSkeleton(animator.avatar.humanDescription.human[i].boneName, animator.avatar.humanDescription);
             q.Add(animator.avatar.humanDescription.skeleton[skeleton_index].rotation);
-
-            Debug.Log("HumanName[" + animator.avatar.humanDescription.human[i].humanName + "] SkeletonName[" + animator.avatar.humanDescription.human[i].boneName + "] From SkeletonBone[ " + animator.avatar.humanDescription.skeleton[skeleton_index].name + "Index[" + index + "]", this);
-            
         }
-
-        Debug.Log(trn.Count, this);
 
         job = new RawRotationJob();
         job.Setup(animator, trn, q);
