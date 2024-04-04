@@ -6,7 +6,7 @@ public class CustomOptitrackSkeletonAnimator : MonoBehaviour
 {
     /// <summary>The client object to use for receiving streamed skeletal pose data.</summary>
     [Tooltip("The object containing the OptiTrackStreamingClient script.")]
-    public CustomOptitrackStreamingClient StreamingClient;
+    public PlayableOptitrackStreamingClient StreamingClient;
 
     /// <summary>The name of the skeleton asset in the stream that will provide retargeting source data.</summary>
     [Tooltip("The name of skeleton asset in Motive.")]
@@ -53,18 +53,18 @@ public class CustomOptitrackSkeletonAnimator : MonoBehaviour
         // If the user didn't explicitly associate a client, find a suitable default.
         if (this.StreamingClient == null)
         {
-            this.StreamingClient = CustomOptitrackStreamingClient.FindDefaultClient();
+            this.StreamingClient = PlayableOptitrackStreamingClient.FindDefaultClient();
 
             // If we still couldn't find one, disable this component.
             if (this.StreamingClient == null)
             {
-                Debug.LogError(GetType().FullName + ": Streaming client not set, and no " + typeof(CustomOptitrackStreamingClient).FullName + " components found in scene; disabling this component.", this);
+                Debug.LogError(GetType().FullName + ": Streaming client not set, and no " + typeof(PlayableOptitrackStreamingClient).FullName + " components found in scene; disabling this component.", this);
                 this.enabled = false;
                 return;
             }
         }
 
-        this.StreamingClient.RegisterSkeleton(this, this.SkeletonAssetName);
+        this.StreamingClient.RegisterSkeleton(this.SkeletonAssetName);
 
         // Create a lookup from Mecanim anatomy bone names to OptiTrack streaming bone names.
         CacheBoneNameMap(this.StreamingClient.BoneNamingConvention, this.SkeletonAssetName);

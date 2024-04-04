@@ -3,58 +3,38 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Playables;
+using UnityEngine.Animations;
 
 public class PosePlayable : PlayableBehaviour
 {
-
-    private CustomOptitrackStreamingClient StreamingClient;
-    private string SkeletonAssetName = "Skeleton1";
-    private Avatar DestinationAvatar;
-
-    private bool connectBones = true;
-
-    private HumanPose m_humanPose = new HumanPose();
+    private PlayableOptitrackStreamingClient client;
+    private string skeleton_asset_name;
     private OptitrackSkeletonDefinition m_skeletonDef;
-    private GameObject m_rootObject;
-    private Dictionary<Int32, GameObject> m_boneObjectMap;
     private Dictionary<string, string> m_cachedMecanimBoneNameMap = new Dictionary<string, string>();
-    private Avatar m_srcAvatar;
-    private HumanPoseHandler m_srcPoseHandler;
-    private HumanPoseHandler m_destPoseHandler;
 
-    public void init()
+    public void Init(PlayableOptitrackStreamingClient streamingClient, string name)
     {
-        // If the user didn't explicitly associate a client, find a suitable default.
-        if (StreamingClient == null)
-        {
-            StreamingClient = CustomOptitrackStreamingClient.FindDefaultClient();
+        client = streamingClient;
+            DefaultStreamingClient();
 
-            // If we still couldn't find one, disable this component.
-            if (StreamingClient == null)
-            {
-                //TODO make ti so that if setup is not full, disconnect node
-                Debug.LogError(GetType().FullName + ": Streaming client not set, and no " + typeof(CustomOptitrackStreamingClient).FullName + " components found in scene; disabling this component.");
-                return;
-            }
-        }
-
+        skeleton_asset_name = name;
         //ALERT have to do streaming client setup outside of the Graph
-        StreamingClient.RegisterSkeleton(this, SkeletonAssetName);
+        client.RegisterSkeleton(skeleton_asset_name);
 
         // Create a lookup from Mecanim anatomy bone names to OptiTrack streaming bone names.
-        CacheBoneNameMap(StreamingClient.BoneNamingConvention, SkeletonAssetName);
+        CacheBoneNameMap(client.BoneNamingConvention, skeleton_asset_name);
 
         // Retrieve the OptiTrack skeleton definition.
-        m_skeletonDef = StreamingClient.GetSkeletonDefinitionByName(SkeletonAssetName);
+        m_skeletonDef = client.GetSkeletonDefinitionByName(skeleton_asset_name);
 
         if (m_skeletonDef == null)
         {
-            Debug.LogError(GetType().FullName + ": Could not find skeleton definition with the name \"" + SkeletonAssetName + "\"");
-            return;
+            Debug.LogError(GetType().FullName + ": Could not find skeleton definition with the name \"" + skeleton_asset_name + "\"");
         }
 
+        /*
         // Create a hierarchy of GameObjects that will receive the skeletal pose data.
-        string rootObjectName = "OptiTrack Skeleton - " + SkeletonAssetName;
+        string rootObjectName = "OptiTrack Skeleton - " + skeleton_asset_name;
         m_rootObject = new GameObject(rootObjectName);
 
         m_boneObjectMap = new Dictionary<Int32, GameObject>(m_skeletonDef.Bones.Count);
@@ -82,12 +62,65 @@ public class PosePlayable : PlayableBehaviour
         m_rootObject.transform.parent = this.StreamingClient.transform;
         m_rootObject.transform.localPosition = Vector3.zero;
         m_rootObject.transform.localRotation = Quaternion.identity;
+
+        */
     }
 
     public override void PrepareFrame(Playable playable, FrameData info)
     {
-        //Prima che il frame venga processato
-        base.PrepareFrame(playable, info);
+        string to_print = "PrepareFrame" + " | StreamingClient_name:" + client.name + "StreamingClient_address" + client.LocalAddress;
+        Debug.Log(to_print);
+
+    }
+
+    public override void ProcessFrame(Playable playable, FrameData info, object playerData)
+    {
+        string to_print = "ProcessFrame | PlayerData_type: " + playerData.GetType().FullName + " | StreamingClient_name:" + client.name + "StreamingClient_address" + client.LocalAddress;
+        to_print += " | CacheBoneNameMap: " + m_cachedMecanimBoneNameMap.Count + " | SkeletonDef: " + m_skeletonDef.Name;
+        Debug.Log(to_print);
+    }
+
+    private void DefaultStreamingClient()
+    {
+        if (client == null)
+        {
+            client = PlayableOptitrackStreamingClient.FindDefaultClient();
+
+            // If we still couldn't find one, disable this component.
+            if (client == null)
+            {
+                //TODO make ti so that if setup is not full, disconnect node
+                Debug.LogError(GetType().FullName + ": Streaming client not set, and no " + typeof(CustomOptitrackStreamingClient).FullName + " components found in scene; disabling this component.");
+                return;
+            }
+        }
+    }
+
+    /*
+    private CustomOptitrackStreamingClient StreamingClient;
+    private string SkeletonAssetName = "Skeleton1";
+    private Avatar DestinationAvatar;
+
+    private bool connectBones = true;
+
+    private HumanPose m_humanPose = new HumanPose();
+    private OptitrackSkeletonDefinition m_skeletonDef;
+    private GameObject m_rootObject;
+    private Dictionary<Int32, GameObject> m_boneObjectMap;
+    
+    private Avatar m_srcAvatar;
+    private HumanPoseHandler m_srcPoseHandler;
+    private HumanPoseHandler m_destPoseHandler;
+    */
+    /*
+    public void init()
+    {
+        
+        
+
+        
+
+        
     }
 
     public override void ProcessFrame(Playable playable, FrameData info, object playerData)
@@ -262,6 +295,7 @@ public class PosePlayable : PlayableBehaviour
 
         return Quaternion.identity;
     }
+    */
 
     private void CacheBoneNameMap(OptitrackBoneNameConvention convention, string assetName)
     {
@@ -462,17 +496,47 @@ public class PosePlayable : PlayableBehaviour
     }
 }
 
+[RequireComponent(typeof(Animator))]
 public class OptitrackPosePlayable : MonoBehaviour
 {
+    public PlayableOptitrackStreamingClient client;
+    public string skeleton_name;
+
+    private PlayableGraph graph;
+    private ScriptPlayable<PosePlayable> posePlayable;
+    private ScriptPlayableOutput output;
+
+
     // Start is called before the first frame update
     void Start()
     {
-        
+        Animator animator = GetComponent<Animator>();
+        graph = PlayableGraph.Create("Optitrack Test_" + UnityEngine.Random.Range(0.0f, 1.0f));
+        output = ScriptPlayableOutput.Create(graph, "output");
+        PlayableOutputExtensions.SetUserData(output, this);
+
+        var posePlayable = ScriptPlayable<PosePlayable>.Create(graph);
+        var poseBehaviour = posePlayable.GetBehaviour();
+
+        poseBehaviour.Init(client, skeleton_name);
+
+        output.SetSourcePlayable(posePlayable);
+
+        graph.Play();
     }
 
     // Update is called once per frame
     void Update()
     {
         
+    }
+
+    private void OnDisable()
+    {
+        if (graph.IsValid())
+        {
+            graph.Stop();
+            graph.Destroy();
+        }
     }
 }
