@@ -8,9 +8,9 @@ using UnityEngine.Playables;
 using UnityEngine;
 using UnityEngine.XR.OpenXR.Input;
 
-/// <summary>
+/// <progress>
 /// TODO create the graph, cre ate the single quaternion modifiers and create the merger
-/// </summary>
+/// </progress>
 
 public class PoseBehaviour : PlayableBehaviour
 {

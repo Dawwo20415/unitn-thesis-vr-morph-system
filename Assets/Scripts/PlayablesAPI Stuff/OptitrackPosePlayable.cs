@@ -4,66 +4,35 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Animations;
+using Unity.Collections;
 
+/// <progress>
+/// The TransformStreamHandle.SetLocalPosition has to be in an IAnimationJob because it requires an AnimationStream
+/// Therefore there needs to be an intermediary node that can take the pose and apply it to the animation. 
+/// This avatar then needs to be able to be referenced because the retargeting of the paper takes in reference meshes put on the original proportions to then retarget
+/// </progress>
 public class PosePlayable : PlayableBehaviour
 {
     private PlayableOptitrackStreamingClient client;
-    private string skeleton_asset_name;
     private OptitrackSkeletonDefinition m_skeletonDef;
-    private Dictionary<string, string> m_cachedMecanimBoneNameMap = new Dictionary<string, string>();
+    //private Dictionary<Int32, GameO bject> m_boneObjectMap;
+    private NativeArray<TransformStreamHandle> source_avatar_bones;
+    private Dictionary<Int32, int> index_links;
 
-    public void Init(PlayableOptitrackStreamingClient streamingClient, string name)
+    public void Init(PlayableOptitrackStreamingClient streamingClient, OptitrackSkeletonDefinition skeletonDefinition, Dictionary<Int32, GameObject> m_boneObjectMap, Animator animator)
     {
         client = streamingClient;
-            DefaultStreamingClient();
+        m_skeletonDef = skeletonDefinition;
+        source_avatar_bones = new NativeArray<TransformStreamHandle>(m_boneObjectMap.Count, Allocator.Persistent);
+        index_links = new Dictionary<int, int>(m_boneObjectMap.Count);
 
-        skeleton_asset_name = name;
-        //ALERT have to do streaming client setup outside of the Graph
-        client.RegisterSkeleton(skeleton_asset_name);
-
-        // Create a lookup from Mecanim anatomy bone names to OptiTrack streaming bone names.
-        CacheBoneNameMap(client.BoneNamingConvention, skeleton_asset_name);
-
-        // Retrieve the OptiTrack skeleton definition.
-        m_skeletonDef = client.GetSkeletonDefinitionByName(skeleton_asset_name);
-
-        if (m_skeletonDef == null)
+        int i = 0;
+        foreach (KeyValuePair<Int32,GameObject> element in m_boneObjectMap)
         {
-            Debug.LogError(GetType().FullName + ": Could not find skeleton definition with the name \"" + skeleton_asset_name + "\"");
+            source_avatar_bones[i] = animator.BindStreamTransform(element.Value.transform);
+            index_links.Add(element.Key, i);
+            i++;
         }
-
-        /*
-        // Create a hierarchy of GameObjects that will receive the skeletal pose data.
-        string rootObjectName = "OptiTrack Skeleton - " + skeleton_asset_name;
-        m_rootObject = new GameObject(rootObjectName);
-
-        m_boneObjectMap = new Dictionary<Int32, GameObject>(m_skeletonDef.Bones.Count);
-
-        for (int boneDefIdx = 0; boneDefIdx < m_skeletonDef.Bones.Count; ++boneDefIdx)
-        {
-            OptitrackSkeletonDefinition.BoneDefinition boneDef = m_skeletonDef.Bones[boneDefIdx];
-
-            GameObject boneObject = new GameObject(boneDef.Name);
-            boneObject.transform.parent = boneDef.ParentId == 0 ? m_rootObject.transform : m_boneObjectMap[boneDef.ParentId].transform;
-            boneObject.transform.localPosition = boneDef.Offset;
-            m_boneObjectMap[boneDef.Id] = boneObject;
-
-            if (connectBones)
-            {
-                FromToLine deb = boneObject.AddComponent<FromToLine>();
-                deb.target = boneDef.ParentId == 0 ? m_rootObject.transform : m_boneObjectMap[boneDef.ParentId].transform;
-            }
-        }
-
-        // Hook up retargeting between those GameObjects and the destination Avatar.
-        MecanimSetup(rootObjectName);
-
-        // Can't re-parent this until after Mecanim setup, or else Mecanim gets confused.
-        m_rootObject.transform.parent = this.StreamingClient.transform;
-        m_rootObject.transform.localPosition = Vector3.zero;
-        m_rootObject.transform.localRotation = Quaternion.identity;
-
-        */
     }
 
     public override void PrepareFrame(Playable playable, FrameData info)
@@ -75,54 +44,18 @@ public class PosePlayable : PlayableBehaviour
 
     public override void ProcessFrame(Playable playable, FrameData info, object playerData)
     {
-        string to_print = "ProcessFrame | PlayerData_type: " + playerData.GetType().FullName + " | StreamingClient_name:" + client.name + "StreamingClient_address" + client.LocalAddress;
-        to_print += " | CacheBoneNameMap: " + m_cachedMecanimBoneNameMap.Count + " | SkeletonDef: " + m_skeletonDef.Name;
+        string to_print = "ProcessFrame | PlayerData_type[" + playerData.GetType().FullName + "] | StreamingClient_name[" + client.name + "] StreamingClient_address[" + client.LocalAddress + "]";
+        to_print += " | SkeletonDef[" + m_skeletonDef.Name + "] | AvatarSourceBones[" + source_avatar_bones.Length + "] | IndexLinking[" + index_links.Count + "]";
         Debug.Log(to_print);
     }
 
-    private void DefaultStreamingClient()
+    public void Dispose()
     {
-        if (client == null)
-        {
-            client = PlayableOptitrackStreamingClient.FindDefaultClient();
-
-            // If we still couldn't find one, disable this component.
-            if (client == null)
-            {
-                //TODO make ti so that if setup is not full, disconnect node
-                Debug.LogError(GetType().FullName + ": Streaming client not set, and no " + typeof(CustomOptitrackStreamingClient).FullName + " components found in scene; disabling this component.");
-                return;
-            }
-        }
+        source_avatar_bones.Dispose();
     }
 
     /*
-    private CustomOptitrackStreamingClient StreamingClient;
-    private string SkeletonAssetName = "Skeleton1";
-    private Avatar DestinationAvatar;
-
-    private bool connectBones = true;
-
-    private HumanPose m_humanPose = new HumanPose();
-    private OptitrackSkeletonDefinition m_skeletonDef;
-    private GameObject m_rootObject;
-    private Dictionary<Int32, GameObject> m_boneObjectMap;
     
-    private Avatar m_srcAvatar;
-    private HumanPoseHandler m_srcPoseHandler;
-    private HumanPoseHandler m_destPoseHandler;
-    */
-    /*
-    public void init()
-    {
-        
-        
-
-        
-
-        
-    }
-
     public override void ProcessFrame(Playable playable, FrameData info, object playerData)
     {
         //Il flow del frame
@@ -174,128 +107,126 @@ public class PosePlayable : PlayableBehaviour
             }
         }
     }
+    */
+}
 
-    private void MecanimSetup(string rootObjectName)
+[RequireComponent(typeof(Animator))]
+public class OptitrackPosePlayable : MonoBehaviour
+{
+    
+    //PlayableGraph Stuff
+    private PlayableGraph graph;
+    private Avatar avatar;
+    private ScriptPlayable<PosePlayable> posePlayable;
+    private ScriptPlayableOutput output;
+    private PosePlayable behaviour;
+
+    //Optitrack Stuff
+    public PlayableOptitrackStreamingClient client;
+    public string skeleton_name;
+    public bool connectBones = true;
+
+    private GameObject m_rootObject;
+    private OptitrackSkeletonDefinition m_skeletonDef;
+    private Dictionary<string, string> m_cachedMecanimBoneNameMap = new Dictionary<string, string>();
+    private Dictionary<Int32, GameObject> m_boneObjectMap;
+    private HumanPoseHandler m_srcPoseHandler;
+    private HumanPoseHandler m_destPoseHandler;
+    private Avatar m_srcAvatar;
+    private Animator optitrackAvatarAnimator;
+    private AnimationPlayableOutput optitrakPlayableOutput;
+
+    // Start is called before the first frame update
+    void Start()
     {
-        string[] humanTraitBoneNames = HumanTrait.BoneName;
+        SetupOptitrack();
 
-        // Set up the mapping between Mecanim human anatomy and OptiTrack skeleton representations.
-        List<HumanBone> humanBones = new List<HumanBone>(m_skeletonDef.Bones.Count);
-        for (int humanBoneNameIdx = 0; humanBoneNameIdx < humanTraitBoneNames.Length; ++humanBoneNameIdx)
+
+        Animator animator = GetComponent<Animator>();
+        avatar = animator.avatar;
+        graph = PlayableGraph.Create("Optitrack Test_" + UnityEngine.Random.Range(0.0f, 1.0f));
+        output = ScriptPlayableOutput.Create(graph, "output");
+        optitrakPlayableOutput = AnimationPlayableOutput.Create(graph, "Optitrack Animation Output", optitrackAvatarAnimator);
+        PlayableOutputExtensions.SetUserData(output, this);
+
+        var posePlayable = ScriptPlayable<PosePlayable>.Create(graph);
+        behaviour = posePlayable.GetBehaviour();
+
+        behaviour.Init(client, m_skeletonDef, m_boneObjectMap, optitrackAvatarAnimator);
+
+        posePlayable.SetOutputCount(2);
+        output.SetSourcePlayable(posePlayable);
+        optitrakPlayableOutput.SetSourcePlayable(posePlayable, 1);
+
+        graph.Play();
+    }
+
+    private void SetupOptitrack()
+    {
+        // If the user didn't explicitly associate a client, find a suitable default.
+        if (this.client == null)
         {
-            string humanBoneName = humanTraitBoneNames[humanBoneNameIdx];
-            if (m_cachedMecanimBoneNameMap.ContainsKey(humanBoneName))
-            {
-                HumanBone humanBone = new HumanBone();
-                humanBone.humanName = humanBoneName;
-                humanBone.boneName = m_cachedMecanimBoneNameMap[humanBoneName];
-                humanBone.limit.useDefaultValues = true;
+            this.client = PlayableOptitrackStreamingClient.FindDefaultClient();
 
-                humanBones.Add(humanBone);
+            // If we still couldn't find one, disable this component.
+            if (this.client == null)
+            {
+                Debug.LogError(GetType().FullName + ": Streaming client not set, and no " + typeof(PlayableOptitrackStreamingClient).FullName + " components found in scene; disabling this component.", this);
+                this.enabled = false;
+                return;
             }
         }
 
-        // Set up the T-pose and game object name mappings.
-        List<SkeletonBone> skeletonBones = new List<SkeletonBone>(m_skeletonDef.Bones.Count + 1);
+        this.client.RegisterSkeleton(this.skeleton_name);
 
-        // Special case: Create the root bone.
+        // Create a lookup from Mecanim anatomy bone names to OptiTrack streaming bone names.
+        CacheBoneNameMap(this.client.BoneNamingConvention, this.skeleton_name);
+
+        // Retrieve the OptiTrack skeleton definition.
+        m_skeletonDef = this.client.GetSkeletonDefinitionByName(this.skeleton_name);
+
+        if (m_skeletonDef == null)
         {
-            SkeletonBone rootBone = new SkeletonBone();
-            rootBone.name = rootObjectName;
-            rootBone.position = Vector3.zero;
-            rootBone.rotation = Quaternion.identity;
-            rootBone.scale = Vector3.one;
-
-            skeletonBones.Add(rootBone);
+            Debug.LogError(GetType().FullName + ": Could not find skeleton definition with the name \"" + this.skeleton_name + "\"", this);
+            this.enabled = false;
+            return;
         }
 
-        // Create remaining re-targeted bone definitions.
+        // Create a hierarchy of GameObjects that will receive the skeletal pose data.
+        string rootObjectName = "OptiTrack Skeleton - " + skeleton_name;
+        m_rootObject = new GameObject(rootObjectName);
+
+        m_boneObjectMap = new Dictionary<Int32, GameObject>(m_skeletonDef.Bones.Count);
+
         for (int boneDefIdx = 0; boneDefIdx < m_skeletonDef.Bones.Count; ++boneDefIdx)
         {
             OptitrackSkeletonDefinition.BoneDefinition boneDef = m_skeletonDef.Bones[boneDefIdx];
 
-            SkeletonBone skelBone = new SkeletonBone();
-            skelBone.name = boneDef.Name;
-            skelBone.position = boneDef.Offset;
-            skelBone.rotation = RemapBoneRotation(boneDef.Name); //Identity unless it's the thumb bone. 
-            skelBone.scale = Vector3.one;
+            GameObject boneObject = new GameObject(boneDef.Name);
+            boneObject.transform.parent = boneDef.ParentId == 0 ? m_rootObject.transform : m_boneObjectMap[boneDef.ParentId].transform;
+            boneObject.transform.localPosition = boneDef.Offset;
+            m_boneObjectMap[boneDef.Id] = boneObject;
 
-            skeletonBones.Add(skelBone);
+            if (connectBones)
+            {
+                FromToLine deb = boneObject.AddComponent<FromToLine>();
+                deb.target = boneDef.ParentId == 0 ? m_rootObject.transform : m_boneObjectMap[boneDef.ParentId].transform;
+            }
         }
 
-        // Now set up the HumanDescription for the retargeting source Avatar.
-        HumanDescription humanDesc = new HumanDescription();
-        humanDesc.human = humanBones.ToArray();
-        humanDesc.skeleton = skeletonBones.ToArray();
+        // Hook up retargeting between those GameObjects and the destination Avatar.
+        MecanimSetup(rootObjectName);
 
-        // These all correspond to default values.
-        humanDesc.upperArmTwist = 0.5f;
-        humanDesc.lowerArmTwist = 0.5f;
-        humanDesc.upperLegTwist = 0.5f;
-        humanDesc.lowerLegTwist = 0.5f;
-        humanDesc.armStretch = 0.05f;
-        humanDesc.legStretch = 0.05f;
-        humanDesc.feetSpacing = 0.0f;
-        humanDesc.hasTranslationDoF = false;
+        // Can't re-parent this until after Mecanim setup, or else Mecanim gets confused.
+        m_rootObject.transform.parent = this.client.transform;
+        m_rootObject.transform.localPosition = Vector3.zero;
+        m_rootObject.transform.localRotation = Quaternion.identity;
 
-        // Finally, take the description and build the Avatar and pose handlers.
-        m_srcAvatar = AvatarBuilder.BuildHumanAvatar(m_rootObject, humanDesc);
-
-        if (m_srcAvatar.isValid == false || m_srcAvatar.isHuman == false)
-        {
-            Debug.LogError(GetType().FullName + ": Unable to create source Avatar for retargeting. Check that your Skeleton Asset Name and Bone Naming Convention are configured correctly.");
-            return;
-        }
-
-        m_srcPoseHandler = new HumanPoseHandler(m_srcAvatar, m_rootObject.transform);
-        //m_destPoseHandler = new HumanPoseHandler(DestinationAvatar, this.transform);
+        //SETUP SECOND ANIMATOR -----------------------------------------------------------------------------
+        optitrackAvatarAnimator = m_rootObject.AddComponent<Animator>();
+        optitrackAvatarAnimator.avatar = m_srcAvatar;   
+        //---------------------------------------------------------------------------------------------------
     }
-
-    private Quaternion RemapBoneRotation(string boneName)
-    {
-        if (StreamingClient.BoneNamingConvention == OptitrackBoneNameConvention.Motive)
-        {
-            if (boneName.EndsWith("_LThumb1"))
-            {
-                // 60 Deg Y-Axis rotation
-                return new Quaternion(0.0f, 0.5000011f, 0.0f, 0.8660248f);
-            }
-            if (boneName.EndsWith("_RThumb1"))
-            {
-                // -60 Deg Y-Axis rotation
-                return new Quaternion(0.0f, -0.5000011f, 0.0f, 0.8660248f);
-            }
-        }
-        if (StreamingClient.BoneNamingConvention == OptitrackBoneNameConvention.FBX)
-        {
-            if (boneName.EndsWith("_LeftHandThumb1"))
-            {
-                // 60 Deg Y-Axis rotation
-                return new Quaternion(0.0f, 0.5000011f, 0.0f, 0.8660248f);
-            }
-            if (boneName.EndsWith("_RightHandThumb1"))
-            {
-                // -60 Deg Y-Axis rotation
-                return new Quaternion(0.0f, -0.5000011f, 0.0f, 0.8660248f);
-            }
-        }
-        if (StreamingClient.BoneNamingConvention == OptitrackBoneNameConvention.BVH)
-        {
-            if (boneName.EndsWith("_LeftFinger0"))
-            {
-                // 60 Deg Y-Axis rotation
-                return new Quaternion(0.0f, 0.5000011f, 0.0f, 0.8660248f);
-            }
-            if (boneName.EndsWith("_RightFinger0"))
-            {
-                // -60 Deg Y-Axis rotation
-                return new Quaternion(0.0f, -0.5000011f, 0.0f, 0.8660248f);
-            }
-        }
-
-        return Quaternion.identity;
-    }
-    */
 
     private void CacheBoneNameMap(OptitrackBoneNameConvention convention, string assetName)
     {
@@ -494,45 +425,132 @@ public class PosePlayable : PlayableBehaviour
                 break;
         }
     }
-}
 
-[RequireComponent(typeof(Animator))]
-public class OptitrackPosePlayable : MonoBehaviour
-{
-    public PlayableOptitrackStreamingClient client;
-    public string skeleton_name;
-
-    private PlayableGraph graph;
-    private ScriptPlayable<PosePlayable> posePlayable;
-    private ScriptPlayableOutput output;
-
-
-    // Start is called before the first frame update
-    void Start()
+    private void MecanimSetup(string rootObjectName)
     {
-        Animator animator = GetComponent<Animator>();
-        graph = PlayableGraph.Create("Optitrack Test_" + UnityEngine.Random.Range(0.0f, 1.0f));
-        output = ScriptPlayableOutput.Create(graph, "output");
-        PlayableOutputExtensions.SetUserData(output, this);
+        string[] humanTraitBoneNames = HumanTrait.BoneName;
 
-        var posePlayable = ScriptPlayable<PosePlayable>.Create(graph);
-        var poseBehaviour = posePlayable.GetBehaviour();
+        // Set up the mapping between Mecanim human anatomy and OptiTrack skeleton representations.
+        List<HumanBone> humanBones = new List<HumanBone>(m_skeletonDef.Bones.Count);
+        for (int humanBoneNameIdx = 0; humanBoneNameIdx < humanTraitBoneNames.Length; ++humanBoneNameIdx)
+        {
+            string humanBoneName = humanTraitBoneNames[humanBoneNameIdx];
+            if (m_cachedMecanimBoneNameMap.ContainsKey(humanBoneName))
+            {
+                HumanBone humanBone = new HumanBone();
+                humanBone.humanName = humanBoneName;
+                humanBone.boneName = m_cachedMecanimBoneNameMap[humanBoneName];
+                humanBone.limit.useDefaultValues = true;
 
-        poseBehaviour.Init(client, skeleton_name);
+                humanBones.Add(humanBone);
+            }
+        }
 
-        output.SetSourcePlayable(posePlayable);
+        // Set up the T-pose and game object name mappings.
+        List<SkeletonBone> skeletonBones = new List<SkeletonBone>(m_skeletonDef.Bones.Count + 1);
 
-        graph.Play();
+        // Special case: Create the root bone.
+        {
+            SkeletonBone rootBone = new SkeletonBone();
+            rootBone.name = rootObjectName;
+            rootBone.position = Vector3.zero;
+            rootBone.rotation = Quaternion.identity;
+            rootBone.scale = Vector3.one;
+
+            skeletonBones.Add(rootBone);
+        }
+
+        // Create remaining re-targeted bone definitions.
+        for (int boneDefIdx = 0; boneDefIdx < m_skeletonDef.Bones.Count; ++boneDefIdx)
+        {
+            OptitrackSkeletonDefinition.BoneDefinition boneDef = m_skeletonDef.Bones[boneDefIdx];
+
+            SkeletonBone skelBone = new SkeletonBone();
+            skelBone.name = boneDef.Name;
+            skelBone.position = boneDef.Offset;
+            skelBone.rotation = RemapBoneRotation(boneDef.Name); //Identity unless it's the thumb bone. 
+            skelBone.scale = Vector3.one;
+
+            skeletonBones.Add(skelBone);
+        }
+
+        // Now set up the HumanDescription for the retargeting source Avatar.
+        HumanDescription humanDesc = new HumanDescription();
+        humanDesc.human = humanBones.ToArray();
+        humanDesc.skeleton = skeletonBones.ToArray();
+
+        // These all correspond to default values.
+        humanDesc.upperArmTwist = 0.5f;
+        humanDesc.lowerArmTwist = 0.5f;
+        humanDesc.upperLegTwist = 0.5f;
+        humanDesc.lowerLegTwist = 0.5f;
+        humanDesc.armStretch = 0.05f;
+        humanDesc.legStretch = 0.05f;
+        humanDesc.feetSpacing = 0.0f;
+        humanDesc.hasTranslationDoF = false;
+
+        // Finally, take the description and build the Avatar and pose handlers.
+        m_srcAvatar = AvatarBuilder.BuildHumanAvatar(m_rootObject, humanDesc);
+        m_srcAvatar.name = "Optitrack Source Avatar";
+
+        if (m_srcAvatar.isValid == false || m_srcAvatar.isHuman == false)
+        {
+            Debug.LogError(GetType().FullName + ": Unable to create source Avatar for retargeting. Check that your Skeleton Asset Name and Bone Naming Convention are configured correctly.");
+            return;
+        }
+
+        m_srcPoseHandler = new HumanPoseHandler(m_srcAvatar, m_rootObject.transform);
+        //m_destPoseHandler = new HumanPoseHandler(avatar, this.transform);
     }
 
-    // Update is called once per frame
-    void Update()
+    private Quaternion RemapBoneRotation(string boneName)
     {
-        
+        if (client.BoneNamingConvention == OptitrackBoneNameConvention.Motive)
+        {
+            if (boneName.EndsWith("_LThumb1"))
+            {
+                // 60 Deg Y-Axis rotation
+                return new Quaternion(0.0f, 0.5000011f, 0.0f, 0.8660248f);
+            }
+            if (boneName.EndsWith("_RThumb1"))
+            {
+                // -60 Deg Y-Axis rotation
+                return new Quaternion(0.0f, -0.5000011f, 0.0f, 0.8660248f);
+            }
+        }
+        if (client.BoneNamingConvention == OptitrackBoneNameConvention.FBX)
+        {
+            if (boneName.EndsWith("_LeftHandThumb1"))
+            {
+                // 60 Deg Y-Axis rotation
+                return new Quaternion(0.0f, 0.5000011f, 0.0f, 0.8660248f);
+            }
+            if (boneName.EndsWith("_RightHandThumb1"))
+            {
+                // -60 Deg Y-Axis rotation
+                return new Quaternion(0.0f, -0.5000011f, 0.0f, 0.8660248f);
+            }
+        }
+        if (client.BoneNamingConvention == OptitrackBoneNameConvention.BVH)
+        {
+            if (boneName.EndsWith("_LeftFinger0"))
+            {
+                // 60 Deg Y-Axis rotation
+                return new Quaternion(0.0f, 0.5000011f, 0.0f, 0.8660248f);
+            }
+            if (boneName.EndsWith("_RightFinger0"))
+            {
+                // -60 Deg Y-Axis rotation
+                return new Quaternion(0.0f, -0.5000011f, 0.0f, 0.8660248f);
+            }
+        }
+
+        return Quaternion.identity;
     }
 
     private void OnDisable()
     {
+        behaviour.Dispose();
         if (graph.IsValid())
         {
             graph.Stop();
