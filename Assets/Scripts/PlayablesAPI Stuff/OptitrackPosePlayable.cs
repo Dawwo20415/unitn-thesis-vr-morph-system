@@ -7,54 +7,54 @@ using UnityEngine.Animations;
 using Unity.Collections;
 
 /// <progress>
-/// The TransformStreamHandle.SetLocalPosition has to be in an IAnimationJob because it requires an AnimationStream
-/// Therefore there needs to be an intermediary node that can take the pose and apply it to the animation. 
-/// This avatar then needs to be able to be referenced because the retargeting of the paper takes in reference meshes put on the original proportions to then retarget
+/// Need to figure out this naming convention thing
+/// LToe and RToe seem to not be returned by animator.GetBoneTransform, and I don't know why
+/// Need to manually check that the optitrack Filllink is correct because the avatar is stuck in place instead of following the markers
+/// And it might be because the hips are not mapped correctly
 /// </progress>
+/// 
+
+public static class MechanimHumanoidBonesExtension
+{
+    //Put here functions to help manage bones and ids and similar
+}
+
 public class PosePlayable : PlayableBehaviour
 {
     private PlayableOptitrackStreamingClient client;
     private OptitrackSkeletonDefinition m_skeletonDef;
-    //private Dictionary<Int32, GameO bject> m_boneObjectMap;
     private NativeArray<Quaternion> source_avatar_bones;
     private NativeArray<Vector3> source_avatar_positions;
-    private Dictionary<Int32, int> index_links;
+    private Dictionary<Int32, int> id2HumanBodyBones;
 
-    public void Init(PlayableOptitrackStreamingClient streamingClient, OptitrackSkeletonDefinition skeletonDefinition, Dictionary<Int32, GameObject> m_boneObjectMap, Animator animator)
+    public void Init(PlayableOptitrackStreamingClient streamingClient, OptitrackSkeletonDefinition skeletonDefinition, Dictionary<Int32, int> correspondence)
     {
         client = streamingClient;
         m_skeletonDef = skeletonDefinition;
-        source_avatar_bones = new NativeArray<Quaternion>(m_boneObjectMap.Count, Allocator.Persistent);
-        source_avatar_positions = new NativeArray<Vector3>(m_boneObjectMap.Count, Allocator.Persistent);
-        index_links = new Dictionary<int, int>(m_boneObjectMap.Count);
+        source_avatar_bones = new NativeArray<Quaternion>((int)HumanBodyBones.LastBone, Allocator.Persistent);
+        source_avatar_positions = new NativeArray<Vector3>((int)HumanBodyBones.LastBone, Allocator.Persistent);
+        id2HumanBodyBones = new Dictionary<int, int>(correspondence);
 
-        int i = 0;
-        foreach (KeyValuePair<Int32,GameObject> element in m_boneObjectMap)
+        for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
         {
             source_avatar_bones[i] = Quaternion.identity;
             source_avatar_positions[i] = Vector3.one;
-            index_links.Add(element.Key, i);
-            i++;
         }
     }
 
-    public Quaternion GetRotation(int index)
+    public Quaternion GetRotation(int hbb_index)
     {
-        int id;
-        index_links.TryGetValue(index, out id);
-        return source_avatar_bones[index];
+        return source_avatar_bones[hbb_index];
     }
 
-    public Vector3 GetPosition(int index)
+    public Vector3 GetPosition(int hbb_index)
     {
-        int id;
-        index_links.TryGetValue(index, out id);
-        return source_avatar_positions[index];
+        return source_avatar_positions[hbb_index];
     }
 
     public override void PrepareFrame(Playable playable, FrameData info)
     {
-        string to_print = "PrepareFrame" + " | StreamingClient_name:" + client.name + "StreamingClient_address" + client.LocalAddress;
+        string to_print = "PrepareFrame" + " | StreamingClient_name:[" + client.name + "] StreamingClient_address[" + client.LocalAddress +"]";
         Debug.Log(to_print);
 
         OptitrackSkeletonState skelState = client.GetLatestSkeletonState(m_skeletonDef.Id);
@@ -81,8 +81,8 @@ public class PosePlayable : PlayableBehaviour
 
                 if (foundPose)
                 {
-                    int index = 0;
-                    index_links.TryGetValue(boneId, out index);
+                    int index;
+                    id2HumanBodyBones.TryGetValue(boneId, out index);
                     source_avatar_bones[index] = bonePose.Orientation;
                     source_avatar_positions[index] = bonePose.Position;
                 }
@@ -90,9 +90,7 @@ public class PosePlayable : PlayableBehaviour
         }
     }
 
-    public override void ProcessFrame(Playable playable, FrameData info, object playerData)
-    {
-    }
+    public override void ProcessFrame(Playable playable, FrameData info, object playerData) { }
 
     public void Dispose()
     {
@@ -105,30 +103,60 @@ public struct PoseApplyJob : IAnimationJob
 {
     private PosePlayable posePlayable;
     private NativeArray<TransformStreamHandle> bones;
+    private Dictionary<int, int> human_body_bones2transforms;
 
-    public void Init(ScriptPlayable<PosePlayable> playable, Dictionary<Int32, GameObject> m_boneObjectMap, Animator animator)
+    public void Init(ScriptPlayable<PosePlayable> playable, Animator animator)
     {
-        bones = new NativeArray<TransformStreamHandle>(m_boneObjectMap.Count, Allocator.Persistent);
-
-        int i = 0;
-        foreach (KeyValuePair<Int32, GameObject> element in m_boneObjectMap)
-        {
-            bones[i] = animator.BindStreamTransform(element.Value.transform);
-            i++;
-        }
+        BindAvatarTransforms(animator);
 
         posePlayable = playable.GetBehaviour();
+    }
+
+    private void BindAvatarTransforms(Animator animator)
+    {
+        int modifiable_bones_counter = 0;
+
+        for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+        {
+            if (animator.GetBoneTransform((HumanBodyBones)i) != null)
+            {
+                modifiable_bones_counter++;
+            }
+        }
+
+        Avatar avatar = animator.avatar;
+        bones = new NativeArray<TransformStreamHandle>(modifiable_bones_counter, Allocator.Persistent);
+        human_body_bones2transforms = new Dictionary<int, int>(modifiable_bones_counter);
+
+        if (animator.GetBoneTransform((HumanBodyBones)19) != null)
+        {
+            Debug.Log("Got Left Toes Transform");
+        } else
+        {
+            Debug.Log("DID NOT GET Left Toes Transform");
+        }
+        
+        int transform_index = 0;
+        for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+        {
+            if (animator.GetBoneTransform((HumanBodyBones)i) != null)
+            {
+                bones[transform_index] = animator.BindStreamTransform(animator.GetBoneTransform((HumanBodyBones)i));
+                human_body_bones2transforms[transform_index] = i;
+                transform_index++;
+            } 
+        }
     }
 
     public void ProcessRootMotion(AnimationStream stream) { }
 
     public void ProcessAnimation(AnimationStream stream)
     {
-        Debug.Log("ProcessAnimation");
         for (int i = 0; i < bones.Length; i++)
         {
-            bones[i].SetLocalRotation(stream, posePlayable.GetRotation(i));
-            bones[i].SetLocalPosition(stream, posePlayable.GetPosition(i));
+            int index = human_body_bones2transforms[i];
+            bones[i].SetLocalRotation(stream, posePlayable.GetRotation(index));
+            bones[i].SetLocalPosition(stream, posePlayable.GetPosition(index));
         }
     }
 
@@ -221,6 +249,7 @@ public class OptitrackPosePlayable : MonoBehaviour
     private ScriptPlayable<PosePlayable> posePlayable;
     private ScriptPlayableOutput output;
     private PosePlayable behaviour;
+    private Dictionary<Int32, int> optitrack2mecanim; 
 
     //Optitrack Stuff
     public PlayableOptitrackStreamingClient client;
@@ -250,7 +279,6 @@ public class OptitrackPosePlayable : MonoBehaviour
     {
         SetupOptitrack();
 
-
         Animator animator = GetComponent<Animator>();
         avatar = animator.avatar;
         graph = PlayableGraph.Create("Optitrack Test_" + UnityEngine.Random.Range(0.0f, 1.0f));
@@ -265,9 +293,11 @@ public class OptitrackPosePlayable : MonoBehaviour
         var posePlayable = ScriptPlayable<PosePlayable>.Create(graph);
         behaviour = posePlayable.GetBehaviour();
 
-        poseApplyJob.Init(posePlayable, m_boneObjectMap, optitrackAvatarAnimator);
-        //poseApplyJob2.Init(posePlayable, m_boneObjectMap, animator);
-        behaviour.Init(client, m_skeletonDef, m_boneObjectMap, optitrackAvatarAnimator);
+        FillLink(m_boneObjectMap, optitrackAvatarAnimator);
+
+        poseApplyJob.Init(posePlayable, optitrackAvatarAnimator);
+        //poseApplyJob2.Init(posePlayable, animator);
+        behaviour.Init(client, m_skeletonDef, optitrack2mecanim);
 
         animationPlayable = AnimationScriptPlayable.Create(graph, poseApplyJob);
         animationPlayable.SetInputCount(1);
@@ -572,7 +602,6 @@ public class OptitrackPosePlayable : MonoBehaviour
 
         // Set up the T-pose and game object name mappings.
         List<SkeletonBone> skeletonBones = new List<SkeletonBone>(m_skeletonDef.Bones.Count + 1);
-
         // Special case: Create the root bone.
         {
             SkeletonBone rootBone = new SkeletonBone();
@@ -588,7 +617,6 @@ public class OptitrackPosePlayable : MonoBehaviour
         for (int boneDefIdx = 0; boneDefIdx < m_skeletonDef.Bones.Count; ++boneDefIdx)
         {
             OptitrackSkeletonDefinition.BoneDefinition boneDef = m_skeletonDef.Bones[boneDefIdx];
-
             SkeletonBone skelBone = new SkeletonBone();
             skelBone.name = boneDef.Name;
             skelBone.position = boneDef.Offset;
@@ -670,6 +698,21 @@ public class OptitrackPosePlayable : MonoBehaviour
         }
 
         return Quaternion.identity;
+    }
+
+    private void FillLink(Dictionary<Int32, GameObject> dictionary, Animator animator)
+    {
+        optitrack2mecanim = new Dictionary<int, int>();
+        foreach ((Int32 id, GameObject obj) in dictionary)
+        {
+            for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+            {
+                if (obj.transform == animator.GetBoneTransform((HumanBodyBones)i))
+                {
+                    optitrack2mecanim[id] = i;
+                }
+            }
+        }
     }
 
     private void OnDisable()
