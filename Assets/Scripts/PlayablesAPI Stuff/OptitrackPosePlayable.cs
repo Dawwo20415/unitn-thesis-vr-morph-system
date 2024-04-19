@@ -16,6 +16,133 @@ public class PosePlayable : PlayableBehaviour
     private PlayableOptitrackStreamingClient client;
     private OptitrackSkeletonDefinition m_skeletonDef;
     //private Dictionary<Int32, GameO bject> m_boneObjectMap;
+    private NativeArray<Quaternion> source_avatar_bones;
+    private NativeArray<Vector3> source_avatar_positions;
+    private Dictionary<Int32, int> index_links;
+
+    public void Init(PlayableOptitrackStreamingClient streamingClient, OptitrackSkeletonDefinition skeletonDefinition, Dictionary<Int32, GameObject> m_boneObjectMap, Animator animator)
+    {
+        client = streamingClient;
+        m_skeletonDef = skeletonDefinition;
+        source_avatar_bones = new NativeArray<Quaternion>(m_boneObjectMap.Count, Allocator.Persistent);
+        source_avatar_positions = new NativeArray<Vector3>(m_boneObjectMap.Count, Allocator.Persistent);
+        index_links = new Dictionary<int, int>(m_boneObjectMap.Count);
+
+        int i = 0;
+        foreach (KeyValuePair<Int32,GameObject> element in m_boneObjectMap)
+        {
+            source_avatar_bones[i] = Quaternion.identity;
+            source_avatar_positions[i] = Vector3.one;
+            index_links.Add(element.Key, i);
+            i++;
+        }
+    }
+
+    public Quaternion GetRotation(int index)
+    {
+        int id;
+        index_links.TryGetValue(index, out id);
+        return source_avatar_bones[id];
+    }
+
+    public Vector3 GetPosition(int index)
+    {
+        int id;
+        index_links.TryGetValue(index, out id);
+        return source_avatar_positions[id];
+    }
+
+    public override void PrepareFrame(Playable playable, FrameData info)
+    {
+        string to_print = "PrepareFrame" + " | StreamingClient_name:" + client.name + "StreamingClient_address" + client.LocalAddress;
+        Debug.Log(to_print);
+
+        OptitrackSkeletonState skelState = client.GetLatestSkeletonState(m_skeletonDef.Id);
+        if (skelState != null)
+        {
+            // Update the transforms of the bone GameObjects.
+            for (int i = 0; i < m_skeletonDef.Bones.Count; ++i)
+            {
+                Int32 boneId = m_skeletonDef.Bones[i].Id;
+
+                OptitrackPose bonePose;
+
+                bool foundPose = false;
+                if (client.SkeletonCoordinates == StreamingCoordinatesValues.Global)
+                {
+                    // Use global skeleton coordinates
+                    foundPose = skelState.LocalBonePoses.TryGetValue(boneId, out bonePose);
+                }
+                else
+                {
+                    // Use local skeleton coordinates
+                    foundPose = skelState.BonePoses.TryGetValue(boneId, out bonePose);
+                }
+
+                if (foundPose)
+                {
+                    int index = 0;
+                    index_links.TryGetValue(boneId, out index);
+                    source_avatar_bones[index] = bonePose.Orientation;
+                    source_avatar_positions[index] = bonePose.Position;
+                }
+            }
+        }
+    }
+
+    public override void ProcessFrame(Playable playable, FrameData info, object playerData)
+    {
+    }
+
+    public void Dispose()
+    {
+        source_avatar_bones.Dispose();
+        source_avatar_positions.Dispose();
+    }
+}
+
+public struct PoseApplyJob : IAnimationJob
+{
+    private PosePlayable posePlayable;
+    private NativeArray<TransformStreamHandle> bones;
+
+    public void Init(ScriptPlayable<PosePlayable> playable, Dictionary<Int32, GameObject> m_boneObjectMap, Animator animator)
+    {
+        bones = new NativeArray<TransformStreamHandle>(m_boneObjectMap.Count, Allocator.Persistent);
+
+        int i = 0;
+        foreach (KeyValuePair<Int32, GameObject> element in m_boneObjectMap)
+        {
+            bones[i] = animator.BindStreamTransform(element.Value.transform);
+            i++;
+        }
+
+        posePlayable = playable.GetBehaviour();
+    }
+
+    public void ProcessRootMotion(AnimationStream stream) { }
+
+    public void ProcessAnimation(AnimationStream stream)
+    {
+        Debug.Log("ProcessAnimation");
+        for (int i = 0; i < bones.Length; i++)
+        {
+            bones[i].SetLocalRotation(stream, posePlayable.GetRotation(i));
+            bones[i].SetLocalPosition(stream, posePlayable.GetPosition(i));
+        }
+    }
+
+    public void Dispose()
+    {
+        bones.Dispose();
+    }
+}
+
+public struct PoseJob : IAnimationJob
+{
+    private PlayableOptitrackStreamingClient client;
+    private OptitrackSkeletonDefinition m_skeletonDef;
+    //private Dictionary<Int32, GameO bject> m_boneObjectMap;
     private NativeArray<TransformStreamHandle> source_avatar_bones;
     private Dictionary<Int32, int> index_links;
 
@@ -27,7 +154,7 @@ public class PosePlayable : PlayableBehaviour
         index_links = new Dictionary<int, int>(m_boneObjectMap.Count);
 
         int i = 0;
-        foreach (KeyValuePair<Int32,GameObject> element in m_boneObjectMap)
+        foreach (KeyValuePair<Int32, GameObject> element in m_boneObjectMap)
         {
             source_avatar_bones[i] = animator.BindStreamTransform(element.Value.transform);
             index_links.Add(element.Key, i);
@@ -35,34 +162,16 @@ public class PosePlayable : PlayableBehaviour
         }
     }
 
-    public override void PrepareFrame(Playable playable, FrameData info)
-    {
-        string to_print = "PrepareFrame" + " | StreamingClient_name:" + client.name + "StreamingClient_address" + client.LocalAddress;
-        Debug.Log(to_print);
+    public void ProcessRootMotion(AnimationStream stream) { }
 
-    }
-
-    public override void ProcessFrame(Playable playable, FrameData info, object playerData)
+    public void ProcessAnimation(AnimationStream stream)
     {
-        string to_print = "ProcessFrame | PlayerData_type[" + playerData.GetType().FullName + "] | StreamingClient_name[" + client.name + "] StreamingClient_address[" + client.LocalAddress + "]";
+        string to_print = "ProcessFrame | StreamingClient_name[" + /*client.name +*/ "] StreamingClient_address[" + client.LocalAddress + "]";
         to_print += " | SkeletonDef[" + m_skeletonDef.Name + "] | AvatarSourceBones[" + source_avatar_bones.Length + "] | IndexLinking[" + index_links.Count + "]";
         Debug.Log(to_print);
-    }
-
-    public void Dispose()
-    {
-        source_avatar_bones.Dispose();
-    }
-
-    /*
-    
-    public override void ProcessFrame(Playable playable, FrameData info, object playerData)
-    {
-        //Il flow del frame
-        base.ProcessFrame(playable, info, playerData);
 
         //Custom
-        OptitrackSkeletonState skelState = StreamingClient.GetLatestSkeletonState(m_skeletonDef.Id);
+        OptitrackSkeletonState skelState = client.GetLatestSkeletonState(m_skeletonDef.Id);
         if (skelState != null)
         {
             // Update the transforms of the bone GameObjects.
@@ -71,10 +180,9 @@ public class PosePlayable : PlayableBehaviour
                 Int32 boneId = m_skeletonDef.Bones[i].Id;
 
                 OptitrackPose bonePose;
-                GameObject boneObject;
 
                 bool foundPose = false;
-                if (StreamingClient.SkeletonCoordinates == StreamingCoordinatesValues.Global)
+                if (client.SkeletonCoordinates == StreamingCoordinatesValues.Global)
                 {
                     // Use global skeleton coordinates
                     foundPose = skelState.LocalBonePoses.TryGetValue(boneId, out bonePose);
@@ -85,29 +193,21 @@ public class PosePlayable : PlayableBehaviour
                     foundPose = skelState.BonePoses.TryGetValue(boneId, out bonePose);
                 }
 
-                bool foundObject = m_boneObjectMap.TryGetValue(boneId, out boneObject);
-                if (foundPose && foundObject)
+                if (foundPose)
                 {
-                    boneObject.transform.localPosition = bonePose.Position;
-                    boneObject.transform.localRotation = bonePose.Orientation;
+                    int index = 0;
+                    index_links.TryGetValue(boneId, out index);
+                    source_avatar_bones[index].SetLocalRotation(stream, bonePose.Orientation);
+                    source_avatar_bones[index].SetLocalPosition(stream, bonePose.Position);
                 }
-
-                string to_print = "boneId: " + boneId + " boneName: " + m_skeletonDef.Bones[i].Name + " objName: " + boneObject.name;
-                Debug.Log(to_print);
-            }
-
-            // Perform Mecanim retargeting.
-            if (m_srcPoseHandler != null && m_destPoseHandler != null)
-            {
-                // Interpret the streamed pose into Mecanim muscle space representation.
-                m_srcPoseHandler.GetHumanPose(ref m_humanPose);
-
-                // Re-target that muscle space pose to the destination avatar.
-                m_destPoseHandler.SetHumanPose(ref m_humanPose);
             }
         }
     }
-    */
+
+    public void Dispose()
+    {
+        source_avatar_bones.Dispose();
+    }
 }
 
 [RequireComponent(typeof(Animator))]
@@ -136,6 +236,10 @@ public class OptitrackPosePlayable : MonoBehaviour
     private Animator optitrackAvatarAnimator;
     private AnimationPlayableOutput optitrakPlayableOutput;
 
+    private PoseJob poseJob;
+    private PoseApplyJob poseApplyJob;
+    private AnimationScriptPlayable animationPlayable;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -149,15 +253,23 @@ public class OptitrackPosePlayable : MonoBehaviour
         optitrakPlayableOutput = AnimationPlayableOutput.Create(graph, "Optitrack Animation Output", optitrackAvatarAnimator);
         PlayableOutputExtensions.SetUserData(output, this);
 
+        poseJob = new PoseJob();
+        poseApplyJob = new PoseApplyJob();
+
         var posePlayable = ScriptPlayable<PosePlayable>.Create(graph);
         behaviour = posePlayable.GetBehaviour();
 
+        poseJob.Init(client, m_skeletonDef, m_boneObjectMap, optitrackAvatarAnimator);
+        poseApplyJob.Init(posePlayable, m_boneObjectMap, animator);
         behaviour.Init(client, m_skeletonDef, m_boneObjectMap, optitrackAvatarAnimator);
 
+        animationPlayable = AnimationScriptPlayable.Create(graph, poseApplyJob);
+        animationPlayable.SetInputCount(1);
         posePlayable.SetOutputCount(2);
         output.SetSourcePlayable(posePlayable);
-        optitrakPlayableOutput.SetSourcePlayable(posePlayable, 1);
-
+        optitrakPlayableOutput.SetSourcePlayable(animationPlayable, 1);
+        graph.Connect(posePlayable, 1, animationPlayable, 0);
+        animationPlayable.SetInputWeight(0, 1.0f);
         graph.Play();
     }
 
@@ -550,6 +662,8 @@ public class OptitrackPosePlayable : MonoBehaviour
 
     private void OnDisable()
     {
+        poseJob.Dispose();
+        poseApplyJob.Dispose();
         behaviour.Dispose();
         if (graph.IsValid())
         {
