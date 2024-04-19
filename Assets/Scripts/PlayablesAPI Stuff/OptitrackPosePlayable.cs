@@ -42,14 +42,14 @@ public class PosePlayable : PlayableBehaviour
     {
         int id;
         index_links.TryGetValue(index, out id);
-        return source_avatar_bones[id];
+        return source_avatar_bones[index];
     }
 
     public Vector3 GetPosition(int index)
     {
         int id;
         index_links.TryGetValue(index, out id);
-        return source_avatar_positions[id];
+        return source_avatar_positions[index];
     }
 
     public override void PrepareFrame(Playable playable, FrameData info)
@@ -197,6 +197,7 @@ public struct PoseJob : IAnimationJob
                 {
                     int index = 0;
                     index_links.TryGetValue(boneId, out index);
+                    Debug.Log("OptitrackID[" + boneId + "] AvatarIndex[" + index + "]");
                     source_avatar_bones[index].SetLocalRotation(stream, bonePose.Orientation);
                     source_avatar_bones[index].SetLocalPosition(stream, bonePose.Position);
                 }
@@ -240,6 +241,10 @@ public class OptitrackPosePlayable : MonoBehaviour
     private PoseApplyJob poseApplyJob;
     private AnimationScriptPlayable animationPlayable;
 
+    private AnimationPlayableOutput avatarPlayableOutput;
+    private PoseApplyJob poseApplyJob2;
+    private AnimationScriptPlayable animationPlayable2;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -251,25 +256,32 @@ public class OptitrackPosePlayable : MonoBehaviour
         graph = PlayableGraph.Create("Optitrack Test_" + UnityEngine.Random.Range(0.0f, 1.0f));
         output = ScriptPlayableOutput.Create(graph, "output");
         optitrakPlayableOutput = AnimationPlayableOutput.Create(graph, "Optitrack Animation Output", optitrackAvatarAnimator);
+        avatarPlayableOutput   = AnimationPlayableOutput.Create(graph, "Avatar Animation Output", animator);
         PlayableOutputExtensions.SetUserData(output, this);
 
-        poseJob = new PoseJob();
         poseApplyJob = new PoseApplyJob();
+        poseApplyJob2 = new PoseApplyJob();
 
         var posePlayable = ScriptPlayable<PosePlayable>.Create(graph);
         behaviour = posePlayable.GetBehaviour();
 
-        poseJob.Init(client, m_skeletonDef, m_boneObjectMap, optitrackAvatarAnimator);
-        poseApplyJob.Init(posePlayable, m_boneObjectMap, animator);
+        poseApplyJob.Init(posePlayable, m_boneObjectMap, optitrackAvatarAnimator);
+        //poseApplyJob2.Init(posePlayable, m_boneObjectMap, animator);
         behaviour.Init(client, m_skeletonDef, m_boneObjectMap, optitrackAvatarAnimator);
 
         animationPlayable = AnimationScriptPlayable.Create(graph, poseApplyJob);
         animationPlayable.SetInputCount(1);
-        posePlayable.SetOutputCount(2);
+        //animationPlayable2 = AnimationScriptPlayable.Create(graph, poseApplyJob2);
+        //animationPlayable2.SetInputCount(1);
+        posePlayable.SetOutputCount(3);
+
         output.SetSourcePlayable(posePlayable);
         optitrakPlayableOutput.SetSourcePlayable(animationPlayable, 1);
+        //avatarPlayableOutput.SetSourcePlayable(animationPlayable2, 1);
         graph.Connect(posePlayable, 1, animationPlayable, 0);
         animationPlayable.SetInputWeight(0, 1.0f);
+        //graph.Connect(posePlayable, 2, animationPlayable2, 0);
+        //animationPlayable2.SetInputWeight(0, 1.0f);
         graph.Play();
     }
 
@@ -662,7 +674,7 @@ public class OptitrackPosePlayable : MonoBehaviour
 
     private void OnDisable()
     {
-        poseJob.Dispose();
+        poseApplyJob2.Dispose();
         poseApplyJob.Dispose();
         behaviour.Dispose();
         if (graph.IsValid())
