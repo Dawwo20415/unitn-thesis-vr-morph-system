@@ -618,6 +618,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   client: {fileID: 1598310751}
   skeleton_name: Scheletro
+  connectBones: 1
 --- !u!1001 &373558892651247260
 PrefabInstance:
   m_ObjectHideFlags: 0

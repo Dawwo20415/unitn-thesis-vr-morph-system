@@ -14,11 +14,6 @@ using Unity.Collections;
 /// </progress>
 /// 
 
-public static class MechanimHumanoidBonesExtension
-{
-    //Put here functions to help manage bones and ids and similar
-}
-
 public class PosePlayable : PlayableBehaviour
 {
     private PlayableOptitrackStreamingClient client;
