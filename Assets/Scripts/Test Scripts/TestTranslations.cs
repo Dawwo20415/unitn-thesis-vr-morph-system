@@ -13,7 +13,7 @@ public class TestTranslations : MonoBehaviour
 
         for (int i = 0; i < hd.human.Length; i++)
         {
-            Debug.Log("HumanBone Index[" + i + "] Human_name[" + hd.human[i].humanName + "] Skeleton_name[" + hd.human[i].boneName + "]", this);
+            //Debug.Log("HumanBone Index[" + i + "] Human_name[" + hd.human[i].humanName + "] Skeleton_name[" + hd.human[i].boneName + "]", this);
         }
 
         for (int i = 0; i < hd.skeleton.Length; i++)
@@ -21,11 +21,11 @@ public class TestTranslations : MonoBehaviour
             //Debug.Log("SkeletonBone Index[" + i + "] skeleton_name[" + hd.skeleton[i].name + "]", this);
         }
 
-        Dictionary<int, int> translation = MecanimHumanoidExtension.HumanTrait2HumanDescription_human(hd);
+        Dictionary<int, int> translation = MecanimHumanoidExtension.HumanBodyBones2HumanDescription_human(hd);
 
         foreach ((int a, int b) in translation)
         {
-            Debug.Log("A[" + a + "] B[" + b + "]", this);
+            //Debug.Log("A[" + a + "] B[" + b + "]", this);
         }
 
     }

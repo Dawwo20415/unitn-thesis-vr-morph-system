@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// LIST OF INDEX SPACES
-/// * HumanBodyBones
-/// * HumanDescription Human array index
-/// * HumanDescription Skeleton array index
-/// * Optitrack IDs
-/// * AnimationHumanStream MuscleHandle's 
-/// * Individual Playables Indexes
-/// * HumanTrait
+/// LIST OF INDEX SPACES 
+/// * HumanBodyBones                        |
+/// * HumanDescription Human array index    | X
+/// * HumanDescription Skeleton array index | X
+/// * Optitrack IDs                         |
+/// * AnimationHumanStream MuscleHandle's   |
+/// * Individual Playables Indexes          |
+/// * HumanTrait                            | X
 /// </summary>
 
 public static class MecanimHumanoidExtension
@@ -51,6 +51,29 @@ public static class MecanimHumanoidExtension
         for (int i = 0; i < HumanTrait.BoneCount; i++)
         {
             translation[i] = LookUpHumanHuman(HumanTrait.BoneName[i], hd);
+        }
+
+        return translation;
+    }
+
+    ///<summary> Key: HumanTrait - BoneName | Value: HumanDescription - human</summary>
+    public static Dictionary<int, int> HumanBodyBones2HumanDescription_human(HumanDescription hd)
+    {
+        Dictionary<int, int> translation = new Dictionary<int, int>((int)HumanBodyBones.LastBone);
+
+        //Names for the Hand bones are with a " " (space) in the HumanDescription side
+        for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+        {
+            string name = System.Enum.GetName(typeof(HumanBodyBones), i);
+            int j = LookUpHumanHuman(name, hd);
+            translation[i] = j;
+            if (j != -1)
+            {
+                Debug.Log("Translation: HumanBodyBones [" + name + "," + i + "] corresponds to HumanDescription [" + hd.human[j].humanName + "," + j + "]");
+            } else
+            {
+                Debug.Log("Translation: HumanBodyBones [" + name + "," + i + "] does not correspond to anything");
+            }
         }
 
         return translation;
