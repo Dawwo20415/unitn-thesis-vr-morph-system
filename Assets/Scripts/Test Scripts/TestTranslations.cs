@@ -18,10 +18,10 @@ public class TestTranslations : MonoBehaviour
 
         for (int i = 0; i < hd.skeleton.Length; i++)
         {
-            Debug.Log("SkeletonBone Index[" + i + "] skeleton_name[" + hd.skeleton[i].name + "]", this);
+            //Debug.Log("SkeletonBone Index[" + i + "] skeleton_name[" + hd.skeleton[i].name + "]", this);
         }
 
-        Dictionary<int, int> translation = MecanimHumanoidExtension.HD_skeleton2human(hd);
+        Dictionary<int, int> translation = MecanimHumanoidExtension.HumanTrait2HumanDescription_human(hd);
 
         foreach ((int a, int b) in translation)
         {
