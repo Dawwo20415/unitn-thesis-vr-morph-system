@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Playables;
-using UnityEngine.Animations;
 using Unity.Collections;
 
 public class AvatarPoseBehaviour : PlayableBehaviour
