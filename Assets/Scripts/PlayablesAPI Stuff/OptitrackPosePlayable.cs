@@ -7,103 +7,26 @@ using UnityEngine.Animations;
 using Unity.Collections;
 
 /// <progress>
-/// Need to figure out this naming convention thing
-/// LToe and RToe seem to not be returned by animator.GetBoneTransform, and I don't know why
-/// Need to manually check that the optitrack Fillink is correct because the avatar is stuck in place instead of following the markers
-/// And it might be because the hips are not mapped correctly
-/// </progress>
 /// 
-
-public class PosePlayable : PlayableBehaviour
-{
-    private PlayableOptitrackStreamingClient client;
-    private OptitrackSkeletonDefinition m_skeletonDef;
-    private NativeArray<Quaternion> source_avatar_bones;
-    private NativeArray<Vector3> source_avatar_positions;
-    private Dictionary<Int32, int> id2HumanBodyBones;
-
-    public void Init(PlayableOptitrackStreamingClient streamingClient, OptitrackSkeletonDefinition skeletonDefinition, Dictionary<Int32, int> correspondence)
-    {
-        client = streamingClient;
-        m_skeletonDef = skeletonDefinition;
-        source_avatar_bones = new NativeArray<Quaternion>((int)HumanBodyBones.LastBone, Allocator.Persistent);
-        source_avatar_positions = new NativeArray<Vector3>((int)HumanBodyBones.LastBone, Allocator.Persistent);
-        id2HumanBodyBones = correspondence;
-
-        for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
-        {
-            source_avatar_bones[i] = Quaternion.identity;
-            source_avatar_positions[i] = Vector3.one;
-        }
-    }
-
-    public Quaternion GetRotation(int hbb_index)
-    {
-        return source_avatar_bones[hbb_index];
-    }
-
-    public Vector3 GetPosition(int hbb_index)
-    {
-        return source_avatar_positions[hbb_index];
-    }
-
-    public override void PrepareFrame(Playable playable, FrameData info)
-    {
-        string to_print = "PrepareFrame" + " | StreamingClient_name:[" + client.name + "] StreamingClient_address[" + client.LocalAddress +"]";
-        Debug.Log(to_print);
-
-        OptitrackSkeletonState skelState = client.GetLatestSkeletonState(m_skeletonDef.Id);
-        if (skelState != null)
-        {
-            // Update the transforms of the bone GameObjects.
-            for (int i = 0; i < m_skeletonDef.Bones.Count; ++i)
-            {
-                Int32 boneId = m_skeletonDef.Bones[i].Id;
-
-                OptitrackPose bonePose;
-
-                bool foundPose = false;
-                if (client.SkeletonCoordinates == StreamingCoordinatesValues.Global)
-                {
-                    // Use global skeleton coordinates
-                    foundPose = skelState.LocalBonePoses.TryGetValue(boneId, out bonePose);
-                }
-                else
-                {
-                    // Use local skeleton coordinates
-                    foundPose = skelState.BonePoses.TryGetValue(boneId, out bonePose);
-                }
-
-                if (foundPose)
-                {
-                    int index = id2HumanBodyBones[boneId];
-                    source_avatar_bones[index] = bonePose.Orientation;
-                    source_avatar_positions[index] = bonePose.Position;
-                }
-            }
-        }
-    }
-
-    public override void ProcessFrame(Playable playable, FrameData info, object playerData) { }
-
-    public void Dispose()
-    {
-        source_avatar_bones.Dispose();
-        source_avatar_positions.Dispose();
-    }
-}
+/// </progress>
 
 public struct PoseApplyJob : IAnimationJob
 {
-    private PosePlayable posePlayable;
+    private AvatarPoseBehaviour posePlayable;
     private NativeArray<TransformStreamHandle> bones;
     private Dictionary<int, int> human_body_bones2transforms;
 
-    public void Init(ScriptPlayable<PosePlayable> playable, Animator animator)
+    /*
+    public void Init<T> (ScriptPlayable<T> playable, Animator animator) where T : AvatarPoseBehaviour
     {
         BindAvatarTransforms(animator);
+        posePlayable = playable.GetBehaviour();  
+    }*/
 
-        posePlayable = playable.GetBehaviour();
+    public void Init(AvatarPoseBehaviour playable, Animator animator)
+    {
+        BindAvatarTransforms(animator);
+        posePlayable = playable;
     }
 
     private void BindAvatarTransforms(Animator animator)
@@ -227,14 +150,10 @@ public struct PoseJob : IAnimationJob
 [RequireComponent(typeof(Animator))]
 public class OptitrackPosePlayable : MonoBehaviour
 {
-
     //PlayableGraph Stuff
     private Animator animator;
     private PlayableGraph graph;
     private Avatar avatar;
-    private ScriptPlayable<PosePlayable> posePlayable;
-    private ScriptPlayableOutput output;
-    private PosePlayable behaviour;
     private Dictionary<Int32, int> optitrack2mecanim; 
 
     //Optitrack Stuff
@@ -250,16 +169,21 @@ public class OptitrackPosePlayable : MonoBehaviour
     private List<GameObject> serialize_bones_list;
     [SerializeField]
     private List<Transform> serialize_animator_bones;
-    private HumanPoseHandler m_srcPoseHandler;
-    private HumanPoseHandler m_destPoseHandler;
     private Avatar m_srcAvatar;
     private Animator optitrackAvatarAnimator;
-    private AnimationPlayableOutput optitrakPlayableOutput;
+    private HumanPoseHandler m_srcPoseHandler;
 
-    private PoseJob poseJob;
+    //OPTITRACK POSE PLAYABLE
+    private ScriptPlayableOutput output;
+    private ScriptPlayable<OptitrackPoseBehaviour> posePlayable;
+    private OptitrackPoseBehaviour behaviour;
+
+    //OUTPUT 1 - OPTITRACK
+    private AnimationPlayableOutput optitrakPlayableOutput;
     private PoseApplyJob poseApplyJob;
     private AnimationScriptPlayable animationPlayable;
 
+    //OUTPUT 2 - AVATAR
     private AnimationPlayableOutput avatarPlayableOutput;
     private PoseApplyJob poseApplyJob2;
     private AnimationScriptPlayable animationPlayable2;
@@ -281,14 +205,14 @@ public class OptitrackPosePlayable : MonoBehaviour
         poseApplyJob = new PoseApplyJob();
         poseApplyJob2 = new PoseApplyJob();
 
-        var posePlayable = ScriptPlayable<PosePlayable>.Create(graph);
+        posePlayable = ScriptPlayable<OptitrackPoseBehaviour>.Create(graph);
         behaviour = posePlayable.GetBehaviour();
 
         FillLink(m_boneObjectMap, optitrackAvatarAnimator);
 
-        poseApplyJob.Init(posePlayable, optitrackAvatarAnimator);
+        poseApplyJob.Init(posePlayable.GetBehaviour(), optitrackAvatarAnimator);
         //poseApplyJob2.Init(posePlayable, animator);
-        behaviour.Init(client, m_skeletonDef, /*optitrack2mecanim*/ MecanimHumanoidExtension.OptitrackId2HumanBodyBones(m_boneObjectMap, optitrackAvatarAnimator));
+        behaviour.OptitrackSetup(client, m_skeletonDef, MecanimHumanoidExtension.OptitrackId2HumanBodyBones(m_boneObjectMap, optitrackAvatarAnimator));
 
         serialize_animator_bones = new List<Transform>();
 
@@ -306,14 +230,12 @@ public class OptitrackPosePlayable : MonoBehaviour
 
         output.SetSourcePlayable(posePlayable);
         optitrakPlayableOutput.SetSourcePlayable(animationPlayable, 1);
-        //avatarPlayableOutput.SetSourcePlayable(animationPlayable2, 1);
+        avatarPlayableOutput.SetSourcePlayable(animationPlayable2, 1);
         graph.Connect(posePlayable, 1, animationPlayable, 0);
         animationPlayable.SetInputWeight(0, 1.0f);
         //graph.Connect(posePlayable, 2, animationPlayable2, 0);
         //animationPlayable2.SetInputWeight(0, 1.0f);
         graph.Play();
-
-        TestCorrepondence();
     }
 
     private void TestCorrepondence()
