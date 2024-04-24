@@ -79,6 +79,25 @@ public static class MecanimHumanoidExtension
         return translation;
     }
 
+    public static Dictionary<int, int> OptitrackId2HumanBodyBones(Dictionary<int, GameObject> guide, Animator animator)
+    {
+        Dictionary<int, int> translation = new Dictionary<int, int>(guide.Count);
+
+        foreach ((int key, GameObject obj) in guide)
+        {
+            for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+            {
+                if (animator.GetBoneTransform((HumanBodyBones)i) == obj.transform)
+                {
+                    translation[key] = i;
+                    break;
+                }
+            }
+        }
+
+        return translation;
+    }
+
     private static int LookUpHumanBone(string name, HumanDescription hd)
     {
         for (int i = 0; i < hd.human.Length; i++)

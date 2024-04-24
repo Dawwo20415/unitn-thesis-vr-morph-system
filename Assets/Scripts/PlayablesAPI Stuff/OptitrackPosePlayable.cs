@@ -9,7 +9,7 @@ using Unity.Collections;
 /// <progress>
 /// Need to figure out this naming convention thing
 /// LToe and RToe seem to not be returned by animator.GetBoneTransform, and I don't know why
-/// Need to manually check that the optitrack Filllink is correct because the avatar is stuck in place instead of following the markers
+/// Need to manually check that the optitrack Fillink is correct because the avatar is stuck in place instead of following the markers
 /// And it might be because the hips are not mapped correctly
 /// </progress>
 /// 
@@ -28,7 +28,7 @@ public class PosePlayable : PlayableBehaviour
         m_skeletonDef = skeletonDefinition;
         source_avatar_bones = new NativeArray<Quaternion>((int)HumanBodyBones.LastBone, Allocator.Persistent);
         source_avatar_positions = new NativeArray<Vector3>((int)HumanBodyBones.LastBone, Allocator.Persistent);
-        id2HumanBodyBones = new Dictionary<int, int>(correspondence);
+        id2HumanBodyBones = correspondence;
 
         for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
         {
@@ -76,8 +76,7 @@ public class PosePlayable : PlayableBehaviour
 
                 if (foundPose)
                 {
-                    int index;
-                    id2HumanBodyBones.TryGetValue(boneId, out index);
+                    int index = id2HumanBodyBones[boneId];
                     source_avatar_bones[index] = bonePose.Orientation;
                     source_avatar_positions[index] = bonePose.Position;
                 }
@@ -119,17 +118,8 @@ public struct PoseApplyJob : IAnimationJob
             }
         }
 
-        Avatar avatar = animator.avatar;
         bones = new NativeArray<TransformStreamHandle>(modifiable_bones_counter, Allocator.Persistent);
         human_body_bones2transforms = new Dictionary<int, int>(modifiable_bones_counter);
-
-        if (animator.GetBoneTransform((HumanBodyBones)19) != null)
-        {
-            Debug.Log("Got Left Toes Transform");
-        } else
-        {
-            Debug.Log("DID NOT GET Left Toes Transform");
-        }
         
         int transform_index = 0;
         for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
@@ -237,8 +227,9 @@ public struct PoseJob : IAnimationJob
 [RequireComponent(typeof(Animator))]
 public class OptitrackPosePlayable : MonoBehaviour
 {
-    
+
     //PlayableGraph Stuff
+    private Animator animator;
     private PlayableGraph graph;
     private Avatar avatar;
     private ScriptPlayable<PosePlayable> posePlayable;
@@ -255,6 +246,10 @@ public class OptitrackPosePlayable : MonoBehaviour
     private OptitrackSkeletonDefinition m_skeletonDef;
     private Dictionary<string, string> m_cachedMecanimBoneNameMap = new Dictionary<string, string>();
     private Dictionary<Int32, GameObject> m_boneObjectMap;
+    [SerializeField]
+    private List<GameObject> serialize_bones_list;
+    [SerializeField]
+    private List<Transform> serialize_animator_bones;
     private HumanPoseHandler m_srcPoseHandler;
     private HumanPoseHandler m_destPoseHandler;
     private Avatar m_srcAvatar;
@@ -272,10 +267,11 @@ public class OptitrackPosePlayable : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        animator = GetComponent<Animator>();
+        avatar = animator.avatar;
+
         SetupOptitrack();
 
-        Animator animator = GetComponent<Animator>();
-        avatar = animator.avatar;
         graph = PlayableGraph.Create("Optitrack Test_" + UnityEngine.Random.Range(0.0f, 1.0f));
         output = ScriptPlayableOutput.Create(graph, "output");
         optitrakPlayableOutput = AnimationPlayableOutput.Create(graph, "Optitrack Animation Output", optitrackAvatarAnimator);
@@ -292,7 +288,15 @@ public class OptitrackPosePlayable : MonoBehaviour
 
         poseApplyJob.Init(posePlayable, optitrackAvatarAnimator);
         //poseApplyJob2.Init(posePlayable, animator);
-        behaviour.Init(client, m_skeletonDef, optitrack2mecanim);
+        behaviour.Init(client, m_skeletonDef, /*optitrack2mecanim*/ MecanimHumanoidExtension.OptitrackId2HumanBodyBones(m_boneObjectMap, optitrackAvatarAnimator));
+
+        serialize_animator_bones = new List<Transform>();
+
+        for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+        {
+            if (optitrackAvatarAnimator.GetBoneTransform((HumanBodyBones)i))
+                serialize_animator_bones.Add(optitrackAvatarAnimator.GetBoneTransform((HumanBodyBones)i));
+        }
 
         animationPlayable = AnimationScriptPlayable.Create(graph, poseApplyJob);
         animationPlayable.SetInputCount(1);
@@ -308,6 +312,20 @@ public class OptitrackPosePlayable : MonoBehaviour
         //graph.Connect(posePlayable, 2, animationPlayable2, 0);
         //animationPlayable2.SetInputWeight(0, 1.0f);
         graph.Play();
+
+        TestCorrepondence();
+    }
+
+    private void TestCorrepondence()
+    {
+        Dictionary<int, int> translation = MecanimHumanoidExtension.OptitrackId2HumanBodyBones(m_boneObjectMap, optitrackAvatarAnimator);
+
+        foreach ((int OptitrackID, int HBBindex) in translation)
+        {
+            string optitrack_name = m_boneObjectMap[OptitrackID].name;
+            string animator_name = optitrackAvatarAnimator.GetBoneTransform((HumanBodyBones)HBBindex).name;
+            Debug.Log("OptitrackID [" + OptitrackID + "," + optitrack_name + "] HBBIndex [" + HBBindex + "," + animator_name + "]");
+        }
     }
 
     private void SetupOptitrack()
@@ -346,15 +364,18 @@ public class OptitrackPosePlayable : MonoBehaviour
         m_rootObject = new GameObject(rootObjectName);
 
         m_boneObjectMap = new Dictionary<Int32, GameObject>(m_skeletonDef.Bones.Count);
+        serialize_bones_list = new List<GameObject>(m_skeletonDef.Bones.Count);
+        
 
         for (int boneDefIdx = 0; boneDefIdx < m_skeletonDef.Bones.Count; ++boneDefIdx)
         {
             OptitrackSkeletonDefinition.BoneDefinition boneDef = m_skeletonDef.Bones[boneDefIdx];
-
+            
             GameObject boneObject = new GameObject(boneDef.Name);
             boneObject.transform.parent = boneDef.ParentId == 0 ? m_rootObject.transform : m_boneObjectMap[boneDef.ParentId].transform;
             boneObject.transform.localPosition = boneDef.Offset;
             m_boneObjectMap[boneDef.Id] = boneObject;
+            serialize_bones_list.Add(boneObject);
 
             if (connectBones)
             {
@@ -403,12 +424,14 @@ public class OptitrackPosePlayable : MonoBehaviour
                 m_cachedMecanimBoneNameMap.Add("LeftUpperLeg", assetName + "_LThigh");
                 m_cachedMecanimBoneNameMap.Add("LeftLowerLeg", assetName + "_LShin");
                 m_cachedMecanimBoneNameMap.Add("LeftFoot", assetName + "_LFoot");
-                m_cachedMecanimBoneNameMap.Add("LeftToeBase", assetName + "_LToe");
+                //Modified from "LeftToeBase"
+                m_cachedMecanimBoneNameMap.Add("LeftToes", assetName + "_LToe");
 
                 m_cachedMecanimBoneNameMap.Add("RightUpperLeg", assetName + "_RThigh");
                 m_cachedMecanimBoneNameMap.Add("RightLowerLeg", assetName + "_RShin");
                 m_cachedMecanimBoneNameMap.Add("RightFoot", assetName + "_RFoot");
-                m_cachedMecanimBoneNameMap.Add("RightToeBase", assetName + "_RToe");
+                //Modified from "RightToeBase
+                m_cachedMecanimBoneNameMap.Add("RightToes", assetName + "_RToe");
 
 
                 m_cachedMecanimBoneNameMap.Add("Left Thumb Proximal", assetName + "_LThumb1");
