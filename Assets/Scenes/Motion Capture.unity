@@ -326,13 +326,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1178797417}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 09892fde844d3bd4bb902b70a7b8785e, type: 3}
+  m_Script: {fileID: 11500000, guid: 5dff5bea877653743a4d94a9c76f4d31, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  StreamingClient: {fileID: 1598310751}
-  SkeletonAssetName: Scheletro
-  DestinationAvatar: {fileID: 9000000, guid: 320b1c2af77554f99a1658df4a6d3d5c, type: 3}
-  connectBones: 1
 --- !u!1001 &1209523716
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -347,7 +343,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1783531442289075554, guid: 21ac27ad4e09e824597f5eec5fdbe65b, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5718226898195119379, guid: 21ac27ad4e09e824597f5eec5fdbe65b, type: 3}
       propertyPath: m_LocalPosition.x
@@ -420,7 +416,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3691468834895402575, guid: f3afd5b88f5c1d141862b225e9682598, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5254278163031108084, guid: f3afd5b88f5c1d141862b225e9682598, type: 3}
       propertyPath: m_LocalPosition.x
@@ -483,6 +479,10 @@ PrefabInstance:
       value: Robot Kyle Prefab
       objectReference: {fileID: 0}
     - target: {fileID: 1783531442289075554, guid: 21ac27ad4e09e824597f5eec5fdbe65b, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4118605469898000314, guid: 21ac27ad4e09e824597f5eec5fdbe65b, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
@@ -619,6 +619,8 @@ MonoBehaviour:
   client: {fileID: 1598310751}
   skeleton_name: Scheletro
   connectBones: 1
+  serialize_bones_list: []
+  serialize_animator_bones: []
 --- !u!1001 &373558892651247260
 PrefabInstance:
   m_ObjectHideFlags: 0

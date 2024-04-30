@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Playables;
 using Unity.Collections;
+using UnityEditor.PackageManager;
 
 public class AvatarPoseBehaviour : PlayableBehaviour
 {
@@ -44,6 +45,25 @@ public class AvatarPoseBehaviour : PlayableBehaviour
         source_avatar_bones.Dispose();
         source_avatar_positions.Dispose();
     }
+}
+
+public class AvatarTPoseBehaviour : AvatarPoseBehaviour
+{
+    public void TPoseSetup(Animator animator)
+    {
+        Dictionary<int, int> tmp = MecanimHumanoidExtension.AvatarSkeleton2HumanBodyBones(animator.avatar.humanDescription, animator);
+    
+        foreach((int skeleton_index, int HBB_index) in tmp)
+        {
+            if (HBB_index == -1) { continue; }
+            source_avatar_bones[HBB_index] = animator.avatar.humanDescription.skeleton[skeleton_index].rotation;
+            source_avatar_positions[HBB_index] = animator.avatar.humanDescription.skeleton[skeleton_index].position;
+        }
+    }
+    
+    public override void PrepareFrame(Playable playable, FrameData info) { }
+    public override void ProcessFrame(Playable playable, FrameData info, object playerData) { }
+
 }
 
 public class OptitrackPoseBehaviour : AvatarPoseBehaviour
