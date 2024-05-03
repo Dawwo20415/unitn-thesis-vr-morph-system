@@ -31,6 +31,7 @@ public class AvatarPoseBehaviour : PlayableBehaviour
 
     public Quaternion GetRotation(int hbb_index)
     {
+        Debug.Log("Sending Rotation for index[" + hbb_index + "]");
         return source_avatar_bones[HBB2Index[hbb_index]];
     }
 

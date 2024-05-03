@@ -49,8 +49,13 @@ public class OptitrackPosePlayable : MonoBehaviour
 
     //OUTPUT 2 - AVATAR
     private AnimationPlayableOutput avatarPlayableOutput;
-    private PoseApplyJob poseApplyJob2;
+    private PoseApplyJobDebug poseApplyJob2;
     private AnimationScriptPlayable animationPlayable2;
+
+    //HUMAN POSE HANDLER
+    private AnimationScriptPlayable handlerPlayable;
+    private GetHumanPoseJob getHumanPoseJob;
+    private Transform root_for_job;
 
     // Start is called before the first frame update
     void Start()
@@ -66,10 +71,9 @@ public class OptitrackPosePlayable : MonoBehaviour
         avatarPlayableOutput   = AnimationPlayableOutput.Create(graph, "Avatar Animation Output", animator);
         PlayableOutputExtensions.SetUserData(output, this);
 
-        TestCorrepondence();
-
         poseApplyJob = new PoseApplyJob();
-        poseApplyJob2 = new PoseApplyJob();
+        poseApplyJob2 = new PoseApplyJobDebug();
+        getHumanPoseJob = new GetHumanPoseJob();
 
         posePlayable = ScriptPlayable<OptitrackPoseBehaviour>.Create(graph);
         behaviour = posePlayable.GetBehaviour();
@@ -78,6 +82,7 @@ public class OptitrackPosePlayable : MonoBehaviour
 
         poseApplyJob.Init(posePlayable.GetBehaviour(), optitrackAvatarAnimator, true);
         poseApplyJob2.Init(posePlayable.GetBehaviour(), animator, false);
+        getHumanPoseJob.Init(optitrackAvatarAnimator.avatar, root_for_job);
         behaviour.OptitrackSetup(client, m_skeletonDef, MecanimHumanoidExtension.OptitrackId2HumanBodyBones(m_boneObjectMap, optitrackAvatarAnimator));
 
         serialize_animator_bones = new List<Transform>();
@@ -92,11 +97,15 @@ public class OptitrackPosePlayable : MonoBehaviour
         animationPlayable.SetInputCount(1);
         animationPlayable2 = AnimationScriptPlayable.Create(graph, poseApplyJob2);
         animationPlayable2.SetInputCount(1);
+        handlerPlayable = AnimationScriptPlayable.Create(graph, getHumanPoseJob);
+        handlerPlayable.SetInputCount(1);
         posePlayable.SetOutputCount(3);
 
         output.SetSourcePlayable(posePlayable);
-        optitrakPlayableOutput.SetSourcePlayable(animationPlayable, 1);
+        optitrakPlayableOutput.SetSourcePlayable(handlerPlayable, 1);
         avatarPlayableOutput.SetSourcePlayable(animationPlayable2, 1);
+        graph.Connect(animationPlayable, 0, handlerPlayable, 0);
+        handlerPlayable.SetInputWeight(0, 1.0f);
         graph.Connect(posePlayable, 1, animationPlayable, 0);
         animationPlayable.SetInputWeight(0, 1.0f);
         graph.Connect(posePlayable, 2, animationPlayable2, 0);
@@ -172,6 +181,7 @@ public class OptitrackPosePlayable : MonoBehaviour
         // Create a hierarchy of GameObjects that will receive the skeletal pose data.
         string rootObjectName = "OptiTrack Skeleton - " + skeleton_name;
         m_rootObject = new GameObject(rootObjectName);
+        root_for_job = m_rootObject.transform;
 
         m_boneObjectMap = new Dictionary<Int32, GameObject>(m_skeletonDef.Bones.Count);
         serialize_bones_list = new List<GameObject>(m_skeletonDef.Bones.Count);

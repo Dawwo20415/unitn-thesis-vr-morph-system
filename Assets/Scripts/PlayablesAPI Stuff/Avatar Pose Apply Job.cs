@@ -76,6 +76,25 @@ public struct PoseApplyJob : IAnimationJob
     }
 }
 
+public struct GetHumanPoseJob: IAnimationJob {
+
+    private HumanPoseHandler poseHandler;
+    private HumanPose humanPose;
+
+    public void Init(Avatar avatar, Transform root)
+    {
+        poseHandler = new HumanPoseHandler(avatar, root);
+        humanPose = new HumanPose();
+    }
+
+    public void ProcessRootMotion(AnimationStream stream) { }
+
+    public void ProcessAnimation(AnimationStream stream) 
+    {
+        poseHandler.GetHumanPose(ref humanPose);    
+    }
+}
+
 public struct PoseApplyJobDebug : IAnimationJob
 {
     private AvatarPoseBehaviour posePlayable;
@@ -140,23 +159,25 @@ public struct PoseApplyJobDebug : IAnimationJob
         for (int i = 0; i < bones.Length; i++)
         {
             int index = transforms2HBB[i];
-            Debug.Log("Setting internal index [" + i + "," + bones[i].ToString() +"] and requesting HBB [" + index + "," + System.Enum.GetName(typeof(HumanBodyBones),index) + "]");
+            int skeleton_index = transforms2HDSkeleton[i];
             if (posePlayable.GetBoneStatus(index) == false)
             {
-                int skeleton_index = transforms2HDSkeleton[i];
-                Debug.Log("This Bone[" + index + "] is not being updated by optitrack");
+                //Debug.Log("This Bone[" + index + "] is not being updated by optitrack");
                 bones[i].SetLocalRotation(stream, hd.skeleton[skeleton_index].rotation);
                 bones[i].SetLocalPosition(stream, hd.skeleton[skeleton_index].position);
             } else
             {
+                //if (index != (int)HumanBodyBones.Hips) { continue; }
+                Debug.Log("Setting Internal index [" + i + "] corresponding to skeleton Bone [" + skeleton_index + "," + hd.skeleton[skeleton_index].name + "] and requesting HBB [" + index + "," + System.Enum.GetName(typeof(HumanBodyBones), index) + "]");
                 bones[i].SetLocalRotation(stream, posePlayable.GetRotation(index));
                 if (applyPosition)
                 {
                     bones[i].SetLocalPosition(stream, posePlayable.GetPosition(index));
-
                 }
             }
         }
+
+
     }
 
     public void Dispose()
