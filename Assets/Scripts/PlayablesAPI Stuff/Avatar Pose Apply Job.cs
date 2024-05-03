@@ -168,7 +168,7 @@ public struct PoseApplyJobDebug : IAnimationJob
             } else
             {
                 //if (index != (int)HumanBodyBones.Hips) { continue; }
-                Debug.Log("Setting Internal index [" + i + "] corresponding to skeleton Bone [" + skeleton_index + "," + hd.skeleton[skeleton_index].name + "] and requesting HBB [" + index + "," + System.Enum.GetName(typeof(HumanBodyBones), index) + "]");
+                //Debug.Log("Setting Internal index [" + i + "] corresponding to skeleton Bone [" + skeleton_index + "," + hd.skeleton[skeleton_index].name + "] and requesting HBB [" + index + "," + System.Enum.GetName(typeof(HumanBodyBones), index) + "]");
                 bones[i].SetLocalRotation(stream, posePlayable.GetRotation(index));
                 if (applyPosition)
                 {

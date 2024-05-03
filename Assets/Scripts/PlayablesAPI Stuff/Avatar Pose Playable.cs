@@ -29,13 +29,13 @@ public class AvatarPoseBehaviour : PlayableBehaviour
         }
     }
 
-    public Quaternion GetRotation(int hbb_index)
+    public virtual Quaternion GetRotation(int hbb_index)
     {
-        Debug.Log("Sending Rotation for index[" + hbb_index + "]");
+        //Debug.Log("Sending Rotation for index[" + hbb_index + "]");
         return source_avatar_bones[HBB2Index[hbb_index]];
     }
 
-    public Vector3 GetPosition(int hbb_index)
+    public virtual Vector3 GetPosition(int hbb_index)
     {
         return source_avatar_positions[HBB2Index[hbb_index]];
     }
@@ -54,6 +54,36 @@ public class AvatarPoseBehaviour : PlayableBehaviour
         source_avatar_bones.Dispose();
         source_avatar_positions.Dispose();
     }
+}
+
+public class AvatarRetargetingBehaviour : AvatarPoseBehaviour
+{
+    private NativeArray<Quaternion> rotation_offsets;
+    private NativeArray<Vector3> position_offsets;
+    //Input
+    private AvatarPoseBehaviour behaviour;
+
+    public void RetargetingSetup(Avatar source_avatar, Avatar destination_avatar)
+    {
+        rotation_offsets = new NativeArray<Quaternion>(1, Allocator.Persistent);
+        position_offsets = new NativeArray<Vector3>(1, Allocator.Persistent);
+
+        //Initialize offsets & input playableBehaviour
+        //Transform this thing in an interface IHumanBodyBonesPose? IHumanPose?
+    }
+
+    public override Vector3 GetPosition(int hbb_index)
+    {
+        return behaviour.GetPosition(hbb_index) + position_offsets[hbb_index];
+    }
+
+    public override Quaternion GetRotation(int hbb_index)
+    {
+        return behaviour.GetRotation(hbb_index) * rotation_offsets[hbb_index];
+    }
+
+    public override void PrepareFrame(Playable playable, FrameData info) { }
+    public override void ProcessFrame(Playable playable, FrameData info, object playerData) { }
 }
 
 public class AvatarTPoseBehaviour : AvatarPoseBehaviour
