@@ -110,6 +110,18 @@ public static class MecanimHumanoidExtension
         return translation;
     }
 
+    public static Dictionary<int, int> HumanBodyBones2AvatarSkeleton(Animator animator)
+    {
+        Dictionary<int, int> translation = new Dictionary<int, int>((int)HumanBodyBones.LastBone);
+
+        for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+        {
+            translation[i] = HBBIndex2HDSkeleton(i, animator);
+        }
+
+        return translation;
+    }
+
     private static int HDSkeleton2HBBIndex(Animator animator, SkeletonBone skBone)
     {
         for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
@@ -117,6 +129,22 @@ public static class MecanimHumanoidExtension
             if (animator.GetBoneTransform((HumanBodyBones)i))
             {
                 if (skBone.name == animator.GetBoneTransform((HumanBodyBones)i).name)
+                {
+                    return i;
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    private static int HBBIndex2HDSkeleton(int hbb_index, Animator animator)
+    {
+        for (int i = 0; i < animator.avatar.humanDescription.skeleton.Length; i++)
+        {
+            if (animator.GetBoneTransform((HumanBodyBones)hbb_index))
+            {
+                if (animator.avatar.humanDescription.skeleton[i].name == animator.GetBoneTransform((HumanBodyBones)hbb_index).name)
                 {
                     return i;
                 }

@@ -10,6 +10,7 @@ public class AvatarPoseBehaviour : PlayableBehaviour
     protected NativeArray<Quaternion> source_avatar_bones;
     protected NativeArray<Vector3> source_avatar_positions;
     protected Dictionary<int, int> HBB2Index;
+    protected Dictionary<int, bool> HBB2Available;
 
     public AvatarPoseBehaviour()
     {
@@ -17,12 +18,14 @@ public class AvatarPoseBehaviour : PlayableBehaviour
         source_avatar_bones = new NativeArray<Quaternion>(size, Allocator.Persistent);
         source_avatar_positions = new NativeArray<Vector3>(size, Allocator.Persistent);
         HBB2Index = new Dictionary<int, int>(size);
+        HBB2Available = new Dictionary<int, bool>(size);
 
         for (int i = 0; i < size; i++)
         {
             source_avatar_bones[i] = Quaternion.identity;
             source_avatar_positions[i] = Vector3.zero;
             HBB2Index[i] = i;
+            HBB2Available[i] = false;
         }
     }
 
@@ -34,6 +37,11 @@ public class AvatarPoseBehaviour : PlayableBehaviour
     public Vector3 GetPosition(int hbb_index)
     {
         return source_avatar_positions[HBB2Index[hbb_index]];
+    }
+
+    public bool GetBoneStatus(int hbb_index)
+    {
+        return HBB2Available[hbb_index];
     }
 
     public override void PrepareFrame(Playable playable, FrameData info) { }
@@ -77,6 +85,11 @@ public class OptitrackPoseBehaviour : AvatarPoseBehaviour
         client = streamingClient;
         skeleton_definition = skeletonDefinition; 
         id2HumanBodyBones = correspondence;
+
+        foreach ((int key, int value) in id2HumanBodyBones)
+        {
+            HBB2Available[value] = true;
+        }
     }
 
     public override void PrepareFrame(Playable playable, FrameData info)

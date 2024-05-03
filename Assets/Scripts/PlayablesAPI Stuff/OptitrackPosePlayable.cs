@@ -76,8 +76,8 @@ public class OptitrackPosePlayable : MonoBehaviour
 
         FillLink(m_boneObjectMap, optitrackAvatarAnimator);
 
-        poseApplyJob.Init(posePlayable.GetBehaviour(), optitrackAvatarAnimator);
-        poseApplyJob2.Init(posePlayable.GetBehaviour(), animator);
+        poseApplyJob.Init(posePlayable.GetBehaviour(), optitrackAvatarAnimator, true);
+        poseApplyJob2.Init(posePlayable.GetBehaviour(), animator, false);
         behaviour.OptitrackSetup(client, m_skeletonDef, MecanimHumanoidExtension.OptitrackId2HumanBodyBones(m_boneObjectMap, optitrackAvatarAnimator));
 
         serialize_animator_bones = new List<Transform>();
