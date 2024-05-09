@@ -123,6 +123,11 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!95 &591390311 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 7059783583317235923, guid: 21ac27ad4e09e824597f5eec5fdbe65b, type: 3}
+  m_PrefabInstance: {fileID: 1629036939}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1167951660 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -7061339561929513925, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
@@ -232,6 +237,67 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b19f40a7b3512f49b410a96ab52c01e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1001 &1629036939
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1783531442289075554, guid: 21ac27ad4e09e824597f5eec5fdbe65b, type: 3}
+      propertyPath: m_Name
+      value: Robot Kyle Prefab (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 5718226898195119379, guid: 21ac27ad4e09e824597f5eec5fdbe65b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 3.4925687
+      objectReference: {fileID: 0}
+    - target: {fileID: 5718226898195119379, guid: 21ac27ad4e09e824597f5eec5fdbe65b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5718226898195119379, guid: 21ac27ad4e09e824597f5eec5fdbe65b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.03657031
+      objectReference: {fileID: 0}
+    - target: {fileID: 5718226898195119379, guid: 21ac27ad4e09e824597f5eec5fdbe65b, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5718226898195119379, guid: 21ac27ad4e09e824597f5eec5fdbe65b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5718226898195119379, guid: 21ac27ad4e09e824597f5eec5fdbe65b, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5718226898195119379, guid: 21ac27ad4e09e824597f5eec5fdbe65b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5718226898195119379, guid: 21ac27ad4e09e824597f5eec5fdbe65b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5718226898195119379, guid: 21ac27ad4e09e824597f5eec5fdbe65b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5718226898195119379, guid: 21ac27ad4e09e824597f5eec5fdbe65b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8554512012967601357, guid: 21ac27ad4e09e824597f5eec5fdbe65b, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 21ac27ad4e09e824597f5eec5fdbe65b, type: 3}
 --- !u!4 &1702761448 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -7646984823093700347, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
@@ -441,7 +507,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1934692287}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2b19f40a7b3512f49b410a96ab52c01e, type: 3}
   m_Name: 
@@ -467,6 +533,19 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1934692305
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1934692287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05868c0d6082745408f8fe3cf0926d31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  source_animator: {fileID: 591390311}
 --- !u!1001 &1985061546
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -554,6 +633,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1934692303}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1934692305}
     - targetCorrespondingSourceObject: {fileID: 7739434412143464913, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1333420131}
@@ -565,3 +647,4 @@ SceneRoots:
   - {fileID: 1985061546}
   - {fileID: 1344797408}
   - {fileID: 1902630977}
+  - {fileID: 1629036939}

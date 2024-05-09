@@ -5,7 +5,13 @@ using UnityEngine.Playables;
 using Unity.Collections;
 using UnityEditor.PackageManager;
 
-public class AvatarPoseBehaviour : PlayableBehaviour
+public interface IHumanBodyBonesSplit
+{
+    public Quaternion GetRotation(int hbb_index);
+    public Vector3 GetPosition(int hbb_index);
+}
+
+public class AvatarPoseBehaviour : PlayableBehaviour, IHumanBodyBonesSplit
 {
     protected NativeArray<Quaternion> source_avatar_bones;
     protected NativeArray<Vector3> source_avatar_positions;
@@ -29,13 +35,13 @@ public class AvatarPoseBehaviour : PlayableBehaviour
         }
     }
 
-    public virtual Quaternion GetRotation(int hbb_index)
+    public Quaternion GetRotation(int hbb_index)
     {
         //Debug.Log("Sending Rotation for index[" + hbb_index + "]");
         return source_avatar_bones[HBB2Index[hbb_index]];
     }
 
-    public virtual Vector3 GetPosition(int hbb_index)
+    public Vector3 GetPosition(int hbb_index)
     {
         return source_avatar_positions[HBB2Index[hbb_index]];
     }
@@ -56,34 +62,62 @@ public class AvatarPoseBehaviour : PlayableBehaviour
     }
 }
 
-public class AvatarRetargetingBehaviour : AvatarPoseBehaviour
+public class AvatarRetargetingBehaviour : PlayableBehaviour, IHumanBodyBonesSplit
 {
     private NativeArray<Quaternion> rotation_offsets;
     private NativeArray<Vector3> position_offsets;
     //Input
-    private AvatarPoseBehaviour behaviour;
+    private IHumanBodyBonesSplit behaviour;
 
-    public void RetargetingSetup(Avatar source_avatar, Avatar destination_avatar)
+    public void RetargetingSetup(Animator source_animator, Animator destination_animator, IHumanBodyBonesSplit input_behaviour)
     {
-        rotation_offsets = new NativeArray<Quaternion>(1, Allocator.Persistent);
-        position_offsets = new NativeArray<Vector3>(1, Allocator.Persistent);
+        rotation_offsets = new NativeArray<Quaternion>((int)HumanBodyBones.LastBone, Allocator.Persistent);
+        position_offsets = new NativeArray<Vector3>((int)HumanBodyBones.LastBone, Allocator.Persistent);
 
-        //Initialize offsets & input playableBehaviour
-        //Transform this thing in an interface IHumanBodyBonesPose? IHumanPose?
+        Dictionary<int, int> source_hbb = MecanimHumanoidExtension.HumanBodyBones2AvatarSkeleton(source_animator);
+        Dictionary<int, int> dest_hbb = MecanimHumanoidExtension.HumanBodyBones2AvatarSkeleton(destination_animator);
+
+        for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+        {
+            if (source_hbb[i] == -1 || dest_hbb[i] == -1)
+            {
+                rotation_offsets[i] = Quaternion.identity;
+                position_offsets[i] = Vector3.zero;
+            } else
+            {
+                Quaternion source_tpose = source_animator.avatar.humanDescription.skeleton[source_hbb[i]].rotation;
+                Quaternion dest_tpose = destination_animator.avatar.humanDescription.skeleton[dest_hbb[i]].rotation;
+
+                Vector3 source_pos = source_animator.avatar.humanDescription.skeleton[source_hbb[i]].position;
+                Vector3 dest_pos = destination_animator.avatar.humanDescription.skeleton[dest_hbb[i]].position;
+
+                rotation_offsets[i] = dest_tpose * Quaternion.Inverse(source_tpose);
+                position_offsets[i] = dest_pos - source_pos;
+            }
+
+        }
+
+        behaviour = input_behaviour;
     }
 
-    public override Vector3 GetPosition(int hbb_index)
+    public Vector3 GetPosition(int hbb_index)
     {
         return behaviour.GetPosition(hbb_index) + position_offsets[hbb_index];
     }
 
-    public override Quaternion GetRotation(int hbb_index)
+    public Quaternion GetRotation(int hbb_index)
     {
-        return behaviour.GetRotation(hbb_index) * rotation_offsets[hbb_index];
+        return rotation_offsets[hbb_index] * behaviour.GetRotation(hbb_index);
     }
 
     public override void PrepareFrame(Playable playable, FrameData info) { }
     public override void ProcessFrame(Playable playable, FrameData info, object playerData) { }
+
+    public void Dispose()
+    {
+        rotation_offsets.Dispose();
+        position_offsets.Dispose();
+    }
 }
 
 public class AvatarTPoseBehaviour : AvatarPoseBehaviour

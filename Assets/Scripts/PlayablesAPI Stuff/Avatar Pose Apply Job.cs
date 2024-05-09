@@ -7,12 +7,12 @@ using Unity.Collections;
 
 public struct PoseApplyJob : IAnimationJob
 {
-    private AvatarPoseBehaviour posePlayable;
+    private IHumanBodyBonesSplit posePlayable;
     private NativeArray<TransformStreamHandle> bones;
     private Dictionary<int, int> transforms2HBB;
     private bool applyPosition;
 
-    public void Init(AvatarPoseBehaviour playable, Animator animator, bool apply_position)
+    public void Init(IHumanBodyBonesSplit playable, Animator animator, bool apply_position)
     {
         applyPosition = apply_position;
         BindAvatarTransforms(animator);
