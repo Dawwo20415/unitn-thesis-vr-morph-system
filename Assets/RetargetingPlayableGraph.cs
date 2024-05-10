@@ -46,7 +46,7 @@ public class RetargetingPlayableGraph : MonoBehaviour
         retargetingPlayable = ScriptPlayable<AvatarRetargetingBehaviour>.Create(graph);
         retargeting_behaviour = retargetingPlayable.GetBehaviour();
         //retargeting_behaviour.RetargetingSetup(source_animator, animator, playable.GetBehaviour());
-        retargeting_behaviour.RetargetingSetup(animator, animator, playable.GetBehaviour());
+        //retargeting_behaviour.RetargetingSetup(animator, animator, playable.GetBehaviour());
 
         //Pose Applier
         poseApplyJob = new PoseApplyJob();

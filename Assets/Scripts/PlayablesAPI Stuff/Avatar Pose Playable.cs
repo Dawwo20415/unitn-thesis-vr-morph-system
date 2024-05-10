@@ -9,6 +9,7 @@ public interface IHumanBodyBonesSplit
 {
     public Quaternion GetRotation(int hbb_index);
     public Vector3 GetPosition(int hbb_index);
+    public bool GetBoneStatus(int hbb_index);
 }
 
 public class AvatarPoseBehaviour : PlayableBehaviour, IHumanBodyBonesSplit
@@ -48,7 +49,7 @@ public class AvatarPoseBehaviour : PlayableBehaviour, IHumanBodyBonesSplit
 
     public bool GetBoneStatus(int hbb_index)
     {
-        return HBB2Available[hbb_index];
+        return HBB2Available[HBB2Index[hbb_index]];
     }
 
     public override void PrepareFrame(Playable playable, FrameData info) { }
@@ -66,19 +67,28 @@ public class AvatarRetargetingBehaviour : PlayableBehaviour, IHumanBodyBonesSpli
 {
     private NativeArray<Quaternion> rotation_offsets;
     private NativeArray<Vector3> position_offsets;
+    private NativeArray<bool> mirrored;
+    private NativeArray<Vector3> mirror_axis;
     //Input
     private IHumanBodyBonesSplit behaviour;
 
-    public void RetargetingSetup(Animator source_animator, Animator destination_animator, IHumanBodyBonesSplit input_behaviour)
+    public void RetargetingSetup(Animator source_animator, Animator destination_animator, IHumanBodyBonesSplit input_behaviour, List<bool> mirrorList, List<Vector3> mirrorAxis)
     {
         rotation_offsets = new NativeArray<Quaternion>((int)HumanBodyBones.LastBone, Allocator.Persistent);
         position_offsets = new NativeArray<Vector3>((int)HumanBodyBones.LastBone, Allocator.Persistent);
+        mirrored = new NativeArray<bool>((int)HumanBodyBones.LastBone, Allocator.Persistent);
+        mirror_axis = new NativeArray<Vector3>((int)HumanBodyBones.LastBone, Allocator.Persistent);
 
         Dictionary<int, int> source_hbb = MecanimHumanoidExtension.HumanBodyBones2AvatarSkeleton(source_animator);
         Dictionary<int, int> dest_hbb = MecanimHumanoidExtension.HumanBodyBones2AvatarSkeleton(destination_animator);
 
+        if (mirrorList.Count != (int)HumanBodyBones.LastBone) { Debug.Log("Mirror List doesn not define all bones."); return; }
+        if (mirrorAxis.Count != (int)HumanBodyBones.LastBone) { Debug.Log("Mirror Axis List doesn not define all bones."); return; }
+
         for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
         {
+            mirrored[i] = mirrorList[i];
+            mirror_axis[i] = mirrorAxis[i];
             if (source_hbb[i] == -1 || dest_hbb[i] == -1)
             {
                 rotation_offsets[i] = Quaternion.identity;
@@ -107,16 +117,56 @@ public class AvatarRetargetingBehaviour : PlayableBehaviour, IHumanBodyBonesSpli
 
     public Quaternion GetRotation(int hbb_index)
     {
-        return rotation_offsets[hbb_index] * behaviour.GetRotation(hbb_index);
+        Quaternion newRot = behaviour.GetRotation(hbb_index);
+        //Quaternion newRot = behaviour.GetRotation(hbb_index);
+        if (mirrored[hbb_index])
+        {
+            newRot = Mirror(newRot, mirror_axis[hbb_index]);
+        }
+
+        return rotation_offsets[hbb_index] * newRot;
+    }
+
+    public bool GetBoneStatus(int hbb_index)
+    {
+        return behaviour.GetBoneStatus(hbb_index);
     }
 
     public override void PrepareFrame(Playable playable, FrameData info) { }
     public override void ProcessFrame(Playable playable, FrameData info, object playerData) { }
 
+    private Quaternion MirrorX(Quaternion q)
+    {
+        return new Quaternion(q.x, -q.y, -q.z, q.w);
+    }
+
+    private Quaternion MirrorY(Quaternion q)
+    {
+        return new Quaternion(-q.x, q.y, -q.z, q.w);
+    }
+
+    private Quaternion MirrorZ(Quaternion q)
+    {
+        return new Quaternion(-q.x, -q.y, q.z, q.w);
+    }
+
+    private Quaternion Mirror(Quaternion q, Vector3 axis)
+    {
+        Quaternion newRot = q;
+
+        if (axis.x != 0) { newRot = MirrorX(newRot); }
+        if (axis.y != 0) { newRot = MirrorY(newRot); }
+        if (axis.z != 0) { newRot = MirrorZ(newRot); }
+
+        return newRot;
+    }
+
     public void Dispose()
     {
         rotation_offsets.Dispose();
         position_offsets.Dispose();
+        mirrored.Dispose();
+        mirror_axis.Dispose();
     }
 }
 

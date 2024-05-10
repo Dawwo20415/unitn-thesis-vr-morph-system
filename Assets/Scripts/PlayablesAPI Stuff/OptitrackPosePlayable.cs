@@ -24,6 +24,8 @@ public class OptitrackPosePlayable : MonoBehaviour
     public PlayableOptitrackStreamingClient client;
     public string skeleton_name;
     public bool connectBones = true;
+    public List<bool> mirrorList;
+    public List<Vector3> mirrorAxis;
 
     private GameObject m_rootObject;
     private OptitrackSkeletonDefinition m_skeletonDef;
@@ -52,6 +54,10 @@ public class OptitrackPosePlayable : MonoBehaviour
     private PoseApplyJobDebug poseApplyJob2;
     private AnimationScriptPlayable animationPlayable2;
 
+    //AVATAR RETARGETER
+    private ScriptPlayable<AvatarRetargetingBehaviour> retargetingPlayable;
+    private AvatarRetargetingBehaviour retargetingBehaviour;
+
     //HUMAN POSE HANDLER
     /*private AnimationScriptPlayable handlerPlayable;
     private GetHumanPoseJob getHumanPoseJob;
@@ -77,11 +83,15 @@ public class OptitrackPosePlayable : MonoBehaviour
         posePlayable = ScriptPlayable<OptitrackPoseBehaviour>.Create(graph);
         behaviour = posePlayable.GetBehaviour();
 
+        retargetingPlayable = ScriptPlayable<AvatarRetargetingBehaviour>.Create(graph);
+        retargetingBehaviour = retargetingPlayable.GetBehaviour();
+
         FillLink(m_boneObjectMap, optitrackAvatarAnimator);
 
         poseApplyJob.Init(posePlayable.GetBehaviour(), optitrackAvatarAnimator, true);
-        poseApplyJob2.Init(posePlayable.GetBehaviour(), animator, true);
+        poseApplyJob2.Init(retargetingPlayable.GetBehaviour(), animator, true);
         behaviour.OptitrackSetup(client, m_skeletonDef, MecanimHumanoidExtension.OptitrackId2HumanBodyBones(m_boneObjectMap, optitrackAvatarAnimator));
+        retargetingBehaviour.RetargetingSetup(optitrackAvatarAnimator, animator, posePlayable.GetBehaviour(), mirrorList, mirrorAxis); 
 
         serialize_animator_bones = new List<Transform>();
 
@@ -96,14 +106,21 @@ public class OptitrackPosePlayable : MonoBehaviour
         animationPlayable2 = AnimationScriptPlayable.Create(graph, poseApplyJob2);
         animationPlayable2.SetInputCount(1);
         posePlayable.SetOutputCount(3);
+        retargetingPlayable.SetInputCount(1);
+        retargetingPlayable.SetOutputCount(1);
 
+        //CONNECTIONS
         output.SetSourcePlayable(posePlayable);
         optitrakPlayableOutput.SetSourcePlayable(animationPlayable, 1);
         avatarPlayableOutput.SetSourcePlayable(animationPlayable2, 1);
         graph.Connect(posePlayable, 1, animationPlayable, 0);
         animationPlayable.SetInputWeight(0, 1.0f);
-        graph.Connect(posePlayable, 2, animationPlayable2, 0);
+
+        graph.Connect(posePlayable, 2, retargetingPlayable, 0);
+        retargetingPlayable.SetInputWeight(0, 1.0f);
+        graph.Connect(retargetingPlayable, 0, animationPlayable2, 0);
         animationPlayable2.SetInputWeight(0, 1.0f);
+        
         graph.Play();
     }
 

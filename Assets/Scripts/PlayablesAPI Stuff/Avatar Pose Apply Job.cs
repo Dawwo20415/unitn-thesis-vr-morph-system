@@ -97,7 +97,7 @@ public struct GetHumanPoseJob: IAnimationJob {
 
 public struct PoseApplyJobDebug : IAnimationJob
 {
-    private AvatarPoseBehaviour posePlayable;
+    private IHumanBodyBonesSplit posePlayable;
     private NativeArray<TransformStreamHandle> bones;
     private Dictionary<int, int> transforms2HBB;
     private Dictionary<int, int> transforms2HDSkeleton;
@@ -105,7 +105,7 @@ public struct PoseApplyJobDebug : IAnimationJob
     private Avatar avatar;
     private HumanDescription hd;
 
-    public void Init(AvatarPoseBehaviour playable, Animator animator, bool apply_position)
+    public void Init(IHumanBodyBonesSplit playable, Animator animator, bool apply_position)
     {
         avatar = animator.avatar;
         hd = animator.avatar.humanDescription;
