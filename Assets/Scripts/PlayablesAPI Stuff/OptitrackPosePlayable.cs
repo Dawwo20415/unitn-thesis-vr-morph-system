@@ -33,18 +33,17 @@ public class OptitrackPosePlayable : MonoBehaviour
     private OptitrackSkeletonDefinition m_skeletonDef;
     private Dictionary<string, string> m_cachedMecanimBoneNameMap = new Dictionary<string, string>();
     private Dictionary<Int32, GameObject> m_boneObjectMap;
-    [SerializeField]
-    private List<GameObject> serialize_bones_list;
-    [SerializeField]
-    private List<Transform> serialize_animator_bones;
     private Avatar m_srcAvatar;
     private Animator optitrackAvatarAnimator;
-    private HumanPoseHandler m_srcPoseHandler;
 
     //OPTITRACK POSE PLAYABLE
     private ScriptPlayableOutput output;
     private ScriptPlayable<OptitrackPoseBehaviour> posePlayable;
     private OptitrackPoseBehaviour behaviour;
+
+    //AVATAR T-POSE BEHAVIOUR
+    private ScriptPlayable<AvatarTPoseBehaviour> tposePlayable;
+    private AvatarTPoseBehaviour tposeBehaviour;
 
     //OUTPUT 1 - OPTITRACK
     private AnimationPlayableOutput optitrakPlayableOutput;
@@ -60,11 +59,6 @@ public class OptitrackPosePlayable : MonoBehaviour
     private ScriptPlayable<AvatarRetargetingBehaviour> retargetingPlayable;
     private AvatarRetargetingBehaviour retargetingBehaviour;
 
-    //HUMAN POSE HANDLER
-    /*private AnimationScriptPlayable handlerPlayable;
-    private GetHumanPoseJob getHumanPoseJob;
-    private Transform root_for_job;*/
-
     // Start is called before the first frame update
     void Start()
     {
@@ -75,6 +69,7 @@ public class OptitrackPosePlayable : MonoBehaviour
         FillMirrors();
 
         graph = PlayableGraph.Create("Optitrack Test_" + UnityEngine.Random.Range(0.0f, 1.0f));
+        
         output = ScriptPlayableOutput.Create(graph, "output");
         optitrakPlayableOutput = AnimationPlayableOutput.Create(graph, "Optitrack Animation Output", optitrackAvatarAnimator);
         avatarPlayableOutput   = AnimationPlayableOutput.Create(graph, "Avatar Animation Output", animator);
@@ -84,35 +79,34 @@ public class OptitrackPosePlayable : MonoBehaviour
         poseApplyJob2 = new PoseApplyJobDebug();
 
         posePlayable = ScriptPlayable<OptitrackPoseBehaviour>.Create(graph);
+        tposePlayable = ScriptPlayable<AvatarTPoseBehaviour>.Create(graph);
         behaviour = posePlayable.GetBehaviour();
+        tposeBehaviour = tposePlayable.GetBehaviour();
 
         retargetingPlayable = ScriptPlayable<AvatarRetargetingBehaviour>.Create(graph);
         retargetingBehaviour = retargetingPlayable.GetBehaviour();
 
         FillLink(m_boneObjectMap, optitrackAvatarAnimator);
 
-        poseApplyJob.Init(posePlayable.GetBehaviour(), optitrackAvatarAnimator, true);
+        //poseApplyJob.Init(posePlayable.GetBehaviour(), optitrackAvatarAnimator, true);
+        poseApplyJob.Init(tposePlayable.GetBehaviour(), optitrackAvatarAnimator, true);
         poseApplyJob2.Init(retargetingPlayable.GetBehaviour(), animator, true);
         behaviour.OptitrackSetup(client, m_skeletonDef, MecanimHumanoidExtension.OptitrackId2HumanBodyBones(m_boneObjectMap, optitrackAvatarAnimator));
-        retargetingBehaviour.RetargetingSetup(optitrackAvatarAnimator, animator, posePlayable.GetBehaviour(), mirrorList, mirrorAxis); 
-
-        serialize_animator_bones = new List<Transform>();
-
-        for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
-        {
-            if (optitrackAvatarAnimator.GetBoneTransform((HumanBodyBones)i))
-                serialize_animator_bones.Add(optitrackAvatarAnimator.GetBoneTransform((HumanBodyBones)i));
-        }
+        tposeBehaviour.TPoseSetup(optitrackAvatarAnimator);
+        //retargetingBehaviour.RetargetingSetup(optitrackAvatarAnimator, animator, posePlayable.GetBehaviour(), mirrorList, mirrorAxis);
+        retargetingBehaviour.RetargetingSetup(optitrackAvatarAnimator, animator, tposePlayable.GetBehaviour(), mirrorList, mirrorAxis);
 
         animationPlayable = AnimationScriptPlayable.Create(graph, poseApplyJob);
         animationPlayable.SetInputCount(1);
         animationPlayable2 = AnimationScriptPlayable.Create(graph, poseApplyJob2);
         animationPlayable2.SetInputCount(1);
         posePlayable.SetOutputCount(3);
+        tposePlayable.SetOutputCount(3);
         retargetingPlayable.SetInputCount(1);
         retargetingPlayable.SetOutputCount(1);
 
         //CONNECTIONS
+        /*
         output.SetSourcePlayable(posePlayable);
         optitrakPlayableOutput.SetSourcePlayable(animationPlayable, 1);
         avatarPlayableOutput.SetSourcePlayable(animationPlayable2, 1);
@@ -123,7 +117,19 @@ public class OptitrackPosePlayable : MonoBehaviour
         retargetingPlayable.SetInputWeight(0, 1.0f);
         graph.Connect(retargetingPlayable, 0, animationPlayable2, 0);
         animationPlayable2.SetInputWeight(0, 1.0f);
-        
+        */
+
+        output.SetSourcePlayable(tposePlayable);
+        optitrakPlayableOutput.SetSourcePlayable(animationPlayable, 1);
+        avatarPlayableOutput.SetSourcePlayable(animationPlayable2, 1);
+        graph.Connect(tposePlayable, 1, animationPlayable, 0);
+        animationPlayable.SetInputWeight(0, 1.0f);
+
+        graph.Connect(tposePlayable, 2, retargetingPlayable, 0);
+        retargetingPlayable.SetInputWeight(0, 1.0f);
+        graph.Connect(retargetingPlayable, 0, animationPlayable2, 0);
+        animationPlayable2.SetInputWeight(0, 1.0f);
+
         graph.Play();
     }
 
@@ -216,7 +222,6 @@ public class OptitrackPosePlayable : MonoBehaviour
         //root_for_job = m_rootObject.transform;
 
         m_boneObjectMap = new Dictionary<Int32, GameObject>(m_skeletonDef.Bones.Count);
-        serialize_bones_list = new List<GameObject>(m_skeletonDef.Bones.Count);
         
 
         for (int boneDefIdx = 0; boneDefIdx < m_skeletonDef.Bones.Count; ++boneDefIdx)
@@ -227,7 +232,6 @@ public class OptitrackPosePlayable : MonoBehaviour
             boneObject.transform.parent = boneDef.ParentId == 0 ? m_rootObject.transform : m_boneObjectMap[boneDef.ParentId].transform;
             boneObject.transform.localPosition = boneDef.Offset;
             m_boneObjectMap[boneDef.Id] = boneObject;
-            serialize_bones_list.Add(boneObject);
 
             if (connectBones)
             {
@@ -522,9 +526,6 @@ public class OptitrackPosePlayable : MonoBehaviour
             Debug.LogError(GetType().FullName + ": Unable to create source Avatar for retargeting. Check that your Skeleton Asset Name and Bone Naming Convention are configured correctly.");
             return;
         }
-
-        m_srcPoseHandler = new HumanPoseHandler(m_srcAvatar, m_rootObject.transform);
-        //m_destPoseHandler = new HumanPoseHandler(avatar, this.transform);
     }
 
     private Quaternion RemapBoneRotation(string boneName)
@@ -593,6 +594,7 @@ public class OptitrackPosePlayable : MonoBehaviour
         poseApplyJob.Dispose();
         behaviour.Dispose();
         retargetingBehaviour.Dispose();
+        tposeBehaviour.Dispose();
         if (graph.IsValid())
         {
             graph.Stop();

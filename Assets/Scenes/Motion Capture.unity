@@ -144,8 +144,6 @@ MonoBehaviour:
   skeleton_name: Scheletro
   connectBones: 1
   mirrors: []
-  serialize_bones_list: []
-  serialize_animator_bones: []
 --- !u!65 &421334953
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -663,6 +661,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4653588322997800277, guid: 4b50253634cfb83438fab88357c6d2a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1523569068}
+    - targetCorrespondingSourceObject: {fileID: 4653588322997800277, guid: 4b50253634cfb83438fab88357c6d2a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1523569071}
   m_SourcePrefab: {fileID: 100100000, guid: 4b50253634cfb83438fab88357c6d2a3, type: 3}
 --- !u!1 &1523569067 stripped
 GameObject:
@@ -684,16 +685,19 @@ MonoBehaviour:
   client: {fileID: 1598310751}
   skeleton_name: Scheletro
   connectBones: 1
-  mirrors:
-  - {x: 1, y: 1, z: 0, w: 0}
-  - {x: 3, y: 1, z: 0, w: 0}
-  - {x: 5, y: 1, z: 0, w: 0}
-  - {x: 12, y: 1, z: 0, w: 0}
-  - {x: 14, y: 1, z: 0, w: 1}
-  - {x: 16, y: 1, z: 1, w: 1}
-  - {x: 18, y: 1, z: 0, w: 0}
-  serialize_bones_list: []
-  serialize_animator_bones: []
+  mirrors: []
+--- !u!114 &1523569071
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1523569067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0c8532ca8bb46b4eb804a883673ab49, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1528139004
 PrefabInstance:
   m_ObjectHideFlags: 0

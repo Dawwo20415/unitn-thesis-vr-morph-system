@@ -113,7 +113,8 @@ public class AvatarRetargetingBehaviour : PlayableBehaviour, IHumanBodyBonesSpli
 
     public Vector3 GetPosition(int hbb_index)
     {
-        return behaviour.GetPosition(hbb_index) + position_offsets[hbb_index];
+        //return behaviour.GetPosition(hbb_index) + position_offsets[hbb_index];
+        return behaviour.GetPosition(hbb_index);
     }
 
     public Quaternion GetRotation(int hbb_index)
@@ -125,8 +126,8 @@ public class AvatarRetargetingBehaviour : PlayableBehaviour, IHumanBodyBonesSpli
             newRot = Mirror(newRot, mirror_axis[hbb_index]);
         }
 
-        return rotation_offsets[hbb_index] * newRot;
-        //return newRot;
+        //return rotation_offsets[hbb_index] * newRot;
+        return behaviour.GetRotation(hbb_index);
     }
 
     public bool GetBoneStatus(int hbb_index)
