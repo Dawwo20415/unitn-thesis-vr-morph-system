@@ -24,8 +24,10 @@ public class OptitrackPosePlayable : MonoBehaviour
     public PlayableOptitrackStreamingClient client;
     public string skeleton_name;
     public bool connectBones = true;
-    public List<bool> mirrorList;
-    public List<Vector3> mirrorAxis;
+
+    public  List<Vector4> mirrors;
+    private List<bool> mirrorList;
+    private List<Vector3> mirrorAxis;
 
     private GameObject m_rootObject;
     private OptitrackSkeletonDefinition m_skeletonDef;
@@ -70,6 +72,7 @@ public class OptitrackPosePlayable : MonoBehaviour
         avatar = animator.avatar;
 
         SetupOptitrack();
+        FillMirrors();
 
         graph = PlayableGraph.Create("Optitrack Test_" + UnityEngine.Random.Range(0.0f, 1.0f));
         output = ScriptPlayableOutput.Create(graph, "output");
@@ -122,6 +125,24 @@ public class OptitrackPosePlayable : MonoBehaviour
         animationPlayable2.SetInputWeight(0, 1.0f);
         
         graph.Play();
+    }
+
+    private void FillMirrors()
+    {
+        mirrorList = new List<bool>((int)HumanBodyBones.LastBone);
+        mirrorAxis = new List<Vector3>((int)HumanBodyBones.LastBone);
+
+        for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+        {
+            mirrorList.Add(false);
+            mirrorAxis.Add(Vector3.zero);
+        }
+
+        foreach (Vector4 info in mirrors)
+        {
+            mirrorList[(int)info.x] = true;
+            mirrorAxis[(int)info.x] = new Vector3(info.y, info.z, info.w);
+        }
     }
 
     private void TestCorrepondence()
@@ -211,7 +232,9 @@ public class OptitrackPosePlayable : MonoBehaviour
             if (connectBones)
             {
                 FromToLine deb = boneObject.AddComponent<FromToLine>();
+                DebugDisplayDirections ddd = boneObject.AddComponent<DebugDisplayDirections>();
                 deb.target = boneDef.ParentId == 0 ? m_rootObject.transform : m_boneObjectMap[boneDef.ParentId].transform;
+                ddd.length = 0.1f;
             }
         }
 
@@ -569,6 +592,7 @@ public class OptitrackPosePlayable : MonoBehaviour
         poseApplyJob2.Dispose();
         poseApplyJob.Dispose();
         behaviour.Dispose();
+        retargetingBehaviour.Dispose();
         if (graph.IsValid())
         {
             graph.Stop();

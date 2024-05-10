@@ -97,6 +97,7 @@ public class AvatarRetargetingBehaviour : PlayableBehaviour, IHumanBodyBonesSpli
             {
                 Quaternion source_tpose = source_animator.avatar.humanDescription.skeleton[source_hbb[i]].rotation;
                 Quaternion dest_tpose = destination_animator.avatar.humanDescription.skeleton[dest_hbb[i]].rotation;
+                if (mirrorList[i]) { Mirror(dest_tpose, mirrorAxis[i]); }
 
                 Vector3 source_pos = source_animator.avatar.humanDescription.skeleton[source_hbb[i]].position;
                 Vector3 dest_pos = destination_animator.avatar.humanDescription.skeleton[dest_hbb[i]].position;
@@ -118,13 +119,14 @@ public class AvatarRetargetingBehaviour : PlayableBehaviour, IHumanBodyBonesSpli
     public Quaternion GetRotation(int hbb_index)
     {
         Quaternion newRot = behaviour.GetRotation(hbb_index);
-        //Quaternion newRot = behaviour.GetRotation(hbb_index);
+
         if (mirrored[hbb_index])
         {
             newRot = Mirror(newRot, mirror_axis[hbb_index]);
         }
 
         return rotation_offsets[hbb_index] * newRot;
+        //return newRot;
     }
 
     public bool GetBoneStatus(int hbb_index)
