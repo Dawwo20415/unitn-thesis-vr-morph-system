@@ -40,7 +40,7 @@ public class TPosePlayable : MonoBehaviour
         playable = ScriptPlayable<AvatarTPoseBehaviour>.Create(graph);
         behaviour = playable.GetBehaviour();
 
-        poseApplyJob.Init(playable.GetBehaviour(), animator, true);
+        //poseApplyJob.Init(animator, true);
         behaviour.TPoseSetup(animator);
 
         animationPlayable = AnimationScriptPlayable.Create(graph, poseApplyJob);

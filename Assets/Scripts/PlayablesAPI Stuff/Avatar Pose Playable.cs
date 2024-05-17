@@ -12,9 +12,16 @@ public interface IHumanBodyBonesSplit
     public bool GetBoneStatus(int hbb_index);
 }
 
-public interface IInputNode
+public interface IInputableNode
 {
-    public bool ConnectInput();
+    public bool ConnectInput(Playable behaviour);
+}
+
+public class GenericBehaviour : PlayableBehaviour
+{
+    public GenericBehaviour() { }
+    public override void PrepareFrame(Playable playable, FrameData info) { }
+    public override void ProcessFrame(Playable playable, FrameData info, object playerData) { }
 }
 
 public class AvatarPoseBehaviour : PlayableBehaviour, IHumanBodyBonesSplit
@@ -189,7 +196,8 @@ public class AvatarTPoseBehaviour : AvatarPoseBehaviour
     public void TPoseSetup(Animator animator)
     {
         Dictionary<int, int> tmp = MecanimHumanoidExtension.AvatarSkeleton2HumanBodyBones(animator.avatar.humanDescription, animator);
-    
+        Debug.Log("Using Animator with avatar [" + animator.avatar.name + "]");
+
         foreach((int skeleton_index, int HBB_index) in tmp)
         {
             if (HBB_index == -1) { continue; }

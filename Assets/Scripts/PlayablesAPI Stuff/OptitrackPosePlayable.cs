@@ -52,7 +52,7 @@ public class OptitrackPosePlayable : MonoBehaviour
 
     //OUTPUT 2 - AVATAR
     private AnimationPlayableOutput avatarPlayableOutput;
-    private PoseApplyJobDebug poseApplyJob2;
+    private PoseApplyJob poseApplyJob2;
     private AnimationScriptPlayable animationPlayable2;
 
     //AVATAR RETARGETER
@@ -84,7 +84,7 @@ public class OptitrackPosePlayable : MonoBehaviour
         PlayableOutputExtensions.SetUserData(output, this);
 
         poseApplyJob = new PoseApplyJob();
-        poseApplyJob2 = new PoseApplyJobDebug();
+        poseApplyJob2 = new PoseApplyJob();
 
         posePlayable = ScriptPlayable<OptitrackPoseBehaviour>.Create(graph);
         tposePlayable = ScriptPlayable<AvatarTPoseBehaviour>.Create(graph);
@@ -96,47 +96,24 @@ public class OptitrackPosePlayable : MonoBehaviour
 
         FillLink(m_boneObjectMap, optitrackAvatarAnimator);
 
-        //poseApplyJob.Init(posePlayable.GetBehaviour(), optitrackAvatarAnimator, true);
         poseApplyJob.Init(tposePlayable.GetBehaviour(), optitrackAvatarAnimator, true);
-        poseApplyJob2.Init(retargetingPlayable.GetBehaviour(), animator, true);
+        poseApplyJob2.Init(tposePlayable.GetBehaviour(), animator, true);
         behaviour.OptitrackSetup(client, m_skeletonDef, MecanimHumanoidExtension.OptitrackId2HumanBodyBones(m_boneObjectMap, optitrackAvatarAnimator));
         tposeBehaviour.TPoseSetup(optitrackAvatarAnimator);
-        //retargetingBehaviour.RetargetingSetup(optitrackAvatarAnimator, animator, posePlayable.GetBehaviour(), mirrorList, mirrorAxis);
         retargetingBehaviour.RetargetingSetup(optitrackAvatarAnimator, animator, tposePlayable.GetBehaviour(), mirrorList, mirrorAxis);
 
         animationPlayable = AnimationScriptPlayable.Create(graph, poseApplyJob);
-        animationPlayable.SetInputCount(1);
         animationPlayable2 = AnimationScriptPlayable.Create(graph, poseApplyJob2);
-        animationPlayable2.SetInputCount(1);
-        posePlayable.SetOutputCount(3);
-        tposePlayable.SetOutputCount(3);
-        retargetingPlayable.SetInputCount(1);
-        retargetingPlayable.SetOutputCount(1);
 
-        //CONNECTIONS
-        /*
-        output.SetSourcePlayable(posePlayable);
-        optitrakPlayableOutput.SetSourcePlayable(animationPlayable, 1);
-        avatarPlayableOutput.SetSourcePlayable(animationPlayable2, 1);
-        graph.Connect(posePlayable, 1, animationPlayable, 0);
-        animationPlayable.SetInputWeight(0, 1.0f);
+        AnimationGraphUtility.ConnectNodes(graph, tposePlayable, animationPlayable);
+        //poseApplyJob.ConnectInput(tposePlayable.GetBehaviour());
+        AnimationGraphUtility.ConnectNodes(graph, tposePlayable, animationPlayable2);
+        //poseApplyJob2.ConnectInput(tposePlayable.GetBehaviour());
+        //AnimationGraphUtility.ConnectNodes(graph, retargetingPlayable, animationPlayable2);
 
-        graph.Connect(posePlayable, 2, retargetingPlayable, 0);
-        retargetingPlayable.SetInputWeight(0, 1.0f);
-        graph.Connect(retargetingPlayable, 0, animationPlayable2, 0);
-        animationPlayable2.SetInputWeight(0, 1.0f);
-        */
-
-        output.SetSourcePlayable(tposePlayable);
-        optitrakPlayableOutput.SetSourcePlayable(animationPlayable, 1);
-        avatarPlayableOutput.SetSourcePlayable(animationPlayable2, 1);
-        graph.Connect(tposePlayable, 1, animationPlayable, 0);
-        animationPlayable.SetInputWeight(0, 1.0f);
-
-        graph.Connect(tposePlayable, 2, retargetingPlayable, 0);
-        retargetingPlayable.SetInputWeight(0, 1.0f);
-        graph.Connect(retargetingPlayable, 0, animationPlayable2, 0);
-        animationPlayable2.SetInputWeight(0, 1.0f);
+        //AnimationGraphUtility.ConnectOutput(tposePlayable, output);
+        AnimationGraphUtility.ConnectOutput(animationPlayable, optitrakPlayableOutput);
+        AnimationGraphUtility.ConnectOutput(animationPlayable2, avatarPlayableOutput);
 
         graph.Play();
     }

@@ -55,7 +55,7 @@ public class RetargetingPlayableGraph : MonoBehaviour
 
         //Pose Applier
         poseApplyJob = new PoseApplyJob();
-        poseApplyJob.Init(retargetingPlayable.GetBehaviour(), animator, true);
+        //poseApplyJob.Init( animator, true);
         animationPlayable = AnimationScriptPlayable.Create(graph, poseApplyJob);
 
         //Animation Output

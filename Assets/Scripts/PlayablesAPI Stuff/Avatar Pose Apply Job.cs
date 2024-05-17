@@ -12,11 +12,17 @@ public struct PoseApplyJob : IAnimationJob
     private Dictionary<int, int> transforms2HBB;
     private bool applyPosition;
 
-    public void Init(IHumanBodyBonesSplit playable, Animator animator, bool apply_position)
+    public void Init(IHumanBodyBonesSplit behaviour, Animator animator, bool apply_position)
     {
         applyPosition = apply_position;
         BindAvatarTransforms(animator);
-        posePlayable = playable;
+        posePlayable = behaviour;
+    }
+
+    public bool ConnectInput (IHumanBodyBonesSplit behaviour)
+    {
+        posePlayable = behaviour;
+        return true;
     }
 
     private void BindAvatarTransforms(Animator animator)

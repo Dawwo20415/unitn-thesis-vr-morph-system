@@ -7,19 +7,27 @@ public class AnimationGraphUtility
 {
     public static bool ConnectNodes(PlayableGraph graph, Playable output_node, Playable input_node)
     {
+
         int out_index = FirstFreeOutput(output_node);
         int in_index = FirstFreeInput(input_node);
-
-        Debug.Log("Out Count [" + out_index + "] In Count [" + in_index + "]");
 
         if (in_index == -1) { in_index = input_node.GetInputCount(); input_node.SetInputCount(in_index + 1); }
         if (out_index == -1) { out_index = output_node.GetOutputCount(); output_node.SetOutputCount(out_index + 1); }
 
-        Debug.Log("Out Count [" + out_index + "] In Count [" + in_index + "]");
-
         graph.Connect(output_node, out_index, input_node, in_index);
-
         input_node.SetInputWeight(in_index, 1.0f);
+
+        return true;
+    }
+
+    public static bool ConnectOutput(Playable src_node, PlayableOutput dest_output)
+    {
+        int src_index = FirstFreeOutput(src_node);
+
+        if (src_index == -1) { src_index = src_node.GetOutputCount(); src_node.SetOutputCount(src_index + 1); }
+
+        dest_output.SetSourcePlayable(src_node, src_index);
+        dest_output.SetWeight(1.0f);
 
         return true;
     }
