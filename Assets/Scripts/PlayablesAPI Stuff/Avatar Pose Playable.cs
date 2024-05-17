@@ -12,6 +12,11 @@ public interface IHumanBodyBonesSplit
     public bool GetBoneStatus(int hbb_index);
 }
 
+public interface IInputNode
+{
+    public bool ConnectInput();
+}
+
 public class AvatarPoseBehaviour : PlayableBehaviour, IHumanBodyBonesSplit
 {
     protected NativeArray<Quaternion> source_avatar_bones;
@@ -109,6 +114,12 @@ public class AvatarRetargetingBehaviour : PlayableBehaviour, IHumanBodyBonesSpli
         }
 
         behaviour = input_behaviour;
+    }
+
+    public bool Connect(IHumanBodyBonesSplit input_behaviour)
+    {
+        behaviour = input_behaviour;
+        return true;
     }
 
     public Vector3 GetPosition(int hbb_index)

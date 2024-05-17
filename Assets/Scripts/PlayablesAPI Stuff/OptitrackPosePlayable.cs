@@ -59,6 +59,14 @@ public class OptitrackPosePlayable : MonoBehaviour
     private ScriptPlayable<AvatarRetargetingBehaviour> retargetingPlayable;
     private AvatarRetargetingBehaviour retargetingBehaviour;
 
+    /// <summary>
+    /// Process:
+    ///     - Create the graph
+    ///     - Create playable
+    ///     - Setup Playables
+    ///     - Connect nodes
+    /// </summary>
+
     // Start is called before the first frame update
     void Start()
     {
