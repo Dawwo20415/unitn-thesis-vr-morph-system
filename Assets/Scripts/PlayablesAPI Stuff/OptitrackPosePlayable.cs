@@ -21,13 +21,21 @@ public class OptitrackPosePlayable : MonoBehaviour
     private Dictionary<Int32, int> optitrack2mecanim; 
 
     //Optitrack Stuff
+    [Header("Optitrack Stuff")]
     public PlayableOptitrackStreamingClient client;
     public string skeleton_name;
     public bool connectBones = true;
 
+    [Header("Retargeting Stuff")]
     public  List<Vector4> mirrors;
     private List<bool> mirrorList;
     private List<Vector3> mirrorAxis;
+
+    [Header("Modify Quaternion Stuff")]
+    public bool update_behaviours = true;
+    public HumanBodyBones hbb_index;
+    public int int_index;
+    public Quaternion modify_quaternion;
 
     private GameObject m_rootObject;
     private OptitrackSkeletonDefinition m_skeletonDef;
@@ -59,6 +67,18 @@ public class OptitrackPosePlayable : MonoBehaviour
     private ScriptPlayable<AvatarRetargetingBehaviour> retargetingPlayable;
     private AvatarRetargetingBehaviour retargetingBehaviour;
 
+    //QUATERNION MODIFICATION TARGET
+    private ScriptPlayable<QuaternionHandler> quatPlayable;
+    private QuaternionHandler quatBehaviour;
+    private ScriptPlayable<PoseConjunction> junctionPlayable;
+    private PoseConjunction junctionBehaviour;
+
+    //QUATERNION MODIFICATION OPTITRACK
+    private ScriptPlayable<QuaternionHandler> quatPlayable2;
+    private QuaternionHandler quatBehaviour2;
+    private ScriptPlayable<PoseConjunction> junctionPlayable2;
+    private PoseConjunction junctionBehaviour2;
+
     /// <summary>
     /// Process:
     ///     - Create the graph
@@ -88,34 +108,63 @@ public class OptitrackPosePlayable : MonoBehaviour
 
         posePlayable = ScriptPlayable<OptitrackPoseBehaviour>.Create(graph);
         tposePlayable = ScriptPlayable<AvatarTPoseBehaviour>.Create(graph);
+        quatPlayable = ScriptPlayable<QuaternionHandler>.Create(graph);
+        junctionPlayable = ScriptPlayable<PoseConjunction>.Create(graph);
+        quatPlayable2 = ScriptPlayable<QuaternionHandler>.Create(graph);
+        junctionPlayable2 = ScriptPlayable<PoseConjunction>.Create(graph);
+        retargetingPlayable = ScriptPlayable<AvatarRetargetingBehaviour>.Create(graph);
         behaviour = posePlayable.GetBehaviour();
         tposeBehaviour = tposePlayable.GetBehaviour();
-
-        retargetingPlayable = ScriptPlayable<AvatarRetargetingBehaviour>.Create(graph);
+        quatBehaviour = quatPlayable.GetBehaviour();
+        junctionBehaviour = junctionPlayable.GetBehaviour();
+        quatBehaviour2 = quatPlayable2.GetBehaviour();
+        junctionBehaviour2 = junctionPlayable2.GetBehaviour();
         retargetingBehaviour = retargetingPlayable.GetBehaviour();
 
         FillLink(m_boneObjectMap, optitrackAvatarAnimator);
 
-        poseApplyJob.Init(tposePlayable.GetBehaviour(), optitrackAvatarAnimator, true);
-        poseApplyJob2.Init(tposePlayable.GetBehaviour(), animator, true);
+        poseApplyJob.Init(junctionPlayable2.GetBehaviour(), optitrackAvatarAnimator, true);
+        poseApplyJob2.Init(retargetingPlayable.GetBehaviour(), animator, true);
         behaviour.OptitrackSetup(client, m_skeletonDef, MecanimHumanoidExtension.OptitrackId2HumanBodyBones(m_boneObjectMap, optitrackAvatarAnimator));
         tposeBehaviour.TPoseSetup(optitrackAvatarAnimator);
-        retargetingBehaviour.RetargetingSetup(optitrackAvatarAnimator, animator, tposePlayable.GetBehaviour(), mirrorList, mirrorAxis);
+        retargetingBehaviour.RetargetingSetup(optitrackAvatarAnimator, animator, junctionPlayable2.GetBehaviour(), mirrorList, mirrorAxis);
+        quatBehaviour.QuaternionSetup((int)hbb_index, retargetingBehaviour, modify_quaternion);
+        junctionBehaviour.SetupConjunction(retargetingBehaviour, (int)hbb_index, quatBehaviour);
+        quatBehaviour2.QuaternionSetup((int)hbb_index, tposePlayable.GetBehaviour(), modify_quaternion);
+        junctionBehaviour2.SetupConjunction(tposePlayable.GetBehaviour(), (int)hbb_index, quatPlayable2.GetBehaviour());
 
         animationPlayable = AnimationScriptPlayable.Create(graph, poseApplyJob);
         animationPlayable2 = AnimationScriptPlayable.Create(graph, poseApplyJob2);
 
-        AnimationGraphUtility.ConnectNodes(graph, tposePlayable, animationPlayable);
-        //poseApplyJob.ConnectInput(tposePlayable.GetBehaviour());
-        AnimationGraphUtility.ConnectNodes(graph, tposePlayable, animationPlayable2);
-        //poseApplyJob2.ConnectInput(tposePlayable.GetBehaviour());
-        //AnimationGraphUtility.ConnectNodes(graph, retargetingPlayable, animationPlayable2);
+        AnimationGraphUtility.ConnectNodes(graph, tposePlayable, junctionPlayable2);
+        AnimationGraphUtility.ConnectNodes(graph, tposePlayable, quatPlayable2);
+        AnimationGraphUtility.ConnectNodes(graph, quatPlayable2, junctionPlayable2);
+        AnimationGraphUtility.ConnectNodes(graph, junctionPlayable2, animationPlayable);
+
+        AnimationGraphUtility.ConnectNodes(graph, junctionPlayable2, retargetingPlayable);
+        //AnimationGraphUtility.ConnectNodes(graph, retargetingPlayable, quatPlayable);
+        //AnimationGraphUtility.ConnectNodes(graph, retargetingPlayable, junctionPlayable);
+        //AnimationGraphUtility.ConnectNodes(graph, quatPlayable, junctionPlayable);
+        AnimationGraphUtility.ConnectNodes(graph, retargetingPlayable, animationPlayable2);
 
         //AnimationGraphUtility.ConnectOutput(tposePlayable, output);
         AnimationGraphUtility.ConnectOutput(animationPlayable, optitrakPlayableOutput);
         AnimationGraphUtility.ConnectOutput(animationPlayable2, avatarPlayableOutput);
 
         graph.Play();
+    }
+
+    private void Update()
+    {
+        int_index = (int)hbb_index;
+        if (!update_behaviours) { return; }
+        quatBehaviour.UpdateData((int)hbb_index, modify_quaternion);
+        junctionBehaviour.UpdateData((int)hbb_index, quatBehaviour);
+        quatBehaviour2.UpdateData((int)hbb_index, modify_quaternion);
+        junctionBehaviour2.UpdateData((int)hbb_index, quatBehaviour2);
+
+        FillMirrors();
+        retargetingBehaviour.UpdateMirrors(mirrorList, mirrorAxis);
     }
 
     private void FillMirrors()

@@ -109,7 +109,7 @@ public class AvatarRetargetingBehaviour : PlayableBehaviour, IHumanBodyBonesSpli
             {
                 Quaternion source_tpose = source_animator.avatar.humanDescription.skeleton[source_hbb[i]].rotation;
                 Quaternion dest_tpose = destination_animator.avatar.humanDescription.skeleton[dest_hbb[i]].rotation;
-                if (mirrorList[i]) { Mirror(dest_tpose, mirrorAxis[i]); }
+                //if (mirrorList[i]) { Mirror(dest_tpose, mirrorAxis[i]); }
 
                 Vector3 source_pos = source_animator.avatar.humanDescription.skeleton[source_hbb[i]].position;
                 Vector3 dest_pos = destination_animator.avatar.humanDescription.skeleton[dest_hbb[i]].position;
@@ -121,6 +121,18 @@ public class AvatarRetargetingBehaviour : PlayableBehaviour, IHumanBodyBonesSpli
         }
 
         behaviour = input_behaviour;
+    }
+
+    public void UpdateMirrors(List<bool> mirrorList, List<Vector3> mirrorAxis)
+    {
+        if (mirrorList.Count != (int)HumanBodyBones.LastBone) { Debug.Log("Mirror List doesn not define all bones."); return; }
+        if (mirrorAxis.Count != (int)HumanBodyBones.LastBone) { Debug.Log("Mirror Axis List doesn not define all bones."); return; }
+
+        for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+        {
+            mirrored[i] = mirrorList[i];
+            mirror_axis[i] = mirrorAxis[i];
+        }
     }
 
     public bool Connect(IHumanBodyBonesSplit input_behaviour)
@@ -145,7 +157,7 @@ public class AvatarRetargetingBehaviour : PlayableBehaviour, IHumanBodyBonesSpli
         }
 
         //return rotation_offsets[hbb_index] * newRot;
-        return behaviour.GetRotation(hbb_index);
+        return newRot * rotation_offsets[hbb_index];
     }
 
     public bool GetBoneStatus(int hbb_index)

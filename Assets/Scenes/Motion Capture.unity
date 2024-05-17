@@ -144,6 +144,10 @@ MonoBehaviour:
   skeleton_name: Scheletro
   connectBones: 1
   mirrors: []
+  update_behaviours: 0
+  hbb_index: 0
+  int_index: 0
+  modify_quaternion: {x: 0, y: 0, z: 0, w: 0}
 --- !u!65 &421334953
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -685,7 +689,12 @@ MonoBehaviour:
   client: {fileID: 1598310751}
   skeleton_name: Scheletro
   connectBones: 1
-  mirrors: []
+  mirrors:
+  - {x: 3, y: 1, z: 0, w: 0}
+  update_behaviours: 1
+  hbb_index: 16
+  int_index: 3
+  modify_quaternion: {x: 0, y: 0, z: 0, w: 1}
 --- !u!114 &1523569071
 MonoBehaviour:
   m_ObjectHideFlags: 0
