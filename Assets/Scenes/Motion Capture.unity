@@ -143,7 +143,7 @@ MonoBehaviour:
   client: {fileID: 1598310751}
   skeleton_name: Scheletro
   connectBones: 1
-  mirrors: []
+  destination_root: {fileID: 0}
   update_behaviours: 0
   hbb_index: 0
   int_index: 0
@@ -336,6 +336,11 @@ Transform:
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2550463727306718371, guid: 00c9c177e828a57439e290aef2a23b3f, type: 3}
   m_PrefabInstance: {fileID: 652124635}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &823083030 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5528748583410103801, guid: 4b50253634cfb83438fab88357c6d2a3, type: 3}
+  m_PrefabInstance: {fileID: 1523569066}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &831537001
 PrefabInstance:
@@ -689,10 +694,9 @@ MonoBehaviour:
   client: {fileID: 1598310751}
   skeleton_name: Scheletro
   connectBones: 1
-  mirrors:
-  - {x: 3, y: 1, z: 0, w: 0}
+  destination_root: {fileID: 823083030}
   update_behaviours: 1
-  hbb_index: 16
+  hbb_index: 14
   int_index: 3
   modify_quaternion: {x: 0, y: 0, z: 0, w: 1}
 --- !u!114 &1523569071

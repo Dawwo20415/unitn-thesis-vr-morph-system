@@ -31,7 +31,7 @@ public class QuaternionHandler : PlayableBehaviour
 
     public Quaternion GetQuaternion()
     {
-        return modification * behaviour.GetRotation(hbb_index);
+        return behaviour.GetRotation(hbb_index) * modification;
     }
 
     public override void PrepareFrame(Playable playable, FrameData info) { }

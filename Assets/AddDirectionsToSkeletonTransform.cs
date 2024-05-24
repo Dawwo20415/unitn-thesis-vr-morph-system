@@ -21,6 +21,9 @@ public class AddDirectionsToSkeletonTransform : MonoBehaviour
                 ddd.length = 0.1f;
             }
         }
+        //Debug.Log("Nome del root del avatar [" + animator.avatar.name + "] è  [" + animator.avatarRoot.name + "]");
+        //DebugDisplayDirections ddd2 = animator.avatarRoot.gameObject.AddComponent<DebugDisplayDirections>();
+        //ddd2.length = 0.2f;
     }
 
     // Update is called once per frame

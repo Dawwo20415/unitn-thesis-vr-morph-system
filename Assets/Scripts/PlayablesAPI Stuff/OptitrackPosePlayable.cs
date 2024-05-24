@@ -27,9 +27,7 @@ public class OptitrackPosePlayable : MonoBehaviour
     public bool connectBones = true;
 
     [Header("Retargeting Stuff")]
-    public  List<Vector4> mirrors;
-    private List<bool> mirrorList;
-    private List<Vector3> mirrorAxis;
+    public Transform destination_root;
 
     [Header("Modify Quaternion Stuff")]
     public bool update_behaviours = true;
@@ -64,8 +62,8 @@ public class OptitrackPosePlayable : MonoBehaviour
     private AnimationScriptPlayable animationPlayable2;
 
     //AVATAR RETARGETER
-    private ScriptPlayable<AvatarRetargetingBehaviour> retargetingPlayable;
-    private AvatarRetargetingBehaviour retargetingBehaviour;
+    private ScriptPlayable<AvatarRetargetingBehaviour2> retargetingPlayable;
+    private AvatarRetargetingBehaviour2 retargetingBehaviour;
 
     //QUATERNION MODIFICATION TARGET
     private ScriptPlayable<QuaternionHandler> quatPlayable;
@@ -94,7 +92,7 @@ public class OptitrackPosePlayable : MonoBehaviour
         avatar = animator.avatar;
 
         SetupOptitrack();
-        FillMirrors();
+        //FillMirrors();
 
         graph = PlayableGraph.Create("Optitrack Test_" + UnityEngine.Random.Range(0.0f, 1.0f));
         
@@ -112,7 +110,7 @@ public class OptitrackPosePlayable : MonoBehaviour
         junctionPlayable = ScriptPlayable<PoseConjunction>.Create(graph);
         quatPlayable2 = ScriptPlayable<QuaternionHandler>.Create(graph);
         junctionPlayable2 = ScriptPlayable<PoseConjunction>.Create(graph);
-        retargetingPlayable = ScriptPlayable<AvatarRetargetingBehaviour>.Create(graph);
+        retargetingPlayable = ScriptPlayable<AvatarRetargetingBehaviour2>.Create(graph);
         behaviour = posePlayable.GetBehaviour();
         tposeBehaviour = tposePlayable.GetBehaviour();
         quatBehaviour = quatPlayable.GetBehaviour();
@@ -123,11 +121,11 @@ public class OptitrackPosePlayable : MonoBehaviour
 
         FillLink(m_boneObjectMap, optitrackAvatarAnimator);
 
-        poseApplyJob.Init(junctionPlayable2.GetBehaviour(), optitrackAvatarAnimator, true);
+        poseApplyJob.Init(posePlayable.GetBehaviour(), optitrackAvatarAnimator, true);
         poseApplyJob2.Init(retargetingPlayable.GetBehaviour(), animator, true);
         behaviour.OptitrackSetup(client, m_skeletonDef, MecanimHumanoidExtension.OptitrackId2HumanBodyBones(m_boneObjectMap, optitrackAvatarAnimator));
         tposeBehaviour.TPoseSetup(optitrackAvatarAnimator);
-        retargetingBehaviour.RetargetingSetup(optitrackAvatarAnimator, animator, junctionPlayable2.GetBehaviour(), mirrorList, mirrorAxis);
+        retargetingBehaviour.RetargetingSetup(optitrackAvatarAnimator, m_rootObject.transform, animator, destination_root, posePlayable.GetBehaviour());
         quatBehaviour.QuaternionSetup((int)hbb_index, retargetingBehaviour, modify_quaternion);
         junctionBehaviour.SetupConjunction(retargetingBehaviour, (int)hbb_index, quatBehaviour);
         quatBehaviour2.QuaternionSetup((int)hbb_index, tposePlayable.GetBehaviour(), modify_quaternion);
@@ -136,18 +134,15 @@ public class OptitrackPosePlayable : MonoBehaviour
         animationPlayable = AnimationScriptPlayable.Create(graph, poseApplyJob);
         animationPlayable2 = AnimationScriptPlayable.Create(graph, poseApplyJob2);
 
-        AnimationGraphUtility.ConnectNodes(graph, tposePlayable, junctionPlayable2);
-        AnimationGraphUtility.ConnectNodes(graph, tposePlayable, quatPlayable2);
-        AnimationGraphUtility.ConnectNodes(graph, quatPlayable2, junctionPlayable2);
-        AnimationGraphUtility.ConnectNodes(graph, junctionPlayable2, animationPlayable);
+        //AnimationGraphUtility.ConnectNodes(graph, posePlayable, junctionPlayable2);
+        //AnimationGraphUtility.ConnectNodes(graph, posePlayable, quatPlayable2);
+        //AnimationGraphUtility.ConnectNodes(graph, quatPlayable2, junctionPlayable2);
+        AnimationGraphUtility.ConnectNodes(graph, posePlayable, animationPlayable);
 
-        AnimationGraphUtility.ConnectNodes(graph, junctionPlayable2, retargetingPlayable);
-        //AnimationGraphUtility.ConnectNodes(graph, retargetingPlayable, quatPlayable);
-        //AnimationGraphUtility.ConnectNodes(graph, retargetingPlayable, junctionPlayable);
-        //AnimationGraphUtility.ConnectNodes(graph, quatPlayable, junctionPlayable);
+        AnimationGraphUtility.ConnectNodes(graph, posePlayable, retargetingPlayable);
         AnimationGraphUtility.ConnectNodes(graph, retargetingPlayable, animationPlayable2);
 
-        //AnimationGraphUtility.ConnectOutput(tposePlayable, output);
+        AnimationGraphUtility.ConnectOutput(posePlayable, output);
         AnimationGraphUtility.ConnectOutput(animationPlayable, optitrakPlayableOutput);
         AnimationGraphUtility.ConnectOutput(animationPlayable2, avatarPlayableOutput);
 
@@ -163,10 +158,11 @@ public class OptitrackPosePlayable : MonoBehaviour
         quatBehaviour2.UpdateData((int)hbb_index, modify_quaternion);
         junctionBehaviour2.UpdateData((int)hbb_index, quatBehaviour2);
 
-        FillMirrors();
-        retargetingBehaviour.UpdateMirrors(mirrorList, mirrorAxis);
+        //FillMirrors();
+        //retargetingBehaviour.UpdateMirrors(mirrorList, mirrorAxis);
     }
 
+    /*
     private void FillMirrors()
     {
         mirrorList = new List<bool>((int)HumanBodyBones.LastBone);
@@ -183,7 +179,7 @@ public class OptitrackPosePlayable : MonoBehaviour
             mirrorList[(int)info.x] = true;
             mirrorAxis[(int)info.x] = new Vector3(info.y, info.z, info.w);
         }
-    }
+    }*/
 
     private void TestCorrepondence()
     {

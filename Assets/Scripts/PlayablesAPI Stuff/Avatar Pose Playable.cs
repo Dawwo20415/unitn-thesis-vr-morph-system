@@ -75,6 +75,104 @@ public class AvatarPoseBehaviour : PlayableBehaviour, IHumanBodyBonesSplit
     }
 }
 
+public class AvatarRetargetingBehaviour2 : PlayableBehaviour, IHumanBodyBonesSplit
+{
+    private NativeArray<AvatarRetargetingComponents> components;
+    private IHumanBodyBonesSplit behaviour;
+
+    public void RetargetingSetup(Animator source_animator, Transform src_root, Animator destination_animator, Transform dest_root, IHumanBodyBonesSplit input_behaviour)
+    {
+        components = new NativeArray<AvatarRetargetingComponents>((int)HumanBodyBones.LastBone, Allocator.Persistent);
+
+        Dictionary<int, int> source_hbb = MecanimHumanoidExtension.HumanBodyBones2AvatarSkeleton(source_animator);
+        Dictionary<int, int> dest_hbb = MecanimHumanoidExtension.HumanBodyBones2AvatarSkeleton(destination_animator);
+
+        behaviour = input_behaviour;
+
+        for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+        {
+            if (source_hbb[i] == -1 || dest_hbb[i] == -1)
+            {
+                components[i] = AvatarRetargetingComponents.identity;
+            } else
+            {
+                components[i] = FormComponents(source_animator, (HumanBodyBones)i, src_root, destination_animator, (HumanBodyBones)i, dest_root);
+            }
+        }
+    }
+
+    public Vector3 GetPosition(int hbb_index)
+    {
+        //return behaviour.GetPosition(hbb_index) + position_offsets[hbb_index];
+        return behaviour.GetPosition(hbb_index);
+    }
+
+    public Quaternion GetRotation(int hbb_index)
+    {
+        Quaternion a = behaviour.GetRotation(hbb_index);
+        Quaternion b = QExtension.ChangeFrame(Quaternion.Inverse(components[hbb_index].localA) * a, components[hbb_index].fromAtoB);
+
+        return components[hbb_index].localB * b;
+    }
+
+    public bool GetBoneStatus(int hbb_index)
+    {
+        return behaviour.GetBoneStatus(hbb_index);
+    }
+
+    public override void PrepareFrame(Playable playable, FrameData info) { }
+    public override void ProcessFrame(Playable playable, FrameData info, object playerData) { }
+
+    public void Dispose()
+    {
+        components.Dispose();
+    }
+
+    private AvatarRetargetingComponents FormComponents(Animator src_anim, HumanBodyBones src, Transform src_root, Animator dest_anim, HumanBodyBones dest, Transform dest_root)
+    {
+        Quaternion src_local = GetBoneFromTransform(src_anim.avatar.humanDescription, src_anim.GetBoneTransform(src)).rotation;
+        Quaternion dest_local = GetBoneFromTransform(dest_anim.avatar.humanDescription, dest_anim.GetBoneTransform(dest)).rotation;
+
+        Quaternion fromRootToSrc = StackToParentAnimator(src_anim, src, src_root);
+        Quaternion fromRootToDest = StackToParentAnimator(dest_anim, dest, dest_root);
+
+        Quaternion fromSrctoDest = QExtension.FromTo(fromRootToSrc, fromRootToDest);
+
+        //Debug.Log("SourceLocal " + QExtension.PrintEuler(src_local) + " | Destination Local " + QExtension.PrintEuler(dest_local) + " | From Src to Dest " + QExtension.PrintEuler(fromSrctoDest));
+        //Debug.Log("SourceLocal " + QExtension.Print(src_local) + " | Destination Local " + QExtension.Print(dest_local) + " | From Src to Dest " + QExtension.Print(fromSrctoDest));
+
+        return new AvatarRetargetingComponents(src_local, dest_local, fromSrctoDest);
+    }
+
+    private Quaternion StackToParentAnimator(Animator anim, HumanBodyBones index, Transform root)
+    {
+        Transform bone = anim.GetBoneTransform(index);
+        Quaternion diff = Quaternion.identity;
+
+        do
+        {
+            Quaternion tpose = GetBoneFromTransform(anim.avatar.humanDescription, bone).rotation;
+            diff = tpose * diff;
+            bone = bone.parent;
+        } while (bone != root);
+
+        return diff;
+    }
+    private SkeletonBone GetBoneFromTransform(HumanDescription hd, Transform trn)
+    {
+        for (int i = 0; i < hd.skeleton.Length; i++)
+        {
+            if (hd.skeleton[i].name == trn.name)
+            {
+                //Debug.Log("Skeleton Name " + hd.skeleton[i].name + " Transform name " + trn.name + " TPose quaternion " + QExtension.PrintEuler(hd.skeleton[i].rotation));
+                return hd.skeleton[i];
+            }
+        }
+        Debug.Log("Have not found the bone");
+        return new SkeletonBone();
+    }
+}
+
 public class AvatarRetargetingBehaviour : PlayableBehaviour, IHumanBodyBonesSplit
 {
     private NativeArray<Quaternion> rotation_offsets;
@@ -209,7 +307,7 @@ public class AvatarTPoseBehaviour : AvatarPoseBehaviour
     public void TPoseSetup(Animator animator)
     {
         Dictionary<int, int> tmp = MecanimHumanoidExtension.AvatarSkeleton2HumanBodyBones(animator.avatar.humanDescription, animator);
-        Debug.Log("Using Animator with avatar [" + animator.avatar.name + "]");
+        //Debug.Log("Using Animator with avatar [" + animator.avatar.name + "]");
 
         foreach((int skeleton_index, int HBB_index) in tmp)
         {
