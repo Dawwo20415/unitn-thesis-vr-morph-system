@@ -39,6 +39,10 @@ public class QuaternionTest : MonoBehaviour
         frame_a1 = QFix(trnA1.rotation);
         frame_a2 = QFix(trnA2.rotation);
 
+        Quaternion alt_frame = GetDiffFromRoot(trnA1, rootA);
+
+        Debug.Log("Global Rotation " + QPrintEuler(frame_a1) + " | From new function " + QPrintEuler(alt_frame));
+
         frame_b1 = QFix(trnB1.rotation);
         frame_b2 = QFix(trnB2.rotation);
 
@@ -47,11 +51,9 @@ public class QuaternionTest : MonoBehaviour
 
         fromRootA1 = QFromTo(QFix(rootA.rotation), frame_a1);
         fromRootA2 = QFromTo(QFix(rootA.rotation), frame_a2);
-        Debug.Log("Root->A1 " + QPrintEuler(fromRootA1) + " | Root->A2 " + QPrintEuler(fromRootA2));
 
         fromRootB1 = QFromTo(QFix(rootB.rotation), frame_b1);
         fromRootB2 = QFromTo(QFix(rootB.rotation), frame_b2);
-        Debug.Log("Root->B1 " + QPrintEuler(fromRootB1) + " | Root->B2 " + QPrintEuler(fromRootB2));
 
         fromA1toB1 = QFromTo(fromRootA1, fromRootB1);
         fromA2toB2 = QFromTo(fromRootA2, fromRootB2);
@@ -72,15 +74,7 @@ public class QuaternionTest : MonoBehaviour
 
         trnA2.localRotation = startingA * a2;
         trnB2.localRotation = startingB * b2;
-        
-        
-        /*
-        trnA1.localRotation = QChangeFrame(a1, fromRootA1);
-        trnB1.localRotation = QChangeFrame(b1, fromRootB1);
 
-        trnA2.localRotation = QChangeFrame(a2, startingA);
-        trnB2.localRotation = QChangeFrame(b2, startingB);
-        */
     }
 
     private Quaternion QChangeFrame (Quaternion q, Quaternion frame)
@@ -112,6 +106,20 @@ public class QuaternionTest : MonoBehaviour
     private string QPrintEuler(Quaternion q)
     {
         return "[" + q.eulerAngles.x + "," + q.eulerAngles.y + "," + q.eulerAngles.z + "]";
+    }
+
+    private Quaternion GetDiffFromRoot(Transform obj, Transform root)
+    {
+        Transform tmp = obj;
+        Quaternion diff = Quaternion.identity;
+
+        while (tmp.parent != root)
+        {
+            diff = tmp.localRotation * diff;
+            tmp = tmp.parent;
+        }
+
+        return diff;
     }
 }
 

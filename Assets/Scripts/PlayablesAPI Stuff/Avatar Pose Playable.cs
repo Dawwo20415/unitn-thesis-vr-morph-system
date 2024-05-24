@@ -81,6 +81,7 @@ public class AvatarRetargetingBehaviour : PlayableBehaviour, IHumanBodyBonesSpli
     private NativeArray<Vector3> position_offsets;
     private NativeArray<bool> mirrored;
     private NativeArray<Vector3> mirror_axis;
+    //private NativeArray<AvatarRetargetingComponents> components;
     //Input
     private IHumanBodyBonesSplit behaviour;
 

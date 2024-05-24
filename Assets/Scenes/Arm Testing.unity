@@ -161,14 +161,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 220822636}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0.1}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0, z: -0.6}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1434185208}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!1 &444688780
 GameObject:
   m_ObjectHideFlags: 0
@@ -476,7 +476,7 @@ Transform:
   m_GameObject: {fileID: 833451563}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0.6}
+  m_LocalPosition: {x: 0, y: 0, z: -0.1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -843,6 +843,7 @@ GameObject:
   - component: {fileID: 1674131310}
   - component: {fileID: 1674131311}
   - component: {fileID: 1674131312}
+  - component: {fileID: 1674131313}
   m_Layer: 0
   m_Name: Controller
   m_TagString: Untagged
@@ -893,9 +894,29 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1674131309}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 57e0e5168a3a1ae4daa0d5367b4c80bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  a1: {x: 0, y: 0, z: 0, w: 0}
+  a2: {x: 0, y: 0, z: 0, w: 0}
+  rootA: {fileID: 220822638}
+  trnA1: {fileID: 1434185208}
+  trnA2: {fileID: 450789187}
+  rootB: {fileID: 833451565}
+  trnB1: {fileID: 1737641777}
+  trnB2: {fileID: 1643558409}
+--- !u!114 &1674131313
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1674131309}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 595fac7ffcc29e14c94b7ce767e6b94b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   a1: {x: 0, y: 0, z: 0, w: 0}
