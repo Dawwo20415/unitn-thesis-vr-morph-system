@@ -103,7 +103,7 @@ public class OptitrackPosePlayable : MonoBehaviour
 
         poseApplyJob = new PoseApplyJob();
         poseApplyJob2 = new PoseApplyJob();
-
+        
         posePlayable = ScriptPlayable<OptitrackPoseBehaviour>.Create(graph);
         tposePlayable = ScriptPlayable<AvatarTPoseBehaviour>.Create(graph);
         quatPlayable = ScriptPlayable<QuaternionHandler>.Create(graph);
@@ -142,7 +142,7 @@ public class OptitrackPosePlayable : MonoBehaviour
         AnimationGraphUtility.ConnectNodes(graph, posePlayable, retargetingPlayable);
         AnimationGraphUtility.ConnectNodes(graph, retargetingPlayable, animationPlayable2);
 
-        AnimationGraphUtility.ConnectOutput(posePlayable, output);
+        AnimationGraphUtility.ConnectOutput(posePlayable, output);   
         AnimationGraphUtility.ConnectOutput(animationPlayable, optitrakPlayableOutput);
         AnimationGraphUtility.ConnectOutput(animationPlayable2, avatarPlayableOutput);
 
