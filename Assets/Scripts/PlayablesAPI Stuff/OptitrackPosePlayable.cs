@@ -25,6 +25,7 @@ public class OptitrackPosePlayable : MonoBehaviour
     public PlayableOptitrackStreamingClient client;
     public string skeleton_name;
     public bool connectBones = true;
+    public bool showBonesReferenceFrame = false;
 
     [Header("Retargeting Stuff")]
     public Transform destination_root;
@@ -266,8 +267,12 @@ public class OptitrackPosePlayable : MonoBehaviour
             if (connectBones)
             {
                 FromToLine deb = boneObject.AddComponent<FromToLine>();
-                DebugDisplayDirections ddd = boneObject.AddComponent<DebugDisplayDirections>();
                 deb.target = boneDef.ParentId == 0 ? m_rootObject.transform : m_boneObjectMap[boneDef.ParentId].transform;
+            }
+
+            if (showBonesReferenceFrame)
+            {
+                DebugDisplayDirections ddd = boneObject.AddComponent<DebugDisplayDirections>();
                 ddd.length = 0.1f;
             }
         }

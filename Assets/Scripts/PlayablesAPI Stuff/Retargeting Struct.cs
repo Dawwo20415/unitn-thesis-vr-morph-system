@@ -25,6 +25,14 @@ public struct AvatarRetargetingComponents
     public static AvatarRetargetingComponents identity { get => new AvatarRetargetingComponents(Quaternion.identity); }
 }
 
+public struct VExtension
+{
+    public static string Print(Vector3 vec)
+    {
+        return "[" + vec.x + "," + vec.y + "," + vec.z + "]";
+    }
+}
+
 public struct QExtension
 {
     public static Quaternion ChangeFrame(Quaternion q, Quaternion frame)
