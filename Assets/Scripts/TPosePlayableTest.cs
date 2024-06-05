@@ -81,6 +81,8 @@ public class TPosePlayableTest : MonoBehaviour
     public Quaternion mod;
     public Vector3 vec;
 
+    public List<Transform> targets;
+
     //GRAPH
     private Animator animator;
     private PlayableGraph graph;
@@ -109,6 +111,10 @@ public class TPosePlayableTest : MonoBehaviour
 
     private StaticDisplacement displacementBehaviour;
     private ScriptPlayable<StaticDisplacement> displacementPlayable;
+
+    //IK NODE
+    private PlayableIK IKJob;
+    private AnimationScriptPlayable IKPlayable;
 
     //ANIMATION OUTPUT
     private AnimationPlayableOutput avatarPlayableOutput;
@@ -152,9 +158,13 @@ public class TPosePlayableTest : MonoBehaviour
 
         extractJob = new ExtractJoint();
         extractJob.Setup(animator, HumanBodyBones.LeftHand);
-        extractPlayable = AnimationScriptPlayable.Create(graph, extractJob);
 
-        displacementBehaviour.Setup(extractJob, new Vector3(0, 0, 0.5f));
+        IKJob = new PlayableIK();
+        IKJob.setup(animator, /*displacementBehaviour,*/ targets);
+         
+        displacementBehaviour.Setup(extractJob, new Vector3(0.2f, 0, 0.1f));
+        extractPlayable = AnimationScriptPlayable.Create(graph, extractJob);
+        IKPlayable = AnimationScriptPlayable.Create(graph, IKJob);
 
         //Connections
         AnimationGraphUtility.ConnectNodes(graph, tposePlayable, animationPlayable);
@@ -171,7 +181,9 @@ public class TPosePlayableTest : MonoBehaviour
 
         AnimationGraphUtility.ConnectNodes(graph, animationPlayable, extractPlayable);
         AnimationGraphUtility.ConnectNodes(graph, extractPlayable, displacementPlayable);
-        AnimationGraphUtility.ConnectOutput(extractPlayable, avatarPlayableOutput);
+        AnimationGraphUtility.ConnectNodes(graph, animationPlayable, IKPlayable);
+        AnimationGraphUtility.ConnectNodes(graph, displacementPlayable, IKPlayable);
+        AnimationGraphUtility.ConnectOutput(IKPlayable, avatarPlayableOutput);
 
         graph.Play();
     }
@@ -186,6 +198,8 @@ public class TPosePlayableTest : MonoBehaviour
     {
         poseApplyJob.Dispose();
         tposeBehaviour.Dispose();
+        IKJob.Dispose();
+        extractJob.Dispose();
 
         if (graph.IsValid())
         {

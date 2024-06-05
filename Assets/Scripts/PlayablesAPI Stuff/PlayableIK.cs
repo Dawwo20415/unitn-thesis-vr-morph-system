@@ -22,28 +22,44 @@ public class StaticDisplacement : PlayableBehaviour, IKTarget
         displacement = dis;
     }
 
-    public Vector3 GetTarget() { return input.GetTarget() + displacement; }
+    public Vector3 GetTarget() 
+    {
+        return input.GetTarget() + displacement; 
+    }
 
 }
 
 public struct ExtractJoint : IAnimationJob, IKTarget
 {
-    private Vector3 position;
+    //Abosilutely hate having to allocate an array for just 1 thing
+    private NativeArray<Vector3> position;
     private TransformStreamHandle joint;
     private TransformStreamHandle root;
+    private HumanBodyBones bone;
 
     public void Setup(Animator animator, HumanBodyBones b)
     {
+        bone = b;
         joint = animator.BindStreamTransform(animator.GetBoneTransform(b));
         root = animator.BindStreamTransform(animator.avatarRoot);
+        position = new NativeArray<Vector3>(1, Allocator.Persistent);
     }
 
-    public Vector3 GetTarget() { return position; }
+    public Vector3 GetTarget() 
+    {
+        Debug.Log("Extracted " + VExtension.Print(position[0]));
+        return position[0]; 
+    }
 
     public void ProcessRootMotion(AnimationStream stream) { }
     public void ProcessAnimation(AnimationStream stream)
     {
-        position = VExtension.FrameChildToParent(root.GetPosition(stream), root.GetRotation(stream), joint.GetPosition(stream));
+        position[0] = joint.GetPosition(stream);
+    }
+
+    public void Dispose()
+    {
+        position.Dispose();
     }
 }
 
@@ -52,9 +68,11 @@ public struct PlayableIK : IAnimationJob
     private NativeArray<TransformStreamHandle> m_Bones;
     private float m_SqrDistError;
     private int m_MaxIterationCount;
-    private IKTarget m_target;
+    //private IKTarget m_target;
 
-    public void setup(Animator animator, IKTarget target)
+    private NativeArray<TransformSceneHandle> m_Targets;
+
+    public void setup(Animator animator/*, IKTarget target*/, List<Transform> targets)
     {
         m_Bones = new NativeArray<TransformStreamHandle>(4, Allocator.Persistent);
 
@@ -66,8 +84,15 @@ public struct PlayableIK : IAnimationJob
             m_Bones[3] = animator.BindStreamTransform(animator.GetBoneTransform(HumanBodyBones.LeftShoulder));
         }
 
-        m_target = target;
-        m_SqrDistError = 1.0f;
+        m_Targets = new NativeArray<TransformSceneHandle>(4, Allocator.Persistent);
+
+        for (int i = 0; i < 4; i++)
+        {
+            m_Targets[i] = animator.BindSceneTransform(targets[i]);
+        }
+
+        //m_target = target;
+        m_SqrDistError = 0.01f;
         m_MaxIterationCount = 10;
 
     }
@@ -75,11 +100,48 @@ public struct PlayableIK : IAnimationJob
     public void ProcessRootMotion(AnimationStream stream) { }
     public void ProcessAnimation(AnimationStream stream)
     {
+        //Vector3 goal = m_target.GetTarget();
+        Vector3 goal = m_Targets[0].GetPosition(stream);
+        //EE = EndEffector
+        Vector3 currentEE = m_Bones[0].GetPosition(stream);
+        float distance = (currentEE - goal).magnitude;
+
+        int iterations = 0;
+        do
+        {
+            //Triangular Loop
+            for (int i = 1; i < m_Bones.Length; i++)
+            {
+                for (int j = i; j >= 1; j--)
+                {
+                    RotateBone(stream, m_Bones[j], currentEE, goal);
+                    currentEE = m_Bones[0].GetPosition(stream);
+                    distance = (currentEE - goal).magnitude;
+
+                    if (distance <= m_SqrDistError)
+                        return;
+                }
+            }
+            iterations++;
+        } while (distance > m_SqrDistError && iterations < m_MaxIterationCount);
         
     }
 
-    private Quaternion RotateBone()
+    private void RotateBone(AnimationStream stream, TransformStreamHandle bone, Vector3 effector, Vector3 eeGoal)
     {
-        return Quaternion.identity;
+        Vector3 bonePosition = bone.GetPosition(stream);
+        Quaternion boneRotation = bone.GetRotation(stream);
+
+        Vector3 boneToEffector = effector - bonePosition;
+        Vector3 boneToGoal = eeGoal - bonePosition;
+
+        Quaternion fromToRotation = Quaternion.FromToRotation(boneToEffector, boneToGoal);
+        bone.SetRotation(stream, fromToRotation * boneRotation);
+    }
+
+    public void Dispose()
+    {
+        m_Bones.Dispose();
+        m_Targets.Dispose();
     }
 }
