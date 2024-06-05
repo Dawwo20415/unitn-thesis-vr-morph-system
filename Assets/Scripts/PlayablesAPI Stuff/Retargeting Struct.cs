@@ -27,6 +27,11 @@ public struct AvatarRetargetingComponents
 
 public struct VExtension
 {
+    public static Vector3 FrameChildToParent(Vector3 pPosition, Quaternion pRotation, Vector3 cPosition)
+    {
+        return Quaternion.Inverse(pRotation) * (cPosition - pPosition);
+    }
+
     public static string Print(Vector3 vec)
     {
         return "[" + vec.x + "," + vec.y + "," + vec.z + "]";

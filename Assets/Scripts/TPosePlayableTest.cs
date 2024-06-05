@@ -34,6 +34,7 @@ public struct ModifySingleBoneRotation : IAnimationJob
 {
     private HumanBodyBones bone;
     private TransformStreamHandle handle;
+    private TransformStreamHandle debughandle;
     private Quaternion modification;
 
     public void SetupJob(Animator animator, HumanBodyBones b, Quaternion q)
@@ -41,12 +42,15 @@ public struct ModifySingleBoneRotation : IAnimationJob
         modification = q;
         bone = b;
         handle = animator.BindStreamTransform(animator.GetBoneTransform(b));
+        debughandle = animator.BindStreamTransform(animator.GetBoneTransform(b+2));
     }
 
     public void ProcessRootMotion(AnimationStream stream) { }
     public void ProcessAnimation(AnimationStream stream)
     {
+        //Debug.Log("Pre-Rotation position " + VExtension.Print(debughandle.GetPosition(stream)));
         handle.SetLocalRotation(stream, handle.GetLocalRotation(stream) * modification);
+        //Debug.Log("Post-Rotation position " + VExtension.Print(debughandle.GetPosition(stream)));
     }
 }
 
@@ -92,15 +96,19 @@ public class TPosePlayableTest : MonoBehaviour
     private ModifySingleBoneRotation singleJob;
     private AnimationScriptPlayable singlePlayable;
 
-    private ModifySingleBonePosition singlePosJob;
-    private AnimationScriptPlayable singlePosPlayable;
-
     //DEBUG PRINT
     private JointPrintPosition printJob;
     private AnimationScriptPlayable printPlayable;
 
     private JointPrintPosition printJob2;
     private AnimationScriptPlayable printPlayable2;
+
+    //IK TARGET MODIFICATION
+    private ExtractJoint extractJob;
+    private AnimationScriptPlayable extractPlayable;
+
+    private StaticDisplacement displacementBehaviour;
+    private ScriptPlayable<StaticDisplacement> displacementPlayable;
 
     //ANIMATION OUTPUT
     private AnimationPlayableOutput avatarPlayableOutput;
@@ -115,6 +123,9 @@ public class TPosePlayableTest : MonoBehaviour
         //Nodes declaration
         tposePlayable = ScriptPlayable<AvatarTPoseBehaviour>.Create(graph);
         tposeBehaviour = tposePlayable.GetBehaviour();
+
+        displacementPlayable = ScriptPlayable<StaticDisplacement>.Create(graph);
+        displacementBehaviour = displacementPlayable.GetBehaviour();
 
         //Output Declaration
         avatarPlayableOutput = AnimationPlayableOutput.Create(graph, "Avatar Animation Output", animator);
@@ -135,27 +146,32 @@ public class TPosePlayableTest : MonoBehaviour
         singleJob.SetupJob(animator, HumanBodyBones.LeftUpperArm, QExtension.Fix(mod));
         singlePlayable = AnimationScriptPlayable.Create(graph, singleJob);
 
-        singlePosJob = new ModifySingleBonePosition();
-        singlePosJob.SetupJob(animator, HumanBodyBones.LeftLowerArm, vec);
-        singlePosPlayable = AnimationScriptPlayable.Create(graph, singlePosJob);
-
         printJob2 = new JointPrintPosition();
         printJob2.SetupJob(animator, HumanBodyBones.LeftLowerArm, 1);
         printPlayable2 = AnimationScriptPlayable.Create(graph, printJob2);
 
+        extractJob = new ExtractJoint();
+        extractJob.Setup(animator, HumanBodyBones.LeftHand);
+        extractPlayable = AnimationScriptPlayable.Create(graph, extractJob);
+
+        displacementBehaviour.Setup(extractJob, new Vector3(0, 0, 0.5f));
+
         //Connections
         AnimationGraphUtility.ConnectNodes(graph, tposePlayable, animationPlayable);
-        AnimationGraphUtility.ConnectNodes(graph, animationPlayable, printPlayable);
-        
+        //AnimationGraphUtility.ConnectNodes(graph, animationPlayable, printPlayable);
+
         //Change Rotation
-        AnimationGraphUtility.ConnectNodes(graph, printPlayable, singlePlayable);
-        AnimationGraphUtility.ConnectNodes(graph, singlePlayable, printPlayable2);
+        //AnimationGraphUtility.ConnectNodes(graph, printPlayable, singlePlayable);
+        //AnimationGraphUtility.ConnectNodes(graph, singlePlayable, printPlayable2);
+        //AnimationGraphUtility.ConnectNodes(graph, animationPlayable, singlePlayable);
 
         //Change Position as I suspected setting the position does basically nothing maybe if you do a run IK? NOPE
         //AnimationGraphUtility.ConnectNodes(graph, printPlayable, singlePosPlayable);
         //AnimationGraphUtility.ConnectNodes(graph, singlePosPlayable, printPlayable2);
 
-        AnimationGraphUtility.ConnectOutput(printPlayable2, avatarPlayableOutput);
+        AnimationGraphUtility.ConnectNodes(graph, animationPlayable, extractPlayable);
+        AnimationGraphUtility.ConnectNodes(graph, extractPlayable, displacementPlayable);
+        AnimationGraphUtility.ConnectOutput(extractPlayable, avatarPlayableOutput);
 
         graph.Play();
     }
