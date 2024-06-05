@@ -114,7 +114,13 @@ public struct PlayableIK : IAnimationJob
             {
                 for (int j = i; j >= 1; j--)
                 {
-                    RotateBone(stream, m_Bones[j], currentEE, goal);
+                    if (j == 2)
+                    {
+                        RotateAdjustBone(stream, m_Bones[j], m_Bones[j-1], currentEE, m_Targets[j-1].GetPosition(stream), goal);
+                    } else
+                    {
+                        RotateBone(stream, m_Bones[j], currentEE, goal);
+                    }
                     currentEE = m_Bones[0].GetPosition(stream);
                     distance = (currentEE - goal).magnitude;
 
@@ -133,10 +139,30 @@ public struct PlayableIK : IAnimationJob
         Quaternion boneRotation = bone.GetRotation(stream);
 
         Vector3 boneToEffector = effector - bonePosition;
-        Vector3 boneToGoal = eeGoal - bonePosition;
+        Vector3 boneToEEGoal = eeGoal - bonePosition;
 
-        Quaternion fromToRotation = Quaternion.FromToRotation(boneToEffector, boneToGoal);
+        Quaternion fromToRotation = Quaternion.FromToRotation(boneToEffector, boneToEEGoal);
         bone.SetRotation(stream, fromToRotation * boneRotation);
+    }
+
+    private void RotateAdjustBone(AnimationStream stream, TransformStreamHandle bone, TransformStreamHandle nextBone, Vector3 effector, Vector3 boneGoal, Vector3 eeGoal)
+    {
+        Vector3 bonePosition = bone.GetPosition(stream);
+        Quaternion boneRotation = bone.GetRotation(stream);
+
+        Vector3 boneToEffector = effector - bonePosition;
+        Vector3 boneToEEGoal = eeGoal - bonePosition;
+
+        Quaternion fromToRotation = Quaternion.FromToRotation(boneToEffector, boneToEEGoal);
+
+        //Adjustment
+        Vector3 boneToGoal = boneGoal - bonePosition;
+        Vector3 boneToNext = nextBone.GetPosition(stream) - bonePosition;
+        Vector3 nGoal = Vector3.Cross(boneToGoal, bonePosition);
+        Vector3 nCurrent = Vector3.Cross(boneToNext, bonePosition);
+        Quaternion boneTargetAdjust = Quaternion.AngleAxis(-Vector3.Angle(boneToNext, boneToGoal), boneToEEGoal);
+
+        bone.SetRotation(stream, fromToRotation * boneTargetAdjust * boneRotation);
     }
 
     public void Dispose()
