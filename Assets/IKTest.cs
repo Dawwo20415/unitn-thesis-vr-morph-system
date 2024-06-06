@@ -2,13 +2,37 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
+ * Progress: It works well enough but there needs to be a better handling of the up direction to match more
+ * the normal of the plane created by the 3 points origin | target | effector target
+*/
+
 public class IKTest : MonoBehaviour
 {
     public List<Transform> m_Bones;
     public List<Transform> m_Targets;
+    private List<Quaternion> m_Pose;
 
     public float m_SqrDistError;
     public int m_MaxIterationCount;
+
+    public enum Method
+    {
+        PrePosition,
+        SingleAdjust
+    }
+
+    public Method method;
+
+    private void Start()
+    {
+        m_Pose = new List<Quaternion>();
+
+        foreach (Transform trn in m_Bones)
+        {
+            m_Pose.Add(trn.rotation);
+        }
+    }
 
     // Update is called once per frame
     void Update()
@@ -21,34 +45,40 @@ public class IKTest : MonoBehaviour
 
         for (int i = 1; i < m_Bones.Count; i++)
         {
-            PrintBoneStuff(m_Bones[i], m_Bones[i - 1], currentEE, m_Targets[i - 1].position, goal);
+            //PrintBoneStuff(m_Bones[i], m_Bones[i - 1], currentEE, m_Targets[i - 1].position, goal);
         }
 
-        int iterations = 0;
-        do
+        if (method == Method.PrePosition)
         {
-            //Triangular Loop
-            for (int i = 1; i < m_Bones.Count; i++)
+            //If you don't input a specific pose each frame like in an animation this algorithm starts to rotate
+            //the bones on themselves because of the circular motion in going from one vector to the other
+            SetPose();
+
+            for (int i = m_Bones.Count - 1; i > 0; i--)
             {
-                for (int j = i; j >= 1; j--)
+                RotateBone(m_Bones[i], m_Bones[i - 1].position, m_Targets[i - 1].position);
+            }
+
+            int iterations = 0;
+            do
+            {
+                //Triangular Loop
+                for (int i = 1; i < m_Bones.Count; i++)
                 {
-                    if (j == 7)
-                    {
-                        RotateAdjustBone(m_Bones[j], m_Bones[j - 1], currentEE, m_Targets[j - 1].position, goal);
-                    }
-                    else
+                    for (int j = i; j >= 1; j--)
                     {
                         RotateBone(m_Bones[j], currentEE, goal);
-                    }
-                    currentEE = m_Bones[0].position;
-                    distance = (currentEE - goal).magnitude;
+                        currentEE = m_Bones[0].position;
+                        distance = (currentEE - goal).magnitude;
 
-                    if (distance <= m_SqrDistError)
-                        return;
+                        if (distance <= m_SqrDistError)
+                            return;
+                    }
                 }
-            }
-            iterations++;
-        } while (distance > m_SqrDistError && iterations < m_MaxIterationCount);
+                iterations++;
+            } while (distance > m_SqrDistError && iterations < m_MaxIterationCount);
+            Debug.Log("Arrived at 10 iterations", this);
+        }
     }
 
     private void PrintBoneStuff(Transform bone, Transform nextBone, Vector3 effector, Vector3 boneGoal, Vector3 eeGoal)
@@ -65,6 +95,18 @@ public class IKTest : MonoBehaviour
         Debug.DrawLine(bone.position, bone.position + boneToEE, Color.blue, Time.deltaTime, false);
     }
 
+    private void RotateSingleBone(Transform bone, Vector3 current, Vector3 goal)
+    {
+        Vector3 bonePosition = bone.position;
+        Quaternion boneRotation = bone.rotation;
+
+        Vector3 boneToEffector = current - bonePosition;
+        Vector3 boneToEEGoal = goal - bonePosition;
+
+        Quaternion fromToRotation = Quaternion.FromToRotation(boneToEffector, boneToEEGoal);
+        bone.rotation = fromToRotation * boneRotation;
+    }
+
     private void RotateBone(Transform bone, Vector3 effector, Vector3 eeGoal)
     {
         Vector3 bonePosition = bone.position;
@@ -75,6 +117,14 @@ public class IKTest : MonoBehaviour
 
         Quaternion fromToRotation = Quaternion.FromToRotation(boneToEffector, boneToEEGoal);
         bone.rotation = fromToRotation * boneRotation;
+    }
+
+    private void SetPose()
+    {
+        for (int i = 0; i < m_Bones.Count; i++)
+        {
+            m_Bones[i].rotation = m_Pose[i];
+        }
     }
 
     private void RotateAdjustBone(Transform bone, Transform nextBone, Vector3 effector, Vector3 boneGoal, Vector3 eeGoal)
