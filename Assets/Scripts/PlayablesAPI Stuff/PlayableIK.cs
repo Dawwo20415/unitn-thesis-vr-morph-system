@@ -100,29 +100,50 @@ public struct PlayableIK : IAnimationJob
     public void ProcessRootMotion(AnimationStream stream) { }
     public void ProcessAnimation(AnimationStream stream)
     {
-        //Vector3 goal = m_target.GetTarget();
         Vector3 goal = m_Targets[0].GetPosition(stream);
-        //EE = EndEffector
-        Vector3 currentEE = m_Bones[0].GetPosition(stream);
-        float distance = (currentEE - goal).magnitude;
 
+        ROTATE_CROSS(stream, goal);
+        PRE_2TARGETS(stream);
+        CCD_IK(stream, goal); 
+    }
+
+    private void ROTATE_CROSS(AnimationStream stream, Vector3 goal)
+    {
+        Quaternion rot;
+        float angle = 0.0f;
+        for (int i = 1; i < m_Bones.Length - 1; i++)
+        {
+            angle = BetweenNormals(m_Bones[i].GetPosition(stream), m_Bones[i + 1].GetPosition(stream), goal, m_Targets[i].GetPosition(stream));
+            Vector3 boneToNext = (m_Bones[i + 1].GetPosition(stream) - m_Bones[i].GetPosition(stream)).normalized;
+            rot = Quaternion.AngleAxis(angle, boneToNext) * m_Bones[i].GetRotation(stream);
+            m_Bones[i].SetRotation(stream, rot); 
+        }
+    }
+
+    private void PRE_2TARGETS(AnimationStream stream)
+    {
+        Quaternion rot;
+        for (int i = m_Bones.Length - 1; i > 0; i--)
+        {
+            rot = RotateBone(m_Bones[i].GetPosition(stream), m_Bones[i - 1].GetPosition(stream), m_Targets[i - 1].GetPosition(stream)) * m_Bones[i].GetRotation(stream);
+            m_Bones[i].SetRotation(stream, rot);
+        }
+    }
+
+    private void CCD_IK(AnimationStream stream, Vector3 goal)
+    {
+        float distance = (m_Bones[0].GetPosition(stream) - goal).magnitude;
         int iterations = 0;
         do
         {
-            //Triangular Loop
+            //Reverse Triangular Loop [1-21-321-4321-Loop]
             for (int i = 1; i < m_Bones.Length; i++)
             {
                 for (int j = i; j >= 1; j--)
                 {
-                    if (j == 2)
-                    {
-                        RotateAdjustBone(stream, m_Bones[j], m_Bones[j-1], currentEE, m_Targets[j-1].GetPosition(stream), goal);
-                    } else
-                    {
-                        RotateBone(stream, m_Bones[j], currentEE, goal);
-                    }
-                    currentEE = m_Bones[0].GetPosition(stream);
-                    distance = (currentEE - goal).magnitude;
+                    Quaternion rot = RotateBone(m_Bones[j].GetPosition(stream), m_Bones[0].GetPosition(stream), goal) * m_Bones[j].GetRotation(stream);
+                    m_Bones[j].SetRotation(stream, rot);
+                    distance = (m_Bones[0].GetPosition(stream) - goal).magnitude;
 
                     if (distance <= m_SqrDistError)
                         return;
@@ -130,39 +151,29 @@ public struct PlayableIK : IAnimationJob
             }
             iterations++;
         } while (distance > m_SqrDistError && iterations < m_MaxIterationCount);
-        
     }
 
-    private void RotateBone(AnimationStream stream, TransformStreamHandle bone, Vector3 effector, Vector3 eeGoal)
+    private Quaternion RotateBone(Vector3 bonePosition, Vector3 effector, Vector3 goal)
     {
-        Vector3 bonePosition = bone.GetPosition(stream);
-        Quaternion boneRotation = bone.GetRotation(stream);
-
         Vector3 boneToEffector = effector - bonePosition;
-        Vector3 boneToEEGoal = eeGoal - bonePosition;
+        Vector3 boneToEEGoal = goal - bonePosition;
 
-        Quaternion fromToRotation = Quaternion.FromToRotation(boneToEffector, boneToEEGoal);
-        bone.SetRotation(stream, fromToRotation * boneRotation);
+        return Quaternion.FromToRotation(boneToEffector, boneToEEGoal);
     }
 
-    private void RotateAdjustBone(AnimationStream stream, TransformStreamHandle bone, TransformStreamHandle nextBone, Vector3 effector, Vector3 boneGoal, Vector3 eeGoal)
+    private float BetweenNormals(Vector3 bone, Vector3 prevBone, Vector3 nextBone, Vector3 goal)
     {
-        Vector3 bonePosition = bone.GetPosition(stream);
-        Quaternion boneRotation = bone.GetRotation(stream);
+        Vector3 boneToNext = nextBone - bone;
+        Vector3 boneToPrev = prevBone - bone;
+        Vector3 goalToNext = nextBone - goal;
+        Vector3 goalToPrev = prevBone - goal;
 
-        Vector3 boneToEffector = effector - bonePosition;
-        Vector3 boneToEEGoal = eeGoal - bonePosition;
+        Vector3 n1 = Vector3.Cross(boneToNext, boneToPrev).normalized;
+        Vector3 n2 = Vector3.Cross(goalToNext, goalToPrev).normalized;
 
-        Quaternion fromToRotation = Quaternion.FromToRotation(boneToEffector, boneToEEGoal);
+        Vector3 axis = prevBone - nextBone;
 
-        //Adjustment
-        Vector3 boneToGoal = boneGoal - bonePosition;
-        Vector3 boneToNext = nextBone.GetPosition(stream) - bonePosition;
-        Vector3 nGoal = Vector3.Cross(boneToGoal, bonePosition);
-        Vector3 nCurrent = Vector3.Cross(boneToNext, bonePosition);
-        Quaternion boneTargetAdjust = Quaternion.AngleAxis(-Vector3.Angle(boneToNext, boneToGoal), boneToEEGoal);
-
-        bone.SetRotation(stream, fromToRotation * boneTargetAdjust * boneRotation);
+        return Vector3.SignedAngle(n1, n2, axis);
     }
 
     public void Dispose()
