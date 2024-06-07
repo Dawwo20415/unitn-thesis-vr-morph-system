@@ -19,7 +19,8 @@ public class IKTest : MonoBehaviour
     public enum Method
     {
         PrePosition,
-        SingleAdjust
+        SingleAdjust,
+        DebugPrint
     }
 
     public Method method;
@@ -53,7 +54,7 @@ public class IKTest : MonoBehaviour
             //If you don't input a specific pose each frame like in an animation this algorithm starts to rotate
             //the bones on themselves because of the circular motion in going from one vector to the other
             SetPose();
-
+            
             for (int i = m_Bones.Count - 1; i > 0; i--)
             {
                 RotateBone(m_Bones[i], m_Bones[i - 1].position, m_Targets[i - 1].position);
@@ -77,34 +78,56 @@ public class IKTest : MonoBehaviour
                 }
                 iterations++;
             } while (distance > m_SqrDistError && iterations < m_MaxIterationCount);
-            Debug.Log("Arrived at 10 iterations", this);
+            Debug.Log("Arrived at 10 iterations", this); 
+        } 
+        else if (method == Method.DebugPrint)
+        {
+            SetPose();
+            float angle = 0.0f;
+
+            for (int i = 1; i < m_Bones.Count - 2; i++)
+            {
+                angle = PrintNormals(m_Bones[i], m_Bones[i+1], m_Targets[0], m_Targets[i].position);
+            }
+
+            for (int i = 1; i < m_Bones.Count - 2; i++)
+            {
+                Vector3 boneToNext = (m_Bones[i + 1].position - m_Bones[i].position).normalized;
+                m_Bones[i].rotation = Quaternion.AngleAxis(angle, boneToNext) * m_Bones[i].rotation;
+            }
+
+            for (int i = m_Bones.Count - 1; i > 0; i--)
+            {
+                RotateBone(m_Bones[i], m_Bones[i - 1].position, m_Targets[i - 1].position);
+            }
         }
     }
 
-    private void PrintBoneStuff(Transform bone, Transform nextBone, Vector3 effector, Vector3 boneGoal, Vector3 eeGoal)
+    private float PrintNormals(Transform bone, Transform prevBone, Transform nextBone, Vector3 goal)
     {
-        //Effector
-        Debug.DrawLine(boneGoal, boneGoal + new Vector3(0.0f,0.2f,0.0f), Color.yellow, Time.deltaTime, false);
+        Vector3 boneToNext = nextBone.position - bone.position;
+        Vector3 boneToPrev = prevBone.position - bone.position;
+        Vector3 goalToNext = nextBone.position - goal;
+        Vector3 goalToPrev = prevBone.position - goal;
 
-        //Bone to Target
-        Vector3 boneToTarget = boneGoal - bone.position;
-        Debug.DrawLine(bone.position, bone.position + boneToTarget, Color.white, Time.deltaTime, false);
+        Vector3 n1 = Vector3.Cross(boneToNext, boneToPrev).normalized;
+        Vector3 n2 = Vector3.Cross(goalToNext, goalToPrev).normalized;
 
-        //Bone to EE
-        Vector3 boneToEE = eeGoal - bone.position;
-        Debug.DrawLine(bone.position, bone.position + boneToEE, Color.blue, Time.deltaTime, false);
-    }
+        //Debug.DrawLine(bone.position, bone.position + boneToNext, Color.magenta, Time.deltaTime, false);
+        //Debug.DrawLine(bone.position, bone.position + boneToPrev, Color.magenta, Time.deltaTime, false);
+        //Debug.DrawLine(goal, goal + goalToNext, Color.black, Time.deltaTime, false);
+        //Debug.DrawLine(goal, goal + goalToPrev, Color.black, Time.deltaTime, false);
 
-    private void RotateSingleBone(Transform bone, Vector3 current, Vector3 goal)
-    {
-        Vector3 bonePosition = bone.position;
-        Quaternion boneRotation = bone.rotation;
+        Debug.DrawLine(bone.position, bone.position + (n1 * 0.3f), Color.yellow, Time.deltaTime, false);
+        Debug.DrawLine(bone.position, bone.position + (n2 * 0.2f), Color.yellow, Time.deltaTime, false);
+        Debug.DrawLine(bone.position, bone.position + Vector3.Cross(n1, n2), Color.red, Time.deltaTime, false);
 
-        Vector3 boneToEffector = current - bonePosition;
-        Vector3 boneToEEGoal = goal - bonePosition;
+        Vector3 axis = prevBone.position - nextBone.position;
+        Debug.DrawLine(bone.position, bone.position + axis, Color.black, Time.deltaTime, false);
 
-        Quaternion fromToRotation = Quaternion.FromToRotation(boneToEffector, boneToEEGoal);
-        bone.rotation = fromToRotation * boneRotation;
+        //Debug.Log("Cross: " + VExtension.Print(Vector3.Cross(n1, n2)) + " Angle Between: " + Vector3.SignedAngle(n1, n2, axis));
+
+        return Vector3.SignedAngle(n1, n2, axis);
     }
 
     private void RotateBone(Transform bone, Vector3 effector, Vector3 eeGoal)
@@ -125,33 +148,5 @@ public class IKTest : MonoBehaviour
         {
             m_Bones[i].rotation = m_Pose[i];
         }
-    }
-
-    private void RotateAdjustBone(Transform bone, Transform nextBone, Vector3 effector, Vector3 boneGoal, Vector3 eeGoal)
-    {
-        Vector3 bonePosition = bone.position;
-        Quaternion boneRotation = bone.rotation;
-
-        Vector3 boneToEffector = effector - bonePosition;
-        Vector3 boneToEEGoal = eeGoal - bonePosition;
-
-        Quaternion fromToRotation = Quaternion.FromToRotation(boneToEffector, boneToEEGoal);
-
-        //Adjustment
-        Vector3 boneToGoal = boneGoal - bonePosition;
-        Vector3 boneToNext = nextBone.position - bonePosition;
-
-        //Debug.DrawLine(bonePosition, bonePosition + boneToGoal, Color.blue, Time.deltaTime, false);
-        //Debug.DrawLine(bonePosition, bonePosition + boneToNext, Color.red, Time.deltaTime, false);
-
-        Vector3 nGoal = Vector3.Cross(boneToGoal, bonePosition);
-        Vector3 nCurrent = Vector3.Cross(boneToNext, bonePosition);
-
-        //Debug.DrawLine(boneGoal, boneGoal + (nGoal.normalized / 3), Color.blue, Time.deltaTime, false);
-        //Debug.DrawLine(boneGoal, boneGoal + (nCurrent.normalized / 3), Color.red, Time.deltaTime, false);
-
-        Quaternion boneTargetAdjust = Quaternion.AngleAxis(-Vector3.Angle(boneToNext, boneToGoal), boneToEEGoal);
-
-        bone.rotation = fromToRotation * boneRotation;
     }
 }

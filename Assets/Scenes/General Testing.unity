@@ -793,7 +793,7 @@ MonoBehaviour:
   - {fileID: 283489521}
   m_SqrDistError: 0.001
   m_MaxIterationCount: 10
-  method: 0
+  method: 2
 --- !u!4 &925954891
 Transform:
   m_ObjectHideFlags: 0
