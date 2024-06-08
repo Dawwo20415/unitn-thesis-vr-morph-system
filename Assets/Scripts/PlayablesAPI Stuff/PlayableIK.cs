@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Animations;
-using static UnityEngine.Rendering.VirtualTexturing.Debugging;
 using Unity.Collections;
 
 public interface IKTarget
@@ -173,21 +172,12 @@ public struct PlayableIKChain : IAnimationJob
 
     private IKChain chain;
 
-    public void setup(Animator animator/*, IKTarget target*/, List<IKTargetLink> targets)
+    public void setup(Animator animator, List<HumanBodyBones> bones, List<IKTargetLink> targets)
     {
-        List<HumanBodyBones> bones = new List<HumanBodyBones>();
-        {
-            bones.Add(HumanBodyBones.LeftHand);
-            bones.Add(HumanBodyBones.LeftLowerArm);
-            bones.Add(HumanBodyBones.LeftUpperArm);
-            bones.Add(HumanBodyBones.LeftShoulder);
-        }
-
         chain = new IKChain(animator, "LeftArm", bones, targets);
 
         m_SqrDistError = 0.01f;
         m_MaxIterationCount = 10;
-
     }
 
     public void ProcessRootMotion(AnimationStream stream) { }

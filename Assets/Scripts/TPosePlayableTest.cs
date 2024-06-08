@@ -181,6 +181,13 @@ public class TPosePlayableTest : MonoBehaviour
             targetLeftLowerArmPlayable = AnimationScriptPlayable.Create(graph, targetLeftLowerArmJob);
             targetLeftUpperArmPlayable = AnimationScriptPlayable.Create(graph, targetLeftUpperArmJob);
         }
+        List<HumanBodyBones> bones = new List<HumanBodyBones>();
+        {
+            bones.Add(HumanBodyBones.LeftHand);
+            bones.Add(HumanBodyBones.LeftLowerArm);
+            bones.Add(HumanBodyBones.LeftUpperArm);
+            bones.Add(HumanBodyBones.LeftShoulder);
+        }
         List<IKTargetLink> targets = new List<IKTargetLink>();
         {
             targets.Add(targetLeftHandJob);
@@ -189,7 +196,7 @@ public class TPosePlayableTest : MonoBehaviour
         }
 
         IKJob = new PlayableIKChain();
-        IKJob.setup(animator, targets);
+        IKJob.setup(animator, bones, targets);
         //IKJob.setup(animator, /*displacementBehaviour,*/ targets);
          
         //displacementBehaviour.Setup(extractJob, new Vector3(0.2f, 0, 0.1f));
