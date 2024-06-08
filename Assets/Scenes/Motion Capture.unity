@@ -385,11 +385,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mod: {x: 0.38268346, y: 0, z: 0, w: 0.9238795}
   vec: {x: 0, y: 0, z: 0.15}
-  targets:
-  - {fileID: 287477014}
-  - {fileID: 1029064691}
-  - {fileID: 1559798148}
-  - {fileID: 519876332}
+  LeftHandTrn: {fileID: 287477014}
+  LeftLowerArmTrn: {fileID: 1029064691}
+  LeftUpperArmTrn: {fileID: 1559798148}
 --- !u!1001 &652124635
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -81,7 +81,10 @@ public class TPosePlayableTest : MonoBehaviour
     public Quaternion mod;
     public Vector3 vec;
 
-    public List<Transform> targets;
+    //public List<Transform> targets_trn;
+    public Transform LeftHandTrn;
+    public Transform LeftLowerArmTrn;
+    public Transform LeftUpperArmTrn;
 
     //GRAPH
     private Animator animator;
@@ -106,14 +109,22 @@ public class TPosePlayableTest : MonoBehaviour
     private AnimationScriptPlayable printPlayable2;
 
     //IK TARGET MODIFICATION
-    private ExtractJoint extractJob;
-    private AnimationScriptPlayable extractPlayable;
+    //private ExtractJoint extractJob;
+    //private AnimationScriptPlayable extractPlayable;
 
-    private StaticDisplacement displacementBehaviour;
-    private ScriptPlayable<StaticDisplacement> displacementPlayable;
+    //private StaticDisplacement displacementBehaviour;
+    //private ScriptPlayable<StaticDisplacement> displacementPlayable;
+
+    private IKTargetLink targetLeftHandJob;
+    private IKTargetLink targetLeftLowerArmJob;
+    private IKTargetLink targetLeftUpperArmJob;
+
+    private AnimationScriptPlayable targetLeftHandPlayable;
+    private AnimationScriptPlayable targetLeftLowerArmPlayable;
+    private AnimationScriptPlayable targetLeftUpperArmPlayable;
 
     //IK NODE
-    private PlayableIK IKJob;
+    private PlayableIKChain IKJob;
     private AnimationScriptPlayable IKPlayable;
 
     //ANIMATION OUTPUT
@@ -130,8 +141,8 @@ public class TPosePlayableTest : MonoBehaviour
         tposePlayable = ScriptPlayable<AvatarTPoseBehaviour>.Create(graph);
         tposeBehaviour = tposePlayable.GetBehaviour();
 
-        displacementPlayable = ScriptPlayable<StaticDisplacement>.Create(graph);
-        displacementBehaviour = displacementPlayable.GetBehaviour();
+        //displacementPlayable = ScriptPlayable<StaticDisplacement>.Create(graph);
+        //displacementBehaviour = displacementPlayable.GetBehaviour();
 
         //Output Declaration
         avatarPlayableOutput = AnimationPlayableOutput.Create(graph, "Avatar Animation Output", animator);
@@ -156,14 +167,33 @@ public class TPosePlayableTest : MonoBehaviour
         printJob2.SetupJob(animator, HumanBodyBones.LeftLowerArm, 1);
         printPlayable2 = AnimationScriptPlayable.Create(graph, printJob2);
 
-        extractJob = new ExtractJoint();
-        extractJob.Setup(animator, HumanBodyBones.LeftHand);
+        //extractJob = new ExtractJoint();
+        //extractJob.Setup(animator, HumanBodyBones.LeftHand);
+        {
+            targetLeftHandJob = new IKTargetLink();
+            targetLeftHandJob.Setup(animator, LeftHandTrn);
+            targetLeftLowerArmJob = new IKTargetLink();
+            targetLeftLowerArmJob.Setup(animator, LeftLowerArmTrn);
+            targetLeftUpperArmJob = new IKTargetLink();
+            targetLeftUpperArmJob.Setup(animator, LeftUpperArmTrn);
 
-        IKJob = new PlayableIK();
-        IKJob.setup(animator, /*displacementBehaviour,*/ targets);
+            targetLeftHandPlayable = AnimationScriptPlayable.Create(graph, targetLeftHandJob);
+            targetLeftLowerArmPlayable = AnimationScriptPlayable.Create(graph, targetLeftLowerArmJob);
+            targetLeftUpperArmPlayable = AnimationScriptPlayable.Create(graph, targetLeftUpperArmJob);
+        }
+        List<IKTargetLink> targets = new List<IKTargetLink>();
+        {
+            targets.Add(targetLeftHandJob);
+            targets.Add(targetLeftLowerArmJob);
+            targets.Add(targetLeftUpperArmJob);
+        }
+
+        IKJob = new PlayableIKChain();
+        IKJob.setup(animator, targets);
+        //IKJob.setup(animator, /*displacementBehaviour,*/ targets);
          
-        displacementBehaviour.Setup(extractJob, new Vector3(0.2f, 0, 0.1f));
-        extractPlayable = AnimationScriptPlayable.Create(graph, extractJob);
+        //displacementBehaviour.Setup(extractJob, new Vector3(0.2f, 0, 0.1f));
+        //extractPlayable = AnimationScriptPlayable.Create(graph, extractJob);
         IKPlayable = AnimationScriptPlayable.Create(graph, IKJob);
 
         //Connections
@@ -179,10 +209,15 @@ public class TPosePlayableTest : MonoBehaviour
         //AnimationGraphUtility.ConnectNodes(graph, printPlayable, singlePosPlayable);
         //AnimationGraphUtility.ConnectNodes(graph, singlePosPlayable, printPlayable2);
 
-        AnimationGraphUtility.ConnectNodes(graph, animationPlayable, extractPlayable);
-        AnimationGraphUtility.ConnectNodes(graph, extractPlayable, displacementPlayable);
+        //AnimationGraphUtility.ConnectNodes(graph, animationPlayable, extractPlayable);
+        //AnimationGraphUtility.ConnectNodes(graph, extractPlayable, displacementPlayable);
         AnimationGraphUtility.ConnectNodes(graph, animationPlayable, IKPlayable);
-        AnimationGraphUtility.ConnectNodes(graph, displacementPlayable, IKPlayable);
+        {
+            AnimationGraphUtility.ConnectNodes(graph, targetLeftHandPlayable, IKPlayable);
+            AnimationGraphUtility.ConnectNodes(graph, targetLeftLowerArmPlayable, IKPlayable);
+            AnimationGraphUtility.ConnectNodes(graph, targetLeftUpperArmPlayable, IKPlayable);
+        }
+        //AnimationGraphUtility.ConnectNodes(graph, displacementPlayable, IKPlayable);
         AnimationGraphUtility.ConnectOutput(IKPlayable, avatarPlayableOutput);
 
         graph.Play();
@@ -198,8 +233,11 @@ public class TPosePlayableTest : MonoBehaviour
     {
         poseApplyJob.Dispose();
         tposeBehaviour.Dispose();
+        targetLeftHandJob.Dispose();
+        targetLeftLowerArmJob.Dispose();
+        targetLeftUpperArmJob.Dispose();
         IKJob.Dispose();
-        extractJob.Dispose();
+        //extractJob.Dispose();
 
         if (graph.IsValid())
         {
