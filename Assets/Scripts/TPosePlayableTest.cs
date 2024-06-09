@@ -124,8 +124,7 @@ public class TPosePlayableTest : MonoBehaviour
     private AnimationScriptPlayable targetLeftUpperArmPlayable;
 
     //IK NODE
-    private PlayableIKChain IKJob;
-    private AnimationScriptPlayable IKPlayable;
+    private AnimationGraphUtility.PlayableGraphIKChain playableIKGraph;
 
     //ANIMATION OUTPUT
     private AnimationPlayableOutput avatarPlayableOutput;
@@ -188,44 +187,27 @@ public class TPosePlayableTest : MonoBehaviour
             bones.Add(HumanBodyBones.LeftUpperArm);
             bones.Add(HumanBodyBones.LeftShoulder);
         }
-        List<IKTargetLink> targets = new List<IKTargetLink>();
+        List<IKTarget> targets = new List<IKTarget>();
         {
             targets.Add(targetLeftHandJob);
             targets.Add(targetLeftLowerArmJob);
             targets.Add(targetLeftUpperArmJob);
         }
 
-        IKJob = new PlayableIKChain();
-        IKJob.setup(animator, bones, targets);
-        //IKJob.setup(animator, /*displacementBehaviour,*/ targets);
-         
-        //displacementBehaviour.Setup(extractJob, new Vector3(0.2f, 0, 0.1f));
-        //extractPlayable = AnimationScriptPlayable.Create(graph, extractJob);
-        IKPlayable = AnimationScriptPlayable.Create(graph, IKJob);
+        playableIKGraph = new AnimationGraphUtility.PlayableGraphIKChain(graph, animator, bones, targets, "LeftArm");
 
         //Connections
         AnimationGraphUtility.ConnectNodes(graph, tposePlayable, animationPlayable);
-        //AnimationGraphUtility.ConnectNodes(graph, animationPlayable, printPlayable);
-
-        //Change Rotation
-        //AnimationGraphUtility.ConnectNodes(graph, printPlayable, singlePlayable);
-        //AnimationGraphUtility.ConnectNodes(graph, singlePlayable, printPlayable2);
-        //AnimationGraphUtility.ConnectNodes(graph, animationPlayable, singlePlayable);
-
-        //Change Position as I suspected setting the position does basically nothing maybe if you do a run IK? NOPE
-        //AnimationGraphUtility.ConnectNodes(graph, printPlayable, singlePosPlayable);
-        //AnimationGraphUtility.ConnectNodes(graph, singlePosPlayable, printPlayable2);
-
-        //AnimationGraphUtility.ConnectNodes(graph, animationPlayable, extractPlayable);
-        //AnimationGraphUtility.ConnectNodes(graph, extractPlayable, displacementPlayable);
-        AnimationGraphUtility.ConnectNodes(graph, animationPlayable, IKPlayable);
+        AnimationGraphUtility.ConnectNodes(graph, animationPlayable, playableIKGraph.output);
         {
-            AnimationGraphUtility.ConnectNodes(graph, targetLeftHandPlayable, IKPlayable);
-            AnimationGraphUtility.ConnectNodes(graph, targetLeftLowerArmPlayable, IKPlayable);
-            AnimationGraphUtility.ConnectNodes(graph, targetLeftUpperArmPlayable, IKPlayable);
+            List<Playable> list = new List<Playable>(3);
+            list.Add(targetLeftHandPlayable);
+            list.Add(targetLeftLowerArmPlayable);
+            list.Add(targetLeftUpperArmPlayable);
+            AnimationGraphUtility.ConnectIKInputs(graph, list, playableIKGraph);
         }
         //AnimationGraphUtility.ConnectNodes(graph, displacementPlayable, IKPlayable);
-        AnimationGraphUtility.ConnectOutput(IKPlayable, avatarPlayableOutput);
+        AnimationGraphUtility.ConnectOutput(playableIKGraph.output, avatarPlayableOutput);
 
         graph.Play();
     }
@@ -243,7 +225,6 @@ public class TPosePlayableTest : MonoBehaviour
         targetLeftHandJob.Dispose();
         targetLeftLowerArmJob.Dispose();
         targetLeftUpperArmJob.Dispose();
-        IKJob.Dispose();
         //extractJob.Dispose();
 
         if (graph.IsValid())

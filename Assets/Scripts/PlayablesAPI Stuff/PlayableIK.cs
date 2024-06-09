@@ -65,7 +65,7 @@ public struct ExtractJoint : IAnimationJob, IKTarget
 public struct IKChainElement
 {
     public TransformStreamHandle bone;
-    public IKTargetLink target;
+    public IKTargetInput target;
 }
 
 public struct IKTargetLink : IAnimationJob, IKTarget
@@ -97,15 +97,29 @@ public struct IKTargetLink : IAnimationJob, IKTarget
     }
 }
 
-public class IKChain
+//Wrapper for input in IK chains
+public struct IKTargetInput : IAnimationJob
+{
+    //IKTarget target;
+
+    public void setup(IKTarget t) { /*target = t;*/ }
+
+    public Vector3 GetTarget() { return /*target.GetTarget();*/ Vector3.zero; }
+
+    public void ProcessRootMotion(AnimationStream stream) { }
+    public void ProcessAnimation(AnimationStream stream) { }
+}
+
+public struct IKChain
 {
     //Effector is at index 0
     private NativeArray<IKChainElement> m_Links;
     private String name;
     private int length;
 
-    public IKChain(Animator animator, String call, List<HumanBodyBones> bones, List<IKTargetLink> targets)
+    public IKChain(Animator animator, String call, List<HumanBodyBones> bones, List<IKTargetInput> targets)
     {
+        //Debug.Log("Starting to make IK chain bones count " + bones.Count + " targets count " + targets.Count);
         m_Links = new NativeArray<IKChainElement>(bones.Count, Allocator.Persistent);
         name = call;
         length = bones.Count;
@@ -126,6 +140,7 @@ public class IKChain
     public Vector3 GetTarget(int i)
     {
         //Debug.Log("IKChain GetTarget [" + i + "] - " + VExtension.Print(m_Links[i].target.GetTarget()));
+        //Debug.Log("List" + list.ToString() + " Count " + list.Count + "Element 0 " + list[0].ToString());
         return m_Links[i].target.GetTarget();
     }
 
@@ -169,12 +184,14 @@ public struct PlayableIKChain : IAnimationJob
 {
     private float m_SqrDistError;
     private int m_MaxIterationCount;
+    private NativeArray<Vector3> vectors;
 
     private IKChain chain;
 
-    public void setup(Animator animator, List<HumanBodyBones> bones, List<IKTargetLink> targets)
+    public void setup(Animator animator, List<HumanBodyBones> bones, List<IKTargetInput> targets, NativeArray<Vector3> vec)
     {
         chain = new IKChain(animator, "LeftArm", bones, targets);
+        vectors = vec;
 
         m_SqrDistError = 0.01f;
         m_MaxIterationCount = 10;
@@ -184,6 +201,7 @@ public struct PlayableIKChain : IAnimationJob
     public void ProcessAnimation(AnimationStream stream)
     {
         //Vector3 goal = m_Targets[0].GetPosition(stream);
+        Debug.Log("Vector Native Array length" + vectors.Length + " element 0 " + VExtension.Print(vectors[0]));
         Vector3 goal = chain.GetGoal();
 
         ROTATE_CROSS(stream, goal);
@@ -203,7 +221,6 @@ public struct PlayableIKChain : IAnimationJob
             chain.SetBoneRotation(stream, i, rot);
         }
     }
-
     private void PRE_2TARGETS(AnimationStream stream)
     {
         Quaternion rot;
@@ -213,7 +230,6 @@ public struct PlayableIKChain : IAnimationJob
             chain.SetBoneRotation(stream, i, rot);
         }
     }
-
     private void CCD_IK(AnimationStream stream, Vector3 goal)
     {
         float distance = (chain.GetEffector(stream) - goal).magnitude;
