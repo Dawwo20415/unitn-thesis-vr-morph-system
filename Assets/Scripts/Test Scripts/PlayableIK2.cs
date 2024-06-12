@@ -27,7 +27,7 @@ public class IKTargetWrap : PlayableBehaviour
     public override void PrepareFrame(Playable playable, FrameData info) { }
     public override void ProcessFrame(Playable playable, FrameData info, object playerData) 
     {
-        //Debug.Log("Target Wrap [" + m_Name + "] ProcessingFrame");
+        //Debug.Log("Target Wrap [" + m_Name + "] ProcessingFrame " + VExtension.Print(m_Entry.GetTarget()));
         m_TargetReference[m_Index] = m_Entry.GetTarget();
     }
 }

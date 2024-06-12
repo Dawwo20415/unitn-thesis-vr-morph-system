@@ -43,7 +43,7 @@ public class PlayableOptitrackGraph
 
         //GEN NODES
         m_AvatarOutput = AnimationPlayableOutput.Create(graph, "Optitrack Animation Output", m_optitrackAvatarAnimator);
-        m_scriptOutput = ScriptPlayableOutput.Create(graph, "Script Output");
+        m_scriptOutput = ScriptPlayableOutput.Create(graph, "Optitrack Script Output");
         m_optitrackPlayable = ScriptPlayable<OptitrackPoseBehaviour>.Create(graph);
         m_optitrackBehaviour = m_optitrackPlayable.GetBehaviour();
         m_optitrackBehaviour.OptitrackSetup(m_client, m_skeletonDef, MecanimHumanoidExtension.OptitrackId2HumanBodyBones(m_boneObjectMap, m_optitrackAvatarAnimator));

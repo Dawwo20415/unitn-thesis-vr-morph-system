@@ -10,24 +10,6 @@ public interface IKTarget
     public Vector3 GetTarget();
 }
 
-public class StaticDisplacement : PlayableBehaviour, IKTarget
-{
-    IKTarget input;
-    Vector3 displacement;
-
-    public void Setup(IKTarget target, Vector3 dis)
-    {
-        input = target;
-        displacement = dis;
-    }
-
-    public Vector3 GetTarget() 
-    {
-        return input.GetTarget() + displacement; 
-    }
-
-}
-
 public struct ExtractJoint : IAnimationJob, IKTarget
 {
     //Abosilutely hate having to allocate an array for just 1 thing
