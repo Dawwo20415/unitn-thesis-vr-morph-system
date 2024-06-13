@@ -19,7 +19,7 @@ public class AvatarCalibrator : MonoBehaviour
     public float capsule_thickness;
 
     [Header("To Apply on Character Avatar")]
-    private string parent_obj_name = "Colliders";
+    public string parent_obj_name = "Colliders";
     public EgocentricMappingDescription egocentric_description;
     public GameObject avatar_root;
 
@@ -190,7 +190,7 @@ public class AvatarCalibrator : MonoBehaviour
 
             asset.position_offset = midpoint;
             asset.rotation_offset = Quaternion.Euler(0,0,0);
-            asset.avatar_reference_points = parentObj.GetComponent<CalibrationMeshAsync>().getBoneNames();
+            //asset.avatar_reference_points = parentObj.GetComponent<CalibrationMeshAsync>().getBoneNames();
             
             AssetDatabase.SaveAssets();
             calibration.meshes.Add(asset);
@@ -213,7 +213,7 @@ public class AvatarCalibrator : MonoBehaviour
             asset.capsule_mesh = capsuleMesh;
             asset.length = distance / 2;
             asset.radius = capsule_thickness;
-            asset.avatar_reference_points = name_list;
+            //asset.avatar_reference_points = name_list;
             asset.position_offset = position;
             asset.rotation_offset = rotation;
 
@@ -259,6 +259,7 @@ public class AvatarCalibrator : MonoBehaviour
 
             List<Transform> anchors = new List<Transform>();
 
+            /*
             foreach (string name in calibration.avatar_reference_points)
             {
                 foreach (Transform trn in avatar_root.GetComponentsInChildren<Transform>())
@@ -269,7 +270,7 @@ public class AvatarCalibrator : MonoBehaviour
                     }
                 }
             }
-
+            */
             if (anchors.Count != 0)
                 follow.calibrate(anchors, calibration.position_offset, calibration.rotation_offset, calibration.getScale());
             else

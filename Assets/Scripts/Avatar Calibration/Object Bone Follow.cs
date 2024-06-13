@@ -17,19 +17,22 @@ public class ObjectBoneFollow : MonoBehaviour
     private List<Vector3> references;
     
     // 0-1 = Error | 2 = 2 points | 3> = 3 points
-    private int mode;
+    private enum Mode
+    {
+        Error,
+        TwoPoints,
+        ThreePoints
+    }
+    [SerializeField]
+    private Mode mode;
+    [SerializeField]
+    private Quaternion m_rotation;
+    [SerializeField]
+    private Quaternion m_globalRotation;
 
     void Start()
     {
-        SetReferences(getMidpoint());
-
-        if (references.Count < 2)
-        {
-            Debug.LogError("Not enough reference points", this);
-            Debug.Break();
-        }
-
-        mode = references.Count;  
+         
     }
     void Update()
     {
@@ -42,11 +45,12 @@ public class ObjectBoneFollow : MonoBehaviour
         Vector3 midpoint = getMidpoint();
 
         Quaternion rot = getRotation(midpoint) * rotation_offset;
+        m_globalRotation = getRotation(midpoint);
         transform.rotation = rot;
         transform.position = midpoint + (rot * midpoint_offset);
         if (debug)
         {
-            Debug.DrawLine(midpoint, midpoint + (rot * midpoint_offset), Color.cyan, Time.deltaTime, false);
+            Debug.DrawLine(midpoint, midpoint + (rot * Vector3.forward), Color.cyan, Time.deltaTime, false);
         }
     }
 
@@ -57,21 +61,22 @@ public class ObjectBoneFollow : MonoBehaviour
         Vector3 midpoint = getMidpoint();
 
         midpoint_offset = position - midpoint;
-        rotation_offset = rotation;
+        rotation_offset = QExtension.Fix(rotation);
         SetReferences(midpoint);
 
         transform.position = position;
         transform.localScale = scale;
         transform.rotation = getRotation(midpoint) * rotation_offset;
-    }
 
-    [ContextMenu("Calibrate Statically")]
-    public void staticCalibration()
-    {
-        Vector3 midpoint = getMidpoint();
-        SetReferences(midpoint);
-        midpoint_offset = transform.position - midpoint;
-        rotation_offset = getRotation(midpoint) * transform.rotation;
+        if (references.Count < 2)
+        {
+            mode = Mode.Error;
+            Debug.LogError("Not enough reference points", this);
+            Debug.Break();
+        }
+
+        if (references.Count == 2) { mode = Mode.TwoPoints; }
+        else { mode = Mode.ThreePoints; }
     }
 
     void SetReferences(Vector3 midpoint)
@@ -87,19 +92,11 @@ public class ObjectBoneFollow : MonoBehaviour
     {
         Quaternion rotation = Quaternion.identity;
         
-        if (mode == 2)
+        if (mode == Mode.TwoPoints)
         {
-            Vector3 up = points[0].position - points[1].position;
-            float c = -(up.x + up.y) / up.z;
-            Vector3 fwd = new Vector3(1,1, c);
-            if (debug)
-            {
-                Debug.DrawLine(points[1].position, points[1].position + up, Color.white, Time.deltaTime, false);
-                Debug.DrawLine(midpoint, midpoint + fwd, Color.red, Time.deltaTime, false);
-            }
-            rotation = Quaternion.LookRotation(fwd, up);
+            rotation = points[0].rotation;
 
-        } else if (mode > 2)
+        } else if (mode == Mode.ThreePoints)
         {
             Vector3 A = midpoint + references[0];
             Vector3 B = midpoint + references[1];
@@ -123,6 +120,7 @@ public class ObjectBoneFollow : MonoBehaviour
 
             rotation = rotation2 * rotation1;
         }
+        m_rotation = rotation;
         return rotation;
     }
 

@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc1af5b8db0e585439960264522ce09a, type: 3}
+  m_Name: Torso Mesh
+  m_EditorClassIdentifier: 
+  anchors: 000000000b0000000c000000
+  position_offset: {x: 0, y: 0, z: 0}
+  rotation_offset: {x: 0, y: 0, z: 0, w: 0}
+  points:
+  - {x: 0, y: 1.299, z: 0.133}
+  - {x: -0.1321, y: 1.48, z: 0.0224}
+  - {x: 0.1321, y: 1.48, z: 0.0224}
+  - {x: -0.131, y: 1.063, z: 0.097}
+  - {x: 0.131, y: 1.063, z: 0.097}
+  - {x: 0.103, y: 0.931, z: 0.079}
+  - {x: -0.103, y: 0.931, z: 0.079}
+  - {x: 0, y: 1.16, z: -0.092}
+  - {x: -0.103, y: 0.968, z: -0.132}
+  - {x: 0.103, y: 0.968, z: -0.132}
+  triangles: {fileID: 11400000, guid: 3a903be21d892b94e8bf50d915a6b15d, type: 2}
+  mesh_name: TorsoMesh

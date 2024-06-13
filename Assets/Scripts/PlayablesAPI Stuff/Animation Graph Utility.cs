@@ -153,6 +153,24 @@ public class AnimationGraphUtility
         return true;
     }
 
+    public static bool InterposeNodes(PlayableGraph graph, Playable node_in, Playable node_out, Playable source, Playable destination)
+    {
+        int in_index = GetInputIndex(destination, source);
+        if (in_index == -1) { return false; }
+
+        destination.DisconnectInput(in_index);
+
+        ConnectNodes(graph, source, node_in);
+        ConnectNodes(graph, node_out, destination);
+
+        return true;
+    }
+
+    public static bool InterposeNode(PlayableGraph graph, Playable node, Playable source, Playable destination)
+    {
+        return InterposeNodes(graph, node, node, source, destination);
+    }
+
     public static bool ConnectOutput(Playable src_node, PlayableOutput dest_output)
     {
         int src_index = FirstFreeOutput(src_node);
@@ -186,6 +204,28 @@ public class AnimationGraphUtility
             {
                 return i;
             }
+        }
+
+        return -1;
+    }
+
+    private static int GetInputIndex(Playable playable, Playable comparison)
+    {
+        for (int i = 0; i < playable.GetInputCount(); i++)
+        {
+            if (playable.GetInput(i).Equals(comparison))
+                return i;
+        }
+
+        return -1;
+    }
+
+    private static int GetOutputIndex(Playable playable, Playable comparison)
+    {
+        for (int i = 0; i < playable.GetOutputCount(); i++)
+        {
+            if (playable.GetOutput(i).Equals(comparison))
+                return i;
         }
 
         return -1;

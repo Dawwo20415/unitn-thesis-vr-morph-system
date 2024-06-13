@@ -490,6 +490,17 @@ MonoBehaviour:
   client: {fileID: 1598310751}
   skeleton_name: Scheletro
   retargeting_root: {fileID: 1204484303}
+  material: {fileID: 2100000, guid: 7632678931fb0f34cb3d81b319e6fd15, type: 2}
+  capsule_mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+  capsule_thickness: 0.05
+  calMeshes:
+  - {fileID: 11400000, guid: 470991e9062d64045a52bef4210528bf, type: 2}
+  - {fileID: 11400000, guid: 34c7c86a9c18a6546998a9bd297b6d1e, type: 2}
+  egoDebug:
+    drawCylinderRays: 1
+    drawNormals: 0
+    drawMeshProjections: 1
+    drawOnlyInContour: 1
 --- !u!1001 &652124635
 PrefabInstance:
   m_ObjectHideFlags: 0

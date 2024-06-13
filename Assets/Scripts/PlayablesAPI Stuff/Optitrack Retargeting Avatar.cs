@@ -6,9 +6,19 @@ using UnityEngine.Animations;
 
 public class OptitrackRetargetingAvatar : MonoBehaviour
 {
+    [Header("Optitrack Stuff")]
     public PlayableOptitrackStreamingClient client;
     public string skeleton_name;
     public Transform retargeting_root;
+
+    [Space]
+    [Header("Egocentric Stuff")]
+    public Material material;
+    public Mesh capsule_mesh;
+    [Range(0.0f, 0.3f)]
+    public float capsule_thickness;
+    public List<CustomAvatarCalibrationMesh> calMeshes;
+    public EgocentricRayCaster.DebugStruct egoDebug;
 
     private Animator animator;
     private Avatar avatar;
@@ -22,6 +32,8 @@ public class OptitrackRetargetingAvatar : MonoBehaviour
     private IKTargetPipeline IKPipelineUpperArm;
 
     private AnimationGraphUtility.PlayableGraphIKChain playableIKGraph;
+
+    private EgocentricSelfContact egocetric;
 
     // Start is called before the first frame update
     void Start()
@@ -48,7 +60,7 @@ public class OptitrackRetargetingAvatar : MonoBehaviour
             IKPipelineHand.AppendJob(graph, ex);
 
             StaticDisplacement dis = new StaticDisplacement();
-            dis.Setup(ex, new Vector3(0.0f, 0.0f, 0.2f));
+            dis.Setup(ex, new Vector3(0.0f, 0.0f, 0.0f));
             IKPipelineHand.AppendBehaviour(graph, dis);
         }
 
@@ -59,7 +71,7 @@ public class OptitrackRetargetingAvatar : MonoBehaviour
             IKPipelineLowerArm.AppendJob(graph, ex);
 
             StaticDisplacement dis = new StaticDisplacement();
-            dis.Setup(ex, new Vector3(0.0f, 0.2f, 0.0f));
+            dis.Setup(ex, new Vector3(0.0f, 0.0f, 0.0f));
             IKPipelineLowerArm.AppendBehaviour(graph, dis);
         }
 
@@ -70,7 +82,7 @@ public class OptitrackRetargetingAvatar : MonoBehaviour
             IKPipelineUpperArm.AppendJob(graph, ex);
 
             StaticDisplacement dis = new StaticDisplacement();
-            dis.Setup(ex, new Vector3(0.0f, 0.2f, 0.0f));
+            dis.Setup(ex, new Vector3(0.0f, 0.0f, 0.0f));
             IKPipelineUpperArm.AppendBehaviour(graph, dis);
         }
 
@@ -90,6 +102,8 @@ public class OptitrackRetargetingAvatar : MonoBehaviour
 
         AnimationGraphUtility.ConnectNodes(graph, optitrackGraph.retargeted, playableIKGraph.output);
         AnimationGraphUtility.ConnectOutput(playableIKGraph.output, avatarOutput);
+
+        egocetric = new EgocentricSelfContact(optitrackGraph.animator, material, capsule_mesh, capsule_thickness, calMeshes, new List<HumanBodyBones>() { HumanBodyBones.LeftHand }, egoDebug);
 
         graph.Play();
     }

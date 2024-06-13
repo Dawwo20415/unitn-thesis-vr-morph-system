@@ -33,7 +33,7 @@ public struct PoseApplyJob : IAnimationJob
         int size = BoneSize(tmp);
         bones = new NativeArray<TransformStreamHandle>(size, Allocator.Persistent);
         transforms2HBB = new Dictionary<int, int>(size);
-
+        
         int local_index = 0;
         foreach ((int skeleton_index, int HBB_index) in tmp)
         {

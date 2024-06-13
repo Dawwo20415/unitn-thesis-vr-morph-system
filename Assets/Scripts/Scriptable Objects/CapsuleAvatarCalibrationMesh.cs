@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+/*
 public class CapsuleAvatarCalibrationMesh : AvatarCalibrationMesh
 {
     public Mesh capsule_mesh;
@@ -20,3 +21,4 @@ public class CapsuleAvatarCalibrationMesh : AvatarCalibrationMesh
         return new Vector3(radius, length, radius);
     }
 }
+*/

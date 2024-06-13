@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
 public class AvatarCalibrationMesh : ScriptableObject
 {
     public List<string> avatar_reference_points;
@@ -19,3 +20,4 @@ public class AvatarCalibrationMesh : ScriptableObject
         return Vector3.one;
     }
 }
+*/

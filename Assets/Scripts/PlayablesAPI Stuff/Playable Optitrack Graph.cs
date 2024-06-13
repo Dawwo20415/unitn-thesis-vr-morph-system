@@ -8,6 +8,7 @@ using Unity.Collections;
 public class PlayableOptitrackGraph 
 {
     public AnimationScriptPlayable retargeted { get => m_targetAnimationPlayable; }
+    public Animator animator { get => m_optitrackAvatarAnimator; }
 
     //Optitrack
     private PlayableOptitrackStreamingClient m_client;

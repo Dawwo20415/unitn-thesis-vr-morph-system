@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dc1af5b8db0e585439960264522ce09a, type: 3}
-  m_Name: Calibration_Head
+  m_Name: Head Mesh
   m_EditorClassIdentifier: 
-  anchors: 
+  anchors: 0a00000009000000
   position_offset: {x: 0, y: 0, z: 0}
   rotation_offset: {x: 0, y: 0, z: 0, w: 0}
   points:
@@ -31,4 +31,4 @@ MonoBehaviour:
   - {x: -0.0809, y: 1.6869, z: -0.0118}
   - {x: 0.0809, y: 1.6869, z: -0.0118}
   triangles: {fileID: 11400000, guid: a4c30e6684b5d1f4aae68b27ae0bf6f9, type: 2}
-  mesh_name: 
+  mesh_name: HeadMesh
