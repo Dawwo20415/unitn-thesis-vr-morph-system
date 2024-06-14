@@ -37,6 +37,8 @@ public class EgocentricRayCaster : MonoBehaviour
     private List<Transform> m_cylinders;
     private DebugStruct m_debugStruct;
 
+    public string test_string = "Hello";
+
     public void Setup(List<GameObject> custom_meshes, List<GameObject> cylinders, DebugStruct deb)
     {
         m_customMeshes = new List<MeshShape>(custom_meshes.Count);
@@ -54,13 +56,7 @@ public class EgocentricRayCaster : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void LateUpdate()
-    {
-        Cast();
-    }
-
-    public void Cast()
+    public Vector3 Cast()
     {
         foreach (MeshShape shape in m_customMeshes)
         {
@@ -71,6 +67,8 @@ public class EgocentricRayCaster : MonoBehaviour
         {
             CylinderRaycast(trn);
         }
+
+        return Vector3.one;
     }
 
     private void MeshRaycast(MeshShape shape)
