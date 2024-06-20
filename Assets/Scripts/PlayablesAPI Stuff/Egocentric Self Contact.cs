@@ -12,8 +12,8 @@ public class EgocentricBehaviour : PlayableBehaviour, IKTarget
     public override void ProcessFrame(Playable playable, FrameData info, object playerData) 
     {
         EgocentricRayCaster caster = (EgocentricRayCaster)playerData;
-        Vector3 result = caster.Cast();
-        Debug.Log("Result for Egocentric Self Contact Retargeting " + VExtension.Print(result));
+        List<BSACoordinates> result = caster.Cast();
+        Debug.Log("Result for Egocentric Self Contact Retargeting, n. of coordinates [" + result.Count + "]");
     }
 
     public Vector3 GetTarget()
