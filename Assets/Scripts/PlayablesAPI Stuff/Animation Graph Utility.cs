@@ -75,11 +75,13 @@ public class AnimationGraphUtility
         private List<ScriptPlayable<IKTargetWrap>> m_IKInputs;
         private ScriptPlayableOutput m_TargetOutput;
         private NativeArray<Vector3> m_IKTargets;
+        private ScriptPlayable<IKTargetJoin> m_Dummy;
 
         public AnimationScriptPlayable output { get => m_IKPlayable; }
         public int inputsCount { get => m_IKInputs.Count; }
         public ScriptPlayable<IKTargetWrap> this[int i] { get => m_IKInputs[i]; }
         public string name { get; }
+        public ScriptPlayable<IKTargetJoin> dummy { get => m_Dummy; }
 
         public PlayableGraphIKChain(PlayableGraph graph, Animator animator, List<HumanBodyBones> bones, List<IKTarget> targets, string n)
         {
@@ -116,13 +118,13 @@ public class AnimationGraphUtility
         }
         private void CONN_INTERNAL_NODES(PlayableGraph graph)
         {
-            ScriptPlayable<IKTargetJoin> joint = ScriptPlayable<IKTargetJoin>.Create(graph);
+            m_Dummy = ScriptPlayable<IKTargetJoin>.Create(graph);
             foreach (ScriptPlayable<IKTargetWrap> playable in m_IKInputs)
             {
                 ConnectNodes(graph, playable, m_IKPlayable);
-                ConnectNodes(graph, playable, joint);
+                ConnectNodes(graph, playable, m_Dummy);
             }
-            ConnectOutput(joint, m_TargetOutput);
+            ConnectOutput(m_Dummy, m_TargetOutput);
         }
     }
 
@@ -143,6 +145,18 @@ public class AnimationGraphUtility
 
         int out_index = FirstFreeOutput(output_node);
         int in_index = FirstFreeInput(input_node);
+
+        if (in_index == -1) { in_index = input_node.GetInputCount(); input_node.SetInputCount(in_index + 1); }
+        if (out_index == -1) { out_index = output_node.GetOutputCount(); output_node.SetOutputCount(out_index + 1); }
+
+        graph.Connect(output_node, out_index, input_node, in_index);
+        input_node.SetInputWeight(in_index, 1.0f);
+
+        return true;
+    }
+
+    public static bool ConnectNodesI(PlayableGraph graph, Playable output_node, Playable input_node, int out_index, int in_index)
+    {
 
         if (in_index == -1) { in_index = input_node.GetInputCount(); input_node.SetInputCount(in_index + 1); }
         if (out_index == -1) { out_index = output_node.GetOutputCount(); output_node.SetOutputCount(out_index + 1); }
@@ -229,5 +243,11 @@ public class AnimationGraphUtility
         }
 
         return -1;
+    }
+
+    private static bool ConnectEgocentric(EgocentricSelfContact egocentric, IKTargetPipeline pipeline)
+    {
+
+        return true;
     }
 }

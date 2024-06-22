@@ -14,19 +14,51 @@ public struct MeshShape
     }
 }
 
+public static class HumanBodyBonesWeightPath
+{
+    public static HumanBodyBones GetDestination(HumanBodyBones start)
+    {
+        //Left Arm
+        if (start == HumanBodyBones.LeftHand)     { return HumanBodyBones.LeftShoulder; }
+        if (start == HumanBodyBones.LeftLowerArm) { return HumanBodyBones.LeftShoulder; }
+        if (start == HumanBodyBones.LeftUpperArm) { return HumanBodyBones.LeftShoulder; }
+        if (start == HumanBodyBones.LeftShoulder) { return HumanBodyBones.LeftShoulder; }
+        //Right Arm
+        if (start == HumanBodyBones.RightHand)     { return HumanBodyBones.RightShoulder; }
+        if (start == HumanBodyBones.RightLowerArm) { return HumanBodyBones.RightShoulder; }
+        if (start == HumanBodyBones.RightUpperArm) { return HumanBodyBones.RightShoulder; }
+        if (start == HumanBodyBones.RightShoulder) { return HumanBodyBones.RightShoulder; }
+        //Left Leg
+        if (start == HumanBodyBones.LeftFoot)     { return HumanBodyBones.LeftUpperLeg; }
+        if (start == HumanBodyBones.LeftLowerLeg) { return HumanBodyBones.LeftUpperLeg; }
+        if (start == HumanBodyBones.LeftUpperLeg) { return HumanBodyBones.LeftUpperLeg; }
+        if (start == HumanBodyBones.LeftToes)     { return HumanBodyBones.LeftUpperLeg; }
+        //Right Leg
+        if (start == HumanBodyBones.RightFoot)     { return HumanBodyBones.RightUpperLeg; }
+        if (start == HumanBodyBones.RightLowerLeg) { return HumanBodyBones.RightUpperLeg; }
+        if (start == HumanBodyBones.RightUpperLeg) { return HumanBodyBones.RightUpperLeg; }
+        if (start == HumanBodyBones.RightToes)     { return HumanBodyBones.RightUpperLeg; }
+
+        return HumanBodyBones.Hips;
+    }
+}
+
 public class BodySturfaceApproximation
 {
     public int size { get; }
     public int customTrisCount { get => m_trisNumber; }
+    public int customMeshCount { get => m_customMeshes.Count; }
     public int cylindersCount { get => m_cylinders.Count; }
+    public float GetBoneWeight(HumanBodyBones hbb) { return m_BonesDisplacementWeight[hbb]; }
     public List<MeshShape> custom { get => m_customMeshes; }
     public List<Transform> cylinders { get => m_cylinders; }
 
     private List<MeshShape> m_customMeshes;
     private int m_trisNumber;
     private List<Transform> m_cylinders;
+    private Dictionary<HumanBodyBones, float> m_BonesDisplacementWeight;
 
-    public BodySturfaceApproximation(List<GameObject> custom_meshes, List<GameObject> cylinders)
+    public BodySturfaceApproximation(Animator animator, List<GameObject> custom_meshes, List<GameObject> cylinders)
     {
         m_customMeshes = new List<MeshShape>(custom_meshes.Count);
         m_cylinders = new List<Transform>(cylinders.Count);
@@ -46,5 +78,40 @@ public class BodySturfaceApproximation
             m_cylinders.Add(obj.transform);
             size++;
         }
+
+        m_BonesDisplacementWeight = new Dictionary<HumanBodyBones, float>((int)HumanBodyBones.LastBone);
+        for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+        {
+            m_BonesDisplacementWeight[(HumanBodyBones)i] = CalculatePath(animator, (HumanBodyBones)i);
+        }
     }
+
+    private float CalculatePath(Animator animator, HumanBodyBones start)
+    {
+        float length = 0.0f;
+
+        Transform trn = animator.GetBoneTransform(start);
+        HumanBodyBones target = HumanBodyBonesWeightPath.GetDestination(start);
+        Transform dest = animator.GetBoneTransform(target);
+
+        if (trn == dest || trn == null)
+            return 1.0f;
+
+        while (trn != dest)
+        {
+            if (trn.parent == null)
+                throw new UnityException("HumanBodyBones path recursion encountered an object without a parent before reaching destination bone!");
+
+            length += GetDistance(trn, trn.parent);
+            trn = trn.parent;
+        }
+
+        return length;
+    }
+
+    private float GetDistance(Transform a, Transform b)
+    {
+        return Mathf.Abs((a.position - b.position).magnitude);
+    }
+
 }

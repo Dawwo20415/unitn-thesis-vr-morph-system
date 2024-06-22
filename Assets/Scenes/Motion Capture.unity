@@ -500,7 +500,7 @@ MonoBehaviour:
     drawCylinderRays: 1
     drawNormals: 0
     drawMeshProjections: 1
-    drawOnlyInContour: 1
+    drawOnlyInContour: 0
 --- !u!1001 &652124635
 PrefabInstance:
   m_ObjectHideFlags: 0

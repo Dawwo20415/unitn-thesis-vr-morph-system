@@ -15,7 +15,7 @@ public class EgocentricBehaviour : PlayableBehaviour, IKTarget
         List<BSACoordinates> result = caster.GetSourceCoordinates();
         target = caster.SetDestinationCoordinates(result);
 
-        //Debug.Log("Result for Egocentric Self Contact Retargeting, n. of coordinates [" + result.Count + "], weight total, should be around 1.0f [" + total + "]");
+        //Debug.Log("Result for Egocentric Self Contact Retargeting, n. of coordinates [" + result.Count + "], weight total, target ended up being " + VExtension.Print(target));
     }
 
     public Vector3 GetTarget()
@@ -43,6 +43,7 @@ public class EgocentricSelfContact
 
     public Playable this[int i] { get => m_egoPlayables[i]; }
     public Playable this[HumanBodyBones hbb] { get => m_egoPlayables[m_hbbConversion[hbb]]; }
+    public PlayableOutput output(int i) { return m_egoOutputs[i]; }
 
     public EgocentricSelfContact(Animator src_animator, Animator dest_animator, PlayableGraph graph, Material mat, Mesh arm, float thick, List<CustomAvatarCalibrationMesh> acms, List<HumanBodyBones> joints, EgocentricRayCasterSource.DebugStruct egoDebug)
     {
@@ -63,8 +64,8 @@ public class EgocentricSelfContact
                 EgocentricRayCasterDestination dest = dest_animator.GetBoneTransform(hbb).gameObject.AddComponent<EgocentricRayCasterDestination>();
                 EgocentricRayCasterSource src = src_animator.GetBoneTransform(hbb).gameObject.AddComponent<EgocentricRayCasterSource>();
                 EgocentricRayCasterWrapper caster = src_animator.GetBoneTransform(hbb).gameObject.AddComponent<EgocentricRayCasterWrapper>();
-                src.Setup(m_sourceBSA, egoDebug);
-                dest.Setup(m_destinationBSA, egoDebug);
+                src.Setup(hbb, src_animator, m_sourceBSA, egoDebug);
+                dest.Setup(hbb, dest_animator, m_destinationBSA, egoDebug);
                 caster.Set(src, dest);
                 InstancePlayables(graph, hbb, caster);
             }
@@ -94,7 +95,7 @@ public class EgocentricSelfContact
             }
         }
 
-        return new BodySturfaceApproximation(m_customMeshes, m_cylinders);
+        return new BodySturfaceApproximation(animator, m_customMeshes, m_cylinders);
     }
 
     private void InstanceCustomMesh(Animator animator, CustomAvatarCalibrationMesh acm, Transform parent)
@@ -167,7 +168,7 @@ public class EgocentricSelfContact
 
         //Connections
         playable.SetOutputCount(2);
-        output.SetSourcePlayable(playable, 1);
+        output.SetSourcePlayable(playable, 0);
 
         //Store
         m_egoPlayables.Add(playable);

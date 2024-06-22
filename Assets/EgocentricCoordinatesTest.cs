@@ -23,12 +23,6 @@ public class EgocentricCoordinatesTest : MonoBehaviour
     [SerializeField] private float projection_magnitude;
     [SerializeField] private Vector2 barycentric_coordinates;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
     // Update is called once per frame
     void Update()
     {

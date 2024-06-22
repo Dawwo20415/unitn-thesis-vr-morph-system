@@ -65,13 +65,17 @@ public class IKTargetPipeline
     public IKTarget firstNode { get => m_nodes[0]; }
     public IKTarget lastNode { get => m_nodes[m_nodes.Count - 1]; }
 
+    public HumanBodyBones bone { get => m_Bone; }
+
     private List<IKTarget> m_nodes;
     private List<Playable> m_playables;
+    private HumanBodyBones m_Bone;
 
-    public IKTargetPipeline()
+    public IKTargetPipeline(HumanBodyBones hbb)
     {
         m_nodes = new List<IKTarget>();
         m_playables = new List<Playable>();
+        m_Bone = hbb;
     }
 
     public void AppendJob<Job>(PlayableGraph graph, Job job) 
@@ -96,6 +100,28 @@ public class IKTargetPipeline
 
         m_nodes.Add(behaviour);
         m_playables.Add(playable);
+    }
+
+    public void AddEgocentric(PlayableGraph graph, EgocentricSelfContact contact)
+    {
+        EgocentricBehaviour b = ((ScriptPlayable<EgocentricBehaviour>)contact[m_Bone]).GetBehaviour();
+
+        if (m_playables.Count > 0)
+            AnimationGraphUtility.ConnectNodes(graph, m_playables[m_playables.Count - 1], contact[m_Bone]);
+
+        m_nodes.Add(b);
+        m_playables.Add(contact[m_Bone]);
+    }
+
+    //IN CONSTRUCTION
+    public void InsertBehaviour<Behaviour>(PlayableGraph graph, Playable playable, int i)
+        where Behaviour : notnull, PlayableBehaviour, IKTarget, new()
+    {
+
+        AnimationGraphUtility.InterposeNode(graph, playable, m_playables[i-1], m_playables[i]);
+
+        m_playables.Insert(i, playable);
+        m_nodes.Insert(i, ((ScriptPlayable<Behaviour>)playable).GetBehaviour());
     }
 
     ~IKTargetPipeline()

@@ -25,31 +25,31 @@ public class EgocentricRayCasterSource : MonoBehaviour
     private List<BSACoordinates> m_coordinates;
     private DebugStruct m_debugStruct;
     private float m_displacementWeight;
+    private Transform m_Hips;
 
-    public string test_string = "Hello";
-    public float m_dist = 0.0f;
-
-    public void Setup(List<GameObject> custom_meshes, List<GameObject> cylinders, DebugStruct deb)
+    public void Setup(Animator animator, HumanBodyBones hbb, List<GameObject> custom_meshes, List<GameObject> cylinders, DebugStruct deb)
     {
         m_debugStruct = deb;
-        m_BSA = new BodySturfaceApproximation(custom_meshes, cylinders);
+        m_BSA = new BodySturfaceApproximation(animator, custom_meshes, cylinders);
         m_coordinates = new List<BSACoordinates>(m_BSA.size);
-        m_displacementWeight = 1.0f;
+        m_displacementWeight = m_BSA.GetBoneWeight(hbb);
+        m_Hips = animator.GetBoneTransform(HumanBodyBones.Hips);
     }
 
-    public void Setup(BodySturfaceApproximation bsa, DebugStruct deb)
+    public void Setup(HumanBodyBones hbb, Animator animator, BodySturfaceApproximation bsa, DebugStruct deb)
     {
         m_debugStruct = deb;
         m_BSA = bsa;
         m_coordinates = new List<BSACoordinates>(m_BSA.size);
-        m_displacementWeight = 1.0f;
+        m_displacementWeight = m_BSA.GetBoneWeight(hbb);
+        m_Hips = animator.GetBoneTransform(HumanBodyBones.Hips);
     }
 
     public List<BSACoordinates> Cast()
     {
         m_coordinates.Clear();
         float total_weight_sum = 0.0f;
-        
+
         foreach (MeshShape shape in m_BSA.custom)
         {
             //For each triangle in the mesh
@@ -68,8 +68,6 @@ public class EgocentricRayCasterSource : MonoBehaviour
             m_coordinates.Add(bsa);
             total_weight_sum += bsa.weight;
         }
-
-        m_dist = m_coordinates[m_coordinates.Count - 1].surfaceProjection.x;
 
         for (int i = 0; i < m_coordinates.Count; i++) 
         {
@@ -157,7 +155,6 @@ public class EgocentricRayCasterSource : MonoBehaviour
         //Define Cylinder Extremities and Forward direction
         Vector3 a = Vector3.up;
         Vector3 b = Vector3.down;
-        Vector3 f = cylinder.forward;
 
         //Transform from local space to world space
         a = cylinder.TransformPoint(a);
@@ -167,6 +164,9 @@ public class EgocentricRayCasterSource : MonoBehaviour
 
         Vector3 AB = b - a;
         Vector3 AP = pos - a;
+        Vector3 AH = m_Hips.position - a;
+
+        Vector3 reference_direction = Vector3.Cross(AH, AB).normalized;
 
         float ABAPdot = Vector3.Dot(AB.normalized, AP);
 
@@ -174,7 +174,7 @@ public class EgocentricRayCasterSource : MonoBehaviour
 
         Vector3 JP = pos - projection_on_line;
         Vector3 inJP = JP.normalized * radius;
-        float angle_between = Vector3.SignedAngle(f, inJP, AB);
+        float angle_between = Vector3.SignedAngle(reference_direction, inJP, AB);
 
         float distance = JP.magnitude - radius;
         Vector3 displacement = JP.normalized * distance;
@@ -188,7 +188,7 @@ public class EgocentricRayCasterSource : MonoBehaviour
         {
             //Debug.DrawLine(a, a + AP, Color.blue, Time.deltaTime, false);
             Debug.DrawLine(a, projection_on_line, Color.green, Time.deltaTime, false);
-            Debug.DrawLine(projection_on_line, projection_on_line + (f.normalized * radius), Color.black, Time.deltaTime, false);
+            Debug.DrawLine(projection_on_line, projection_on_line + (reference_direction * radius), Color.black, Time.deltaTime, false);
             Debug.DrawLine(projection_on_line, projection_on_line + inJP, Color.red, Time.deltaTime, false);
             Debug.DrawLine(projection_on_line + inJP, projection_on_line + inJP + displacement, Color.magenta, Time.deltaTime, false);
         }

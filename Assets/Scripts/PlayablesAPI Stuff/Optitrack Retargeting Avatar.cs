@@ -53,18 +53,25 @@ public class OptitrackRetargetingAvatar : MonoBehaviour
             return;
         }
 
-        IKPipelineHand = new IKTargetPipeline();
+        egocetric = new EgocentricSelfContact(optitrackGraph.animator, animator, graph, material, capsule_mesh, capsule_thickness, calMeshes, new List<HumanBodyBones>() { HumanBodyBones.LeftHand }, egoDebug);
+
+        IKPipelineHand = new IKTargetPipeline(HumanBodyBones.LeftHand);
         {
+            /*
             ExtractBone ex = new ExtractBone();
             ex.setup(animator, HumanBodyBones.LeftHand);
             IKPipelineHand.AppendJob(graph, ex);
+            */
+            IKPipelineHand.AddEgocentric(graph, egocetric);
 
+            /*
             StaticDisplacement dis = new StaticDisplacement();
-            dis.Setup(ex, new Vector3(0.0f, 0.0f, 0.0f));
+            dis.Setup(((ScriptPlayable<EgocentricBehaviour>)egocetric[IKPipelineHand.bone]).GetBehaviour(), new Vector3(0.0f, 0.0f, 0.0f));
             IKPipelineHand.AppendBehaviour(graph, dis);
+            */
         }
 
-        IKPipelineLowerArm = new IKTargetPipeline();
+        IKPipelineLowerArm = new IKTargetPipeline(HumanBodyBones.LeftLowerArm);
         {
             ExtractBone ex = new ExtractBone();
             ex.setup(animator, HumanBodyBones.LeftLowerArm);
@@ -75,7 +82,7 @@ public class OptitrackRetargetingAvatar : MonoBehaviour
             IKPipelineLowerArm.AppendBehaviour(graph, dis);
         }
 
-        IKPipelineUpperArm = new IKTargetPipeline();
+        IKPipelineUpperArm = new IKTargetPipeline(HumanBodyBones.LeftUpperArm);
         {
             ExtractBone ex = new ExtractBone();
             ex.setup(animator, HumanBodyBones.LeftUpperArm);
@@ -100,10 +107,13 @@ public class OptitrackRetargetingAvatar : MonoBehaviour
         List<Playable> pl = new List<Playable>() { IKPipelineHand.lastPlayable, IKPipelineLowerArm.lastPlayable, IKPipelineUpperArm.lastPlayable };
         AnimationGraphUtility.ConnectIKInputs(graph, pl, playableIKGraph);
 
+        {
+            playableIKGraph.dummy.DisconnectInput(0);
+            AnimationGraphUtility.ConnectOutput(playableIKGraph[0], egocetric.output(0));
+        }
+
         AnimationGraphUtility.ConnectNodes(graph, optitrackGraph.retargeted, playableIKGraph.output);
         AnimationGraphUtility.ConnectOutput(playableIKGraph.output, avatarOutput);
-
-        egocetric = new EgocentricSelfContact(optitrackGraph.animator, animator, graph, material, capsule_mesh, capsule_thickness, calMeshes, new List<HumanBodyBones>() { HumanBodyBones.LeftHand }, egoDebug);
 
         graph.Play();
     }
