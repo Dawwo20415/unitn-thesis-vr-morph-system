@@ -11,9 +11,11 @@ public class EgocentricBehaviour : PlayableBehaviour, IKTarget
     public override void PrepareFrame(Playable playable, FrameData info) { }
     public override void ProcessFrame(Playable playable, FrameData info, object playerData) 
     {
-        EgocentricRayCaster caster = (EgocentricRayCaster)playerData;
-        List<BSACoordinates> result = caster.Cast();
-        Debug.Log("Result for Egocentric Self Contact Retargeting, n. of coordinates [" + result.Count + "]");
+        EgocentricRayCasterWrapper caster = (EgocentricRayCasterWrapper)playerData;
+        List<BSACoordinates> result = caster.GetSourceCoordinates();
+        target = caster.SetDestinationCoordinates(result);
+
+        //Debug.Log("Result for Egocentric Self Contact Retargeting, n. of coordinates [" + result.Count + "], weight total, should be around 1.0f [" + total + "]");
     }
 
     public Vector3 GetTarget()
@@ -31,6 +33,8 @@ public class EgocentricSelfContact
 
     List<GameObject> m_customMeshes;
     List<GameObject> m_cylinders;
+    private BodySturfaceApproximation m_sourceBSA;
+    private BodySturfaceApproximation m_destinationBSA;
 
     //PlayableGraph
     private List<Playable> m_egoPlayables;
@@ -40,18 +44,38 @@ public class EgocentricSelfContact
     public Playable this[int i] { get => m_egoPlayables[i]; }
     public Playable this[HumanBodyBones hbb] { get => m_egoPlayables[m_hbbConversion[hbb]]; }
 
-    public EgocentricSelfContact(Animator animator, PlayableGraph graph, Material mat, Mesh arm, float thick, List<CustomAvatarCalibrationMesh> acms, List<HumanBodyBones> joints, EgocentricRayCaster.DebugStruct egoDebug)
+    public EgocentricSelfContact(Animator src_animator, Animator dest_animator, PlayableGraph graph, Material mat, Mesh arm, float thick, List<CustomAvatarCalibrationMesh> acms, List<HumanBodyBones> joints, EgocentricRayCasterSource.DebugStruct egoDebug)
     {
         m_material = mat;
         m_armMesh = arm;
         m_armThickness = thick;
-        SetupAvatar(animator, graph, acms, joints, egoDebug);
+        
+        m_sourceBSA = SetupAvatar(src_animator, acms, joints, egoDebug);
+        m_destinationBSA = SetupAvatar(dest_animator, acms, joints, egoDebug);
+
+        { // Add Raycasters & Playables
+            m_egoPlayables = new List<Playable>(joints.Count);
+            m_egoOutputs = new List<ScriptPlayableOutput>(joints.Count);
+            m_hbbConversion = new Dictionary<HumanBodyBones, int>(joints.Count);
+
+            foreach (HumanBodyBones hbb in joints)
+            {
+                EgocentricRayCasterDestination dest = dest_animator.GetBoneTransform(hbb).gameObject.AddComponent<EgocentricRayCasterDestination>();
+                EgocentricRayCasterSource src = src_animator.GetBoneTransform(hbb).gameObject.AddComponent<EgocentricRayCasterSource>();
+                EgocentricRayCasterWrapper caster = src_animator.GetBoneTransform(hbb).gameObject.AddComponent<EgocentricRayCasterWrapper>();
+                src.Setup(m_sourceBSA, egoDebug);
+                dest.Setup(m_destinationBSA, egoDebug);
+                caster.Set(src, dest);
+                InstancePlayables(graph, hbb, caster);
+            }
+        }
     }
 
-    public void SetupAvatar(Animator animator, PlayableGraph graph, List<CustomAvatarCalibrationMesh> acms, List<HumanBodyBones> joints, EgocentricRayCaster.DebugStruct egoDebug)
+    public BodySturfaceApproximation SetupAvatar(Animator animator, List<CustomAvatarCalibrationMesh> acms, List<HumanBodyBones> joints, EgocentricRayCasterSource.DebugStruct egoDebug)
     {
         GameObject parent = new GameObject("Egocentric Stuff");
         parent.transform.parent = animator.avatarRoot;
+        parent.transform.localPosition = Vector3.zero;
 
         m_customMeshes = new List<GameObject>(acms.Count);
         m_cylinders = new List<GameObject>(8);
@@ -70,18 +94,7 @@ public class EgocentricSelfContact
             }
         }
 
-        { // Add Raycasters & Playables
-            m_egoPlayables = new List<Playable>(joints.Count);
-            m_egoOutputs = new List<ScriptPlayableOutput>(joints.Count);
-            m_hbbConversion = new Dictionary<HumanBodyBones, int>(joints.Count);
-
-            foreach (HumanBodyBones hbb in joints)
-            {
-                EgocentricRayCaster caster = animator.GetBoneTransform(hbb).gameObject.AddComponent<EgocentricRayCaster>();
-                caster.Setup(m_customMeshes, m_cylinders, egoDebug);
-                InstancePlayables(graph, hbb, caster);
-            }
-        }
+        return new BodySturfaceApproximation(m_customMeshes, m_cylinders);
     }
 
     private void InstanceCustomMesh(Animator animator, CustomAvatarCalibrationMesh acm, Transform parent)
@@ -105,7 +118,8 @@ public class EgocentricSelfContact
             if (!trn) { Debug.Log("No transform found in animator for hbb: " + hbb); }
         }
 
-        follow.calibrate(anchors, acm.position_offset, acm.rotation_offset, acm.getScale());
+        Vector3 pos = animator.GetBoneTransform(acm.anchors[0]).position + acm.position_offset;
+        follow.calibrate(anchors, pos, acm.rotation_offset, acm.getScale());
         m_customMeshes.Add(obj);
     }
     private void InstanceCylinders(Animator animator, List<HumanBodyBones> bones, Transform parent, string name)
@@ -137,17 +151,16 @@ public class EgocentricSelfContact
         Vector3 position = (a.position + b.position) / 2;
         Vector3 pointer = (a.position - position).normalized;
         float distance = (b.position - a.position).magnitude;
-        Quaternion rotation = Quaternion.LookRotation(pointer) * Quaternion.Euler(new Vector3(90, 0, 0));
+        Quaternion rotation = Quaternion.Inverse(a.rotation) * Quaternion.FromToRotation(Vector3.up, pointer);
         Vector3 scale = new Vector3(m_armThickness, distance / 2, m_armThickness);
 
         follow.calibrate(new List<Transform>() { a, b }, position, rotation, scale);
         follow.enabled = true;
         return capsule;
     }
-    private void InstancePlayables(PlayableGraph graph, HumanBodyBones hbb, EgocentricRayCaster component)
+    private void InstancePlayables(PlayableGraph graph, HumanBodyBones hbb, EgocentricRayCasterWrapper component)
     {
         ScriptPlayable<EgocentricBehaviour> playable = ScriptPlayable<EgocentricBehaviour>.Create(graph);
-        EgocentricBehaviour behaviour = playable.GetBehaviour();
 
         ScriptPlayableOutput output = ScriptPlayableOutput.Create(graph, hbb.ToString() + "_ESC_ScriptOutput");
         output.SetUserData(component);

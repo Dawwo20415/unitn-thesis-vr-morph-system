@@ -20,6 +20,7 @@ public class ObjectBoneFollow : MonoBehaviour
     private enum Mode
     {
         Error,
+        OnePoint,
         TwoPoints,
         ThreePoints
     }
@@ -47,10 +48,11 @@ public class ObjectBoneFollow : MonoBehaviour
         Quaternion rot = getRotation(midpoint) * rotation_offset;
         m_globalRotation = getRotation(midpoint);
         transform.rotation = rot;
-        transform.position = midpoint + (rot * midpoint_offset);
+        transform.position = midpoint - (rot * midpoint_offset);
         if (debug)
         {
             Debug.DrawLine(midpoint, midpoint + (rot * Vector3.forward), Color.cyan, Time.deltaTime, false);
+            Debug.DrawLine(midpoint, midpoint - (rot * midpoint_offset), Color.cyan, Time.deltaTime, false);
         }
     }
 
@@ -59,8 +61,7 @@ public class ObjectBoneFollow : MonoBehaviour
         points = point_list;
 
         Vector3 midpoint = getMidpoint();
-
-        midpoint_offset = position - midpoint;
+        midpoint_offset = midpoint - position;
         rotation_offset = QExtension.Fix(rotation);
         SetReferences(midpoint);
 
@@ -68,14 +69,15 @@ public class ObjectBoneFollow : MonoBehaviour
         transform.localScale = scale;
         transform.rotation = getRotation(midpoint) * rotation_offset;
 
-        if (references.Count < 2)
+        if (references.Count < 1)
         {
             mode = Mode.Error;
             Debug.LogError("Not enough reference points", this);
             Debug.Break();
         }
 
-        if (references.Count == 2) { mode = Mode.TwoPoints; }
+        if (references.Count == 1) { mode = Mode.OnePoint; }
+        else if (references.Count == 2) { mode = Mode.TwoPoints; }
         else { mode = Mode.ThreePoints; }
     }
 
@@ -92,7 +94,11 @@ public class ObjectBoneFollow : MonoBehaviour
     {
         Quaternion rotation = Quaternion.identity;
         
-        if (mode == Mode.TwoPoints)
+        if (mode == Mode.OnePoint)
+        {
+            rotation = points[0].rotation;
+        }
+        else if (mode == Mode.TwoPoints)
         {
             rotation = points[0].rotation;
 

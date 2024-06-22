@@ -18,7 +18,7 @@ public class OptitrackRetargetingAvatar : MonoBehaviour
     [Range(0.0f, 0.3f)]
     public float capsule_thickness;
     public List<CustomAvatarCalibrationMesh> calMeshes;
-    public EgocentricRayCaster.DebugStruct egoDebug;
+    public EgocentricRayCasterSource.DebugStruct egoDebug;
 
     private Animator animator;
     private Avatar avatar;
@@ -103,7 +103,7 @@ public class OptitrackRetargetingAvatar : MonoBehaviour
         AnimationGraphUtility.ConnectNodes(graph, optitrackGraph.retargeted, playableIKGraph.output);
         AnimationGraphUtility.ConnectOutput(playableIKGraph.output, avatarOutput);
 
-        egocetric = new EgocentricSelfContact(optitrackGraph.animator, graph, material, capsule_mesh, capsule_thickness, calMeshes, new List<HumanBodyBones>() { HumanBodyBones.LeftHand }, egoDebug);
+        egocetric = new EgocentricSelfContact(optitrackGraph.animator, animator, graph, material, capsule_mesh, capsule_thickness, calMeshes, new List<HumanBodyBones>() { HumanBodyBones.LeftHand }, egoDebug);
 
         graph.Play();
     }

@@ -427,6 +427,23 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ee6544ef4a712e746b79392679c85f39, type: 2}
   meshMaterial: {fileID: 2100000, guid: 51df8064d2153084796127990fc3963f, type: 2}
   EgocentricDescriptionName: Test_Avatar
+  HIPS: {fileID: 869209927}
+  mesh_points:
+  - {x: 0, y: 0.04407859, z: 0.05761428}
+  - {x: 0, y: -0.06092143, z: 0.06251428}
+  - {x: 0, y: -0.11852145, z: 0.03471428}
+  - {x: 0, y: 0.033378482, z: -0.13218571}
+  - {x: -0.0501, y: 0.07217848, z: 0.039814286}
+  - {x: 0.0501, y: 0.07217848, z: 0.039814286}
+  - {x: -0.0501, y: 0.07217848, z: -0.114285715}
+  - {x: 0.0501, y: 0.07217848, z: -0.114285715}
+  - {x: -0.0277, y: -0.10002148, z: 0.047114283}
+  - {x: 0.0277, y: -0.10002148, z: 0.047114283}
+  - {x: -0.0439, y: -0.011321425, z: 0.058114283}
+  - {x: 0.0439, y: -0.011321425, z: 0.058114283}
+  - {x: -0.0809, y: 0.017978549, z: -0.04208572}
+  - {x: 0.0809, y: 0.017978549, z: -0.04208572}
+  avatar_offset: {x: 0, y: 0.045203328, z: 0.044853017}
   targets:
   - {fileID: 1985061547}
   - {fileID: 1985061549}
@@ -2500,7 +2517,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1331971002
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4520,7 +4537,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.75
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
       propertyPath: m_LocalPosition.z

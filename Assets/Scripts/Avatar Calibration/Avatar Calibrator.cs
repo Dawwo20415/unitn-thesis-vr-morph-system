@@ -10,6 +10,9 @@ public class AvatarCalibrator : MonoBehaviour
     public List<AvatarCalibrationMesh> calibrations;
     public Material meshMaterial;
     public string EgocentricDescriptionName;
+    public Transform HIPS;
+    [SerializeField] private List<Vector3> mesh_points;
+    [SerializeField] private Vector3 avatar_offset;
 
     [Header("To Generate Arms Cylinders")]
     [Tooltip("Target object to generate empty references for the arms and legs")]
@@ -23,6 +26,29 @@ public class AvatarCalibrator : MonoBehaviour
     public EgocentricMappingDescription egocentric_description;
     public GameObject avatar_root;
 
+    [ContextMenu("GenPointList")]
+    private void GenPointList()
+    {
+        mesh_points = new List<Vector3>();
+        GameObject obj = meshPoints[0];
+        foreach (Transform childTrn in obj.transform)
+        {
+            mesh_points.Add(childTrn.position);
+        }
+
+        Vector3 midpoint = Vector3.zero;
+        foreach (Vector3 vec in mesh_points)
+        { midpoint += vec; }
+        midpoint = midpoint / mesh_points.Count;
+        avatar_offset = midpoint - HIPS.position;
+
+        for (int i = 0; i < mesh_points.Count; i++)
+        {
+            mesh_points[i] -= midpoint;
+        }
+
+        
+    }
 
     [ContextMenu("Generate Calibration Objects")]
     void GenerateCalibrationObjects()

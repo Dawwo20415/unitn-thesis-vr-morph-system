@@ -497,7 +497,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 470991e9062d64045a52bef4210528bf, type: 2}
   - {fileID: 11400000, guid: 34c7c86a9c18a6546998a9bd297b6d1e, type: 2}
   egoDebug:
-    drawCylinderRays: 0
+    drawCylinderRays: 1
     drawNormals: 0
     drawMeshProjections: 1
     drawOnlyInContour: 1
