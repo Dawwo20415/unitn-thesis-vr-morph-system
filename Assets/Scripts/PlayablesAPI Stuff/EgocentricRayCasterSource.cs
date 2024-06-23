@@ -27,15 +27,6 @@ public class EgocentricRayCasterSource : MonoBehaviour
     private float m_displacementWeight;
     private Transform m_Hips;
 
-    public void Setup(Animator animator, HumanBodyBones hbb, List<GameObject> custom_meshes, List<GameObject> cylinders, DebugStruct deb)
-    {
-        m_debugStruct = deb;
-        m_BSA = new BodySturfaceApproximation(animator, custom_meshes, cylinders);
-        m_coordinates = new List<BSACoordinates>(m_BSA.size);
-        m_displacementWeight = m_BSA.GetBoneWeight(hbb);
-        m_Hips = animator.GetBoneTransform(HumanBodyBones.Hips);
-    }
-
     public void Setup(HumanBodyBones hbb, Animator animator, BodySturfaceApproximation bsa, DebugStruct deb)
     {
         m_debugStruct = deb;

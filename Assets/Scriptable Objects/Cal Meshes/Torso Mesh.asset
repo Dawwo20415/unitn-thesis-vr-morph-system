@@ -26,5 +26,14 @@ MonoBehaviour:
   - {x: 0, y: 0.025699973, z: -0.10938}
   - {x: -0.103, y: -0.1663, z: -0.14938}
   - {x: 0.103, y: -0.1663, z: -0.14938}
+  planes:
+  - bone: 17
+    position_offset: {x: -0.054671764, y: -0.016413093, z: -0.0039379485}
+    scale: {x: 0.01, y: 0.01, z: 0.01}
+    rotation_offset: {x: -0.092722766, y: 0.11698693, z: -0.6141882, w: 0.77491254}
+  - bone: 18
+    position_offset: {x: 0.059866965, y: -0.016417146, z: -0.003937807}
+    scale: {x: 0.01, y: 0.01, z: 0.01}
+    rotation_offset: {x: 0.77381074, y: 0.61547583, z: -0.12394729, w: -0.08392551}
   triangles: {fileID: 11400000, guid: 3a903be21d892b94e8bf50d915a6b15d, type: 2}
   mesh_name: TorsoMesh

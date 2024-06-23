@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Animations;
+using Unity.Collections;
 
 public class OptitrackRetargetingAvatar : MonoBehaviour
 {
@@ -35,9 +36,13 @@ public class OptitrackRetargetingAvatar : MonoBehaviour
 
     private EgocentricSelfContact egocetric;
 
+    NormalMatchingBehaviour m_behaviour;
+    NativeArray<Quaternion> m_NativeQuaternion;
+
     // Start is called before the first frame update
     void Start()
     {
+        m_NativeQuaternion = new NativeArray<Quaternion>(1, Allocator.Persistent);
         animator = GetComponent<Animator>();
         avatar = animator.avatar;
 
@@ -57,6 +62,9 @@ public class OptitrackRetargetingAvatar : MonoBehaviour
 
         IKPipelineHand = new IKTargetPipeline(HumanBodyBones.LeftHand);
         {
+            m_behaviour = new NormalMatchingBehaviour();
+            m_behaviour.Setup(HumanBodyBones.LeftHand, m_NativeQuaternion);
+            IKPipelineHand.AppendBehaviour(graph, m_behaviour);
             /*
             ExtractBone ex = new ExtractBone();
             ex.setup(animator, HumanBodyBones.LeftHand);
@@ -108,18 +116,35 @@ public class OptitrackRetargetingAvatar : MonoBehaviour
         AnimationGraphUtility.ConnectIKInputs(graph, pl, playableIKGraph);
 
         {
-            playableIKGraph.dummy.DisconnectInput(0);
-            AnimationGraphUtility.ConnectOutput(playableIKGraph[0], egocetric.output(0));
+            //playableIKGraph.dummy.DisconnectInput(0);
+            //AnimationGraphUtility.ConnectOutput(playableIKGraph[0], egocetric.output(0));
+            //Disconnect
+            graph.DestroyOutput(playableIKGraph.targetOutput);
+            AnimationGraphUtility.ConnectOutput(playableIKGraph.dummy, egocetric.output(0));
         }
 
         AnimationGraphUtility.ConnectNodes(graph, optitrackGraph.retargeted, playableIKGraph.output);
-        AnimationGraphUtility.ConnectOutput(playableIKGraph.output, avatarOutput);
 
+#if true
+        { //Hand Rotation Stuff
+            
+            NormalMatchingJob job1 = new NormalMatchingJob();
+            job1.Setup(animator, HumanBodyBones.LeftHand, m_NativeQuaternion);
+            AnimationScriptPlayable apl = AnimationScriptPlayable.Create(graph, job1);
+
+            AnimationGraphUtility.ConnectNodes(graph, playableIKGraph.output, apl);
+            AnimationGraphUtility.ConnectOutput(apl, avatarOutput);
+            
+        }
+#else
+        //AnimationGraphUtility.ConnectOutput(playableIKGraph.output, avatarOutput);
+#endif
         graph.Play();
     }
 
     private void OnDisable()
     {
+        m_NativeQuaternion.Dispose();
         if (graph.IsValid())
         {
             graph.Stop();

@@ -20,10 +20,20 @@ public class AvatarCalibrationMesh : ScriptableObject
     }
 }
 
+[System.Serializable]
+public struct ExtremitiesPlaneData
+{
+    public HumanBodyBones bone;
+    public Vector3 position_offset;
+    public Vector3 scale;
+    public Quaternion rotation_offset;
+}
+
 [CreateAssetMenu(fileName = "Calibration Mesh", menuName = "ScriptableObjects/Avatar Calibration/Cal Mesh")]
 public class CustomAvatarCalibrationMesh : AvatarCalibrationMesh
 {
     public List<Vector3> points;
+    public List<ExtremitiesPlaneData> planes;
     public CalibrationMeshDescriptor triangles;
     public string mesh_name;
 

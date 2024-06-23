@@ -11,8 +11,7 @@ public class ObjectBoneFollow : MonoBehaviour
     private List<Transform> points;
     [SerializeField]
     private Vector3 midpoint_offset;
-    [SerializeField]
-    private Quaternion rotation_offset;
+    public Quaternion rotation_offset;
 
     private List<Vector3> references;
     

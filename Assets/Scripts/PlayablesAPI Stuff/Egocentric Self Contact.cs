@@ -33,6 +33,7 @@ public class EgocentricSelfContact
 
     List<GameObject> m_customMeshes;
     List<GameObject> m_cylinders;
+    List<GameObject> m_planes;
     private BodySturfaceApproximation m_sourceBSA;
     private BodySturfaceApproximation m_destinationBSA;
 
@@ -80,6 +81,7 @@ public class EgocentricSelfContact
 
         m_customMeshes = new List<GameObject>(acms.Count);
         m_cylinders = new List<GameObject>(8);
+        m_planes = new List<GameObject>();
 
         { // Arm Cylinders
             InstanceCylinders(animator, new List<HumanBodyBones>() { HumanBodyBones.LeftUpperArm, HumanBodyBones.LeftLowerArm, HumanBodyBones.LeftHand }, parent.transform, "Left Arm");
@@ -92,10 +94,29 @@ public class EgocentricSelfContact
             foreach (CustomAvatarCalibrationMesh acm in acms)
             {
                 InstanceCustomMesh(animator, acm, parent.transform);
+                foreach (ExtremitiesPlaneData data in acm.planes)
+                {
+                    InstanceNormalPlane(animator, data, parent.transform);
+                }
             }
         }
 
-        return new BodySturfaceApproximation(animator, m_customMeshes, m_cylinders);
+        return new BodySturfaceApproximation(animator, m_customMeshes, m_cylinders, m_planes);
+    }
+
+    private void InstanceNormalPlane(Animator animator, ExtremitiesPlaneData data, Transform parent)
+    {
+        GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        ObjectBoneFollow follow = obj.AddComponent<ObjectBoneFollow>();
+        obj.transform.parent = parent;
+
+        Collider col = obj.GetComponent<Collider>();
+        col.enabled = false;
+
+        Transform reference = animator.GetBoneTransform(data.bone);
+
+        follow.calibrate(new List<Transform>() { reference }, reference.position - data.position_offset, Quaternion.Inverse(data.rotation_offset), data.scale);
+        m_planes.Add(obj);
     }
 
     private void InstanceCustomMesh(Animator animator, CustomAvatarCalibrationMesh acm, Transform parent)
@@ -167,8 +188,8 @@ public class EgocentricSelfContact
         output.SetUserData(component);
 
         //Connections
-        playable.SetOutputCount(2);
-        output.SetSourcePlayable(playable, 0);
+        //playable.SetOutputCount(2);
+        //output.SetSourcePlayable(playable, 0);
 
         //Store
         m_egoPlayables.Add(playable);

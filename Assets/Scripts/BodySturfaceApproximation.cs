@@ -52,13 +52,15 @@ public class BodySturfaceApproximation
     public float GetBoneWeight(HumanBodyBones hbb) { return m_BonesDisplacementWeight[hbb]; }
     public List<MeshShape> custom { get => m_customMeshes; }
     public List<Transform> cylinders { get => m_cylinders; }
+    public List<Transform> planes { get => m_planes; }
 
     private List<MeshShape> m_customMeshes;
     private int m_trisNumber;
     private List<Transform> m_cylinders;
     private Dictionary<HumanBodyBones, float> m_BonesDisplacementWeight;
+    private List<Transform> m_planes;
 
-    public BodySturfaceApproximation(Animator animator, List<GameObject> custom_meshes, List<GameObject> cylinders)
+    public BodySturfaceApproximation(Animator animator, List<GameObject> custom_meshes, List<GameObject> cylinders, List<GameObject> planes)
     {
         m_customMeshes = new List<MeshShape>(custom_meshes.Count);
         m_cylinders = new List<Transform>(cylinders.Count);
@@ -83,6 +85,12 @@ public class BodySturfaceApproximation
         for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
         {
             m_BonesDisplacementWeight[(HumanBodyBones)i] = CalculatePath(animator, (HumanBodyBones)i);
+        }
+
+        m_planes = new List<Transform>(planes.Count);
+        foreach (GameObject obj in planes)
+        {
+            m_planes.Add(obj.transform);
         }
     }
 

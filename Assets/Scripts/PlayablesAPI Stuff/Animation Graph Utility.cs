@@ -82,6 +82,7 @@ public class AnimationGraphUtility
         public ScriptPlayable<IKTargetWrap> this[int i] { get => m_IKInputs[i]; }
         public string name { get; }
         public ScriptPlayable<IKTargetJoin> dummy { get => m_Dummy; }
+        public ScriptPlayableOutput targetOutput { get => m_TargetOutput; }
 
         public PlayableGraphIKChain(PlayableGraph graph, Animator animator, List<HumanBodyBones> bones, List<IKTarget> targets, string n)
         {

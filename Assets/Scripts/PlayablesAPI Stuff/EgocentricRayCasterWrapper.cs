@@ -48,4 +48,10 @@ public class EgocentricRayCasterWrapper : MonoBehaviour
     {
         return m_destination.Calculate(coordinates);
     }
+
+    public Quaternion MatchPlaneNormal(HumanBodyBones hbb)
+    {
+        Quaternion q = m_destination.CompareNormals(hbb);
+        return q;
+    }
 }

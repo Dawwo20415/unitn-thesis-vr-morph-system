@@ -10,6 +10,9 @@ public class EgocentricRayCasterDestination : MonoBehaviour
     private Transform m_Hips;
 
     GameObject obj;
+    Vector3 shortest_normal = Vector3.one;
+    float distance = 100.0f;
+    float distance_treshold = 0.001f;
 
     public void Setup(HumanBodyBones hbb, Animator animator, BodySturfaceApproximation bsa, EgocentricRayCasterSource.DebugStruct egoDebug)
     {
@@ -28,6 +31,7 @@ public class EgocentricRayCasterDestination : MonoBehaviour
         float weight = 0.0f;
 
         int t = 0;
+        int counter = 0;
         for (int i = 0; i < m_BSA.customMeshCount; i++)
         {
             Mesh mesh = m_BSA.custom[i].mesh;
@@ -43,7 +47,16 @@ public class EgocentricRayCasterDestination : MonoBehaviour
                 p2 = trn.TransformPoint(p2);
                 p3 = trn.TransformPoint(p3);
 
-                weighted_sum += ConvertToGlobalSpaceTriangle(p1, p2, p3, coordinates[t + j]) * coordinates[t + j].weight;
+                //THE SOLUTION I USING A DISTANCE THE SUM OF ALL 3 VECOTRS IN PROJECTION
+                if (coordinates[t + j].displacement.magnitude * m_displacementWeight < distance)
+                {
+                    distance = coordinates[t + j].displacement.magnitude * m_displacementWeight;
+                    shortest_normal = Vector3.Cross(p2 - p1, p3 - p1).normalized;
+                }
+                
+                //weighted_sum += ConvertToGlobalSpaceTriangle(p1, p2, p3, coordinates[t + j]) * coordinates[t + j].weight;
+                weighted_sum += ConvertToGlobalSpaceTriangle(p1, p2, p3, coordinates[t + j]);
+                counter++;
                 weight += coordinates[t + j].weight;
             }
 
@@ -52,11 +65,13 @@ public class EgocentricRayCasterDestination : MonoBehaviour
 
         for (int i = 0; i < m_BSA.cylindersCount; i++)
         {
-            weighted_sum += ConvertToGlobalSpaceCylinder(coordinates[i + m_BSA.customTrisCount], m_BSA.cylinders[i], i) * coordinates[i + m_BSA.customTrisCount].weight;
+            //weighted_sum += ConvertToGlobalSpaceCylinder(coordinates[i + m_BSA.customTrisCount], m_BSA.cylinders[i], i) * coordinates[i + m_BSA.customTrisCount].weight;
+            weighted_sum += ConvertToGlobalSpaceCylinder(coordinates[i + m_BSA.customTrisCount], m_BSA.cylinders[i], i);
+            counter++;
         }
 
         obj.transform.position = weighted_sum;
-        return weighted_sum;
+        return weighted_sum / counter;
     }
 
     private Vector3 ConvertToGlobalSpaceTriangle(Vector3 p1, Vector3 p2, Vector3 p3, BSACoordinates bsa)
@@ -114,6 +129,12 @@ public class EgocentricRayCasterDestination : MonoBehaviour
         Vector3 toSurface = direction * radius;
         Vector3 displacement = direction * bsa.displacement.magnitude * m_displacementWeight;
 
+        if (bsa.displacement.magnitude * m_displacementWeight < distance && bsa.displacement.magnitude * m_displacementWeight > 0.001f)
+        {
+            distance = bsa.displacement.magnitude * m_displacementWeight;
+            shortest_normal = direction.normalized;
+        }
+
         //Vector3 proj_point = AB * bsa.surfaceProjection.x;
         Vector3 proj_point = AB * bsa.surfaceProjection.x;
 
@@ -126,5 +147,22 @@ public class EgocentricRayCasterDestination : MonoBehaviour
         }
 
         return a + proj_point + toSurface + displacement;
+    }
+
+    public Quaternion CompareNormals(HumanBodyBones hbb)
+    {
+        Quaternion q = Quaternion.identity;
+        if (distance <= distance_treshold)
+        {
+            Debug.Log("Distance " + distance);
+            q = Quaternion.FromToRotation(m_BSA.planes[0].up, -shortest_normal);
+            q = Quaternion.Lerp(q, Quaternion.identity, distance / distance_treshold);
+        } else
+        {
+            Debug.Log("Failed if distance " + distance);
+        }
+
+
+        return q;
     }
 }
