@@ -62,9 +62,11 @@ public class OptitrackRetargetingAvatar : MonoBehaviour
 
         IKPipelineHand = new IKTargetPipeline(HumanBodyBones.LeftHand);
         {
+#if false
             m_behaviour = new NormalMatchingBehaviour();
             m_behaviour.Setup(HumanBodyBones.LeftHand, m_NativeQuaternion);
             IKPipelineHand.AppendBehaviour(graph, m_behaviour);
+#endif
             /*
             ExtractBone ex = new ExtractBone();
             ex.setup(animator, HumanBodyBones.LeftHand);
@@ -125,7 +127,7 @@ public class OptitrackRetargetingAvatar : MonoBehaviour
 
         AnimationGraphUtility.ConnectNodes(graph, optitrackGraph.retargeted, playableIKGraph.output);
 
-#if true
+#if false
         { //Hand Rotation Stuff
             
             NormalMatchingJob job1 = new NormalMatchingJob();
@@ -137,7 +139,7 @@ public class OptitrackRetargetingAvatar : MonoBehaviour
             
         }
 #else
-        //AnimationGraphUtility.ConnectOutput(playableIKGraph.output, avatarOutput);
+        AnimationGraphUtility.ConnectOutput(playableIKGraph.output, avatarOutput);
 #endif
         graph.Play();
     }
