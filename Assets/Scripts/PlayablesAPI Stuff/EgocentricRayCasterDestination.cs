@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class EgocentricRayCasterDestination : MonoBehaviour
 {
+    //public List<float> public_weights;
+
     private BodySturfaceApproximation m_BSA;
     private EgocentricRayCasterSource.DebugStruct m_debugStruct;
     private float m_displacementWeight;
@@ -27,6 +29,7 @@ public class EgocentricRayCasterDestination : MonoBehaviour
 
     public Vector3 Calculate(List<BSACoordinates> coordinates)
     {
+        //public_weights = new List<float>(coordinates.Count);
         Vector3 weighted_sum = Vector3.zero;
         float weight = 0.0f;
 
@@ -58,6 +61,7 @@ public class EgocentricRayCasterDestination : MonoBehaviour
                 weighted_sum += ConvertToGlobalSpaceTriangle(p1, p2, p3, coordinates[t + j]);
                 counter++;
                 weight += coordinates[t + j].weight;
+                //public_weights.Add(coordinates[t + j].weight);
             }
 
             t = t + mesh.triangles.Length / 3;
@@ -65,11 +69,17 @@ public class EgocentricRayCasterDestination : MonoBehaviour
 
         for (int i = 0; i < m_BSA.cylindersCount; i++)
         {
+            if (i + m_BSA.customTrisCount == 43)
+                continue;
             //weighted_sum += ConvertToGlobalSpaceCylinder(coordinates[i + m_BSA.customTrisCount], m_BSA.cylinders[i], i) * coordinates[i + m_BSA.customTrisCount].weight;
             weighted_sum += ConvertToGlobalSpaceCylinder(coordinates[i + m_BSA.customTrisCount], m_BSA.cylinders[i], i);
+            weight += coordinates[i + m_BSA.customTrisCount].weight;
+            //public_weights.Add(coordinates[i + m_BSA.customTrisCount].weight);
             counter++;
         }
 
+        //obj.transform.position = weighted_sum;
+        //return weighted_sum / weight;
         obj.transform.position = weighted_sum;
         return weighted_sum / counter;
     }

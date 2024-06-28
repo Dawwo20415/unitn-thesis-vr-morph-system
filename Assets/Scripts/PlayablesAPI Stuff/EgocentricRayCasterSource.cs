@@ -21,6 +21,8 @@ public class EgocentricRayCasterSource : MonoBehaviour
         }
     }
 
+    //public List<float> public_weights;
+
     private BodySturfaceApproximation m_BSA;
     private List<BSACoordinates> m_coordinates;
     private DebugStruct m_debugStruct;
@@ -38,6 +40,7 @@ public class EgocentricRayCasterSource : MonoBehaviour
 
     public List<BSACoordinates> Cast()
     {
+        //public_weights = new List<float>(m_coordinates.Count);
         m_coordinates.Clear();
         float total_weight_sum = 0.0f;
 
@@ -48,6 +51,7 @@ public class EgocentricRayCasterSource : MonoBehaviour
             {
                 BSACoordinates bsa = TriangleRaycast(shape, i, m_displacementWeight);
                 m_coordinates.Add(bsa);
+                //public_weights.Add(bsa.weight);
                 total_weight_sum += bsa.weight;
             }
         }
@@ -57,9 +61,11 @@ public class EgocentricRayCasterSource : MonoBehaviour
             //NOTE ADD PROPER DISPLACEMENT WEIGHT
             BSACoordinates bsa = CylinderRaycast(trn, transform.position, m_displacementWeight);
             m_coordinates.Add(bsa);
+            //public_weights.Add(bsa.weight);
             total_weight_sum += bsa.weight;
         }
 
+        //Debug.Log("Weight Sum = " + total_weight_sum, this);
         for (int i = 0; i < m_coordinates.Count; i++) 
         {
             BSACoordinates tmp = m_coordinates[i];
@@ -99,8 +105,29 @@ public class EgocentricRayCasterSource : MonoBehaviour
             }
         }
 
+        float dis = 1.0f;
+        if (barycentric_projection.x < 1.0f && barycentric_projection.y < 1.0f)
+        {
+            if (barycentric_projection.x > 0.0f && barycentric_projection.y > 0.0f)
+                dis = displacement_vector.magnitude;
+            else
+                dis = (p1 - transform.position).magnitude;
+        } else
+        {
+            if (barycentric_projection.x > 1.0f)
+            {
+                if (barycentric_projection.y > 1.0f)
+                    dis = (p3 - transform.position).magnitude;
+                else
+                    dis = (p2 - transform.position).magnitude;
+            }
+        }
+
         result.displacement = displacement_vector / displacement_weight;
-        result.weight = 1 / displacement_vector.magnitude;
+        if (dis != 0.0f)
+            result.weight = 1 / dis;
+        else
+            result.weight = 2.0f;
         result.surfaceProjection = barycentric_projection;
 
         return result;
@@ -173,7 +200,24 @@ public class EgocentricRayCasterSource : MonoBehaviour
         float dist = ABAPdot / AB.magnitude;
         result.surfaceProjection = new Vector2(dist, angle_between);
         result.displacement = displacement / displacement_weight;
-        result.weight = 1 / distance;
+
+        float adjusted;
+
+        if (dist > 0.0f && dist < 1.0f)
+            adjusted = dist;
+        else
+        {
+            if (dist < 0.0f)
+                adjusted = (a - pos).magnitude;
+            else
+                adjusted = (b - pos).magnitude;
+        }
+
+
+        if (adjusted != 0.0f)
+            result.weight = 1 / adjusted;
+        else
+            result.weight = 2.0f;
 
         if (m_debugStruct.drawCylinderRays)
         {
