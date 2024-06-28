@@ -1,4 +1,4 @@
-using System.Collections;
+  using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -37,7 +37,7 @@ public class EgocentricRayCasterDestination : MonoBehaviour
             Mesh mesh = m_BSA.custom[i].mesh;
             Transform trn = m_BSA.custom[i].transform;
 
-            for (int j = 0; j < mesh.triangles.Length / 3; j++)
+            for (int j = 0; j < mesh.triangles.Length / 3; j++) 
             {
                 Vector3 p1 = mesh.vertices[mesh.triangles[(3 * j)]];
                 Vector3 p2 = mesh.vertices[mesh.triangles[(3 * j) + 1]];
