@@ -111,6 +111,8 @@ public class AnimationGraphUtility
                 m_IKTargets[i] = Vector3.zero;
             }
 
+            Debug.Log("Finished Allocating Memory");
+
             m_IKJob = new IKChainJob();
             m_IKJob.setup(animator, bones, m_IKTargets);
             m_IKPlayable = AnimationScriptPlayable.Create(graph, m_IKJob);

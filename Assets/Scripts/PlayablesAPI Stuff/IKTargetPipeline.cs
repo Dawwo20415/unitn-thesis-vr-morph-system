@@ -52,6 +52,42 @@ public class StaticDisplacement : PlayableBehaviour, IKTarget
 
 }
 
+public class InverseStaticDisplacement : PlayableBehaviour, IKTarget
+{
+    IKTarget input;
+    Vector3 displacement;
+
+    public void Setup(IKTarget target, Vector3 dis)
+    {
+        input = target;
+        displacement = dis;
+    }
+
+    public Vector3 GetTarget()
+    {
+        return input.GetTarget() - displacement*2.0f;
+    }
+
+}
+
+public class MagnitudeDisplacement : PlayableBehaviour, IKTarget
+{
+    IKTarget input;
+    float magnitude;
+
+    public void Setup(IKTarget target, float mag)
+    {
+        input = target;
+        magnitude = mag;
+    }
+
+    public Vector3 GetTarget()
+    {
+        return input.GetTarget() * magnitude;
+    }
+
+}
+
 public interface IDisposable
 {
     public void Dispose();

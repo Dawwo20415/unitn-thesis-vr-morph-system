@@ -14,6 +14,8 @@ public class OptitrackRetargetingAvatar : MonoBehaviour
 
     [Space]
     [Header("Egocentric Stuff")]
+    public bool show_material;
+    public List<HumanBodyBones> joint_list;
     public Material material;
     public Mesh capsule_mesh;
     [Range(0.0f, 0.3f)]
@@ -59,48 +61,55 @@ public class OptitrackRetargetingAvatar : MonoBehaviour
         }
 
         egocetric = new EgocentricSelfContact(optitrackGraph.animator, animator, graph, material, capsule_mesh, capsule_thickness, calMeshes, new List<HumanBodyBones>() { HumanBodyBones.LeftHand }, egoDebug);
-
-        IKPipelineHand = new IKTargetPipeline(HumanBodyBones.LeftHand);
+        
+        
         {
+            IKPipelineHand = new IKTargetPipeline(HumanBodyBones.LeftHand);
+            {
 #if false
             m_behaviour = new NormalMatchingBehaviour();
             m_behaviour.Setup(HumanBodyBones.LeftHand, m_NativeQuaternion);
             IKPipelineHand.AppendBehaviour(graph, m_behaviour);
 #endif
-            /*
-            ExtractBone ex = new ExtractBone();
-            ex.setup(animator, HumanBodyBones.LeftHand);
-            IKPipelineHand.AppendJob(graph, ex);
-            */
-            IKPipelineHand.AddEgocentric(graph, egocetric);
+                /*
+                ExtractBone ex = new ExtractBone();
+                ex.setup(animator, HumanBodyBones.LeftHand);
+                IKPipelineHand.AppendJob(graph, ex);
+                */
+                IKPipelineHand.AddEgocentric(graph, egocetric);
 
-            /*
-            StaticDisplacement dis = new StaticDisplacement();
-            dis.Setup(((ScriptPlayable<EgocentricBehaviour>)egocetric[IKPipelineHand.bone]).GetBehaviour(), new Vector3(0.0f, 0.0f, 0.0f));
-            IKPipelineHand.AppendBehaviour(graph, dis);
-            */
-        }
+                /*
+                StaticDisplacement dis = new StaticDisplacement();
+                dis.Setup(((ScriptPlayable<EgocentricBehaviour>)egocetric[IKPipelineHand.bone]).GetBehaviour(), new Vector3(0.0f, 0.0f, 0.0f));
+                IKPipelineHand.AppendBehaviour(graph, dis);
+                */
+            }
 
-        IKPipelineLowerArm = new IKTargetPipeline(HumanBodyBones.LeftLowerArm);
-        {
-            ExtractBone ex = new ExtractBone();
-            ex.setup(animator, HumanBodyBones.LeftLowerArm);
-            IKPipelineLowerArm.AppendJob(graph, ex);
+            IKPipelineLowerArm = new IKTargetPipeline(HumanBodyBones.LeftLowerArm);
+            {
+                ExtractBone ex = new ExtractBone();
+                ex.setup(animator, HumanBodyBones.LeftLowerArm);
+                IKPipelineLowerArm.AppendJob(graph, ex);
 
-            StaticDisplacement dis = new StaticDisplacement();
-            dis.Setup(ex, new Vector3(0.0f, 0.0f, 0.0f));
-            IKPipelineLowerArm.AppendBehaviour(graph, dis);
-        }
+                StaticDisplacement dis = new StaticDisplacement();
+                dis.Setup(ex, new Vector3(0.0f, 0.0f, 0.0f));
+                IKPipelineLowerArm.AppendBehaviour(graph, dis);
+            }
 
-        IKPipelineUpperArm = new IKTargetPipeline(HumanBodyBones.LeftUpperArm);
-        {
-            ExtractBone ex = new ExtractBone();
-            ex.setup(animator, HumanBodyBones.LeftUpperArm);
-            IKPipelineUpperArm.AppendJob(graph, ex);
+            IKPipelineUpperArm = new IKTargetPipeline(HumanBodyBones.LeftUpperArm);
+            {
+                ExtractBone ex = new ExtractBone();
+                ex.setup(animator, HumanBodyBones.LeftUpperArm);
+                IKPipelineUpperArm.AppendJob(graph, ex);
 
-            StaticDisplacement dis = new StaticDisplacement();
-            dis.Setup(ex, new Vector3(0.0f, 0.0f, 0.0f));
-            IKPipelineUpperArm.AppendBehaviour(graph, dis);
+                StaticDisplacement dis = new StaticDisplacement();
+                dis.Setup(ex, new Vector3(0.0f, 0.5f, 0.0f));
+                IKPipelineUpperArm.AppendBehaviour(graph, dis);
+
+                MagnitudeDisplacement mag = new MagnitudeDisplacement();
+                mag.Setup(dis, 1.2f);
+                IKPipelineUpperArm.AppendBehaviour(graph, mag);
+            }
         }
 
         List<HumanBodyBones> list = new List<HumanBodyBones>(){ HumanBodyBones.LeftHand, HumanBodyBones.LeftLowerArm, HumanBodyBones.LeftUpperArm, HumanBodyBones.LeftShoulder };

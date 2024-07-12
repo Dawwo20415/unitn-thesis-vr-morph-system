@@ -37,11 +37,17 @@ public class EgocentricRayCasterDestination : MonoBehaviour
         int counter = 0;
         for (int i = 0; i < m_BSA.customMeshCount; i++)
         {
+
             Mesh mesh = m_BSA.custom[i].mesh;
             Transform trn = m_BSA.custom[i].transform;
 
             for (int j = 0; j < mesh.triangles.Length / 3; j++) 
             {
+                if (i == 1 && coordinates[t + j].displacement.magnitude > 0.0f && coordinates[t + j].displacement.magnitude < 0.001f)
+                {
+                    FaiCose();
+                }
+
                 Vector3 p1 = mesh.vertices[mesh.triangles[(3 * j)]];
                 Vector3 p2 = mesh.vertices[mesh.triangles[(3 * j) + 1]];
                 Vector3 p3 = mesh.vertices[mesh.triangles[(3 * j) + 2]];
@@ -83,6 +89,8 @@ public class EgocentricRayCasterDestination : MonoBehaviour
         obj.transform.position = weighted_sum;
         return weighted_sum / counter;
     }
+
+    private void FaiCose() { }
 
     private Vector3 ConvertToGlobalSpaceTriangle(Vector3 p1, Vector3 p2, Vector3 p3, BSACoordinates bsa)
     {
