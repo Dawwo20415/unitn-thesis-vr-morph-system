@@ -6,6 +6,7 @@ using UnityEngine;
 public class BSAMeshBuilder : MonoBehaviour
 {
     public Mesh mesh;
+    [HideInInspector]
     public List<Transform> vertices;
     private List<Vector3> vertices_positions;
 
@@ -34,5 +35,11 @@ public class BSAMeshBuilder : MonoBehaviour
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireMesh(mesh);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = new Color(0.5f, 0.92f, 0.016f, 0.4f);
+        Gizmos.DrawMesh(mesh);
     }
 }

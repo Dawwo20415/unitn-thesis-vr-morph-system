@@ -7,35 +7,72 @@ using System.Linq;
 [ExecuteInEditMode]
 public class BSABuilderComponent : MonoBehaviour
 {
+    [Header("Base Functionality")]
     public Animator animator;
+    public string asset_name;
+    public string asset_path;
+    public int test;
 
-    public Transform normal;
-
-    public Mesh mesh;
-
-    [SerializeField] private List<Transform> meshes;
+    [Space] [Header("Normals")]
     [SerializeField] private List<Transform> normals;
+
+    [Space] [Header("Custom Meshes")]
+    public Mesh mesh;
+    [SerializeField] private List<Transform> meshes;
+
+    [Space] [Header("Appendiges Cylinders")]
+    public Mesh cylinder_mesh;
+    public BSACylinder placeholder_cylinder;
     [SerializeField] private List<Transform> cylinders;
 
     private void Start()
     {
+        if (meshes.Count < 1)
+            meshes = new List<Transform>();
 
+        if (normals.Count < 1)
+            normals = new List<Transform>();
+
+        if (cylinders.Count < 1)
+            cylinders = new List<Transform>();
+    }
+
+    [ContextMenu("Instance/Cylinder")]
+    public void CreateArmCylinderDescriptor()
+    {
+        if (!cylinder_mesh) { Debug.LogError("No Cylinder mesh is selected to create Object, prese select it from Unity's Primitives"); return; }
+
+        GameObject parent = findAggregatorObject("Cylinders");
+
+        GameObject obj = new GameObject("Cylinder_" + placeholder_cylinder.name);
+        obj.transform.position = transform.position;
+        obj.transform.rotation *= Quaternion.Euler(90, 0, 0);
+        obj.transform.parent = parent.transform;
+
+        obj.AddComponent<BSACylinderBuilder>();
+        BSACylinderBuilder component = obj.GetComponent<BSACylinderBuilder>();
+        component.beginning = animator.GetBoneTransform(placeholder_cylinder.start);
+        component.end = animator.GetBoneTransform(placeholder_cylinder.end);
+        component.cylinder = placeholder_cylinder;
+        component.cyMesh = cylinder_mesh;
+
+        cylinders.Add(obj.transform);
+        Selection.activeGameObject = obj;
     }
 
     [ContextMenu("Instance/Surface Normal")]
     public void CreatePlaneNormalDefinitionObject()
     {
+        GameObject parent = findAggregatorObject("Normals");
+
         GameObject obj = new GameObject("Plane Normal");
         obj.transform.position = transform.position;
         obj.transform.rotation *= Quaternion.Euler(90, 0, 0);
-        obj.transform.parent = transform;
+        obj.transform.parent = parent.transform;
 
         obj.AddComponent<SceneVectorDisplay>();
         SceneVectorDisplay component = obj.GetComponent<SceneVectorDisplay>();
         component.scale = 0.1f;
-
-        //if (normals.Empty())
-        //    normals = new List<Transform>();
 
         normals.Add(obj.transform);
         Selection.activeGameObject = obj;
@@ -46,12 +83,14 @@ public class BSABuilderComponent : MonoBehaviour
     {
         if (!mesh) { Debug.LogError("No Mesh is selected to create Object"); return; }
 
+        GameObject parent = findAggregatorObject("Meshes");
+
         Mesh actual = Object.Instantiate(mesh);
         MergeVertices(actual);
         
         GameObject obj = new GameObject(mesh.name);
         obj.transform.position = transform.position;
-        obj.transform.parent = transform;
+        obj.transform.parent = parent.transform;
 
         obj.AddComponent<BSAMeshBuilder>();
         BSAMeshBuilder builder = obj.GetComponent<BSAMeshBuilder>();
@@ -71,6 +110,47 @@ public class BSABuilderComponent : MonoBehaviour
 
         meshes.Add(obj.transform);
         Selection.activeGameObject = obj;
+    }
+
+    [ContextMenu("Create BSA ScriptableObject")]
+    public void CompileBSAScriptableObject()
+    {
+        bool create_asset_from_scratch = false;
+        string path = asset_path + "/" + asset_name + ".asset";
+        BodySurfaceApproximationDefinition BSAD = AssetDatabase.LoadAssetAtPath(path, typeof(BodySurfaceApproximationDefinition)) as BodySurfaceApproximationDefinition;
+
+        if (BSAD == null)
+        {
+            create_asset_from_scratch = true;
+            BSAD = (BodySurfaceApproximationDefinition)ScriptableObject.CreateInstance(typeof(BodySurfaceApproximationDefinition));
+        }
+
+        //ASSIGNING DATA TO THE SCRIPTABLE OBJECT
+        BSAD.name = asset_name;
+
+        //Upload Cylinders
+
+
+        List<BSACylinder> cy = new List<BSACylinder>(cylinders.Count);
+        foreach (Transform trn in cylinders)
+        {
+            BSACylinderBuilder component = trn.gameObject.GetComponent<BSACylinderBuilder>();
+            if (component == null)
+                Debug.Log("Could not find component");
+            cy.Add(component.cylinder);
+        }
+        BSAD.cylinders = cy;
+
+        //---------------------------------------
+
+        if (create_asset_from_scratch)
+        {
+            AssetDatabase.CreateAsset(BSAD, path);
+            return;
+        }
+
+        EditorUtility.SetDirty(BSAD);
+        AssetDatabase.SaveAssets();
     }
 
     [ContextMenu("TPose Avatar")]
@@ -115,7 +195,6 @@ public class BSABuilderComponent : MonoBehaviour
         for (int i = indexes.Count - 1; i >= 0; i--)
         {
             vertices.RemoveAt(indexes[i].Item1 - i);
-            //normals.RemoveAt(indexes[i].Item1);
 
             for (int j = 0; j < triangles.Count; j++)
             {
@@ -129,5 +208,19 @@ public class BSABuilderComponent : MonoBehaviour
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
         mesh.normals = normals.ToArray();
+    }
+
+    private GameObject findAggregatorObject(string name)
+    {
+        GameObject p = transform.Find(name).gameObject;
+
+        if (p == null)
+        {
+            p = new GameObject(name);
+            p.transform.localPosition = Vector3.zero;
+            p.transform.parent = transform;
+        }
+
+        return p;
     }
 }
