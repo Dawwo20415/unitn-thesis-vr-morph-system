@@ -19,7 +19,7 @@ public class BSABuilderComponent : MonoBehaviour
 
     private void Start()
     {
-        meshes = new List<Transform>();
+
     }
 
     [ContextMenu("Instance/Surface Normal")]
@@ -33,6 +33,9 @@ public class BSABuilderComponent : MonoBehaviour
         obj.AddComponent<SceneVectorDisplay>();
         SceneVectorDisplay component = obj.GetComponent<SceneVectorDisplay>();
         component.scale = 0.1f;
+
+        //if (normals.Empty())
+        //    normals = new List<Transform>();
 
         normals.Add(obj.transform);
         Selection.activeGameObject = obj;
