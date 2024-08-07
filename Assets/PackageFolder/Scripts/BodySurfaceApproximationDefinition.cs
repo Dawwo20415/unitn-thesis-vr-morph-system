@@ -19,8 +19,9 @@ public struct BSACustomMesh
     public Vector3 offset;
     public Quaternion rot_offset;
 
-    public List<Vector3> vertices;
-    public List<int> triangles;
+    public List<HumanBodyBones> anchors;
+    public Vector3[] vertices;
+    public int[] triangles;
 }
 
 

@@ -17,7 +17,10 @@ public class BSABuilderComponent : MonoBehaviour
     [SerializeField] private List<Transform> normals;
 
     [Space] [Header("Custom Meshes")]
+    public string mesh_name;
     public Mesh mesh;
+    public List<HumanBodyBones> mesh_anchors;
+
     [SerializeField] private List<Transform> meshes;
 
     [Space] [Header("Appendiges Cylinders")]
@@ -94,8 +97,10 @@ public class BSABuilderComponent : MonoBehaviour
 
         obj.AddComponent<BSAMeshBuilder>();
         BSAMeshBuilder builder = obj.GetComponent<BSAMeshBuilder>();
+        builder.mesh_name = mesh_name;
         builder.mesh = actual;
         builder.vertices = new List<Transform>(actual.vertexCount);
+        builder.SetAnchors(animator, mesh_anchors);
 
         int i = 0;
         foreach (Vector3 vec in actual.vertices)
@@ -129,17 +134,24 @@ public class BSABuilderComponent : MonoBehaviour
         BSAD.name = asset_name;
 
         //Upload Cylinders
-
-
-        List<BSACylinder> cy = new List<BSACylinder>(cylinders.Count);
+        BSAD.cylinders = new List<BSACylinder>(cylinders.Count);
         foreach (Transform trn in cylinders)
         {
             BSACylinderBuilder component = trn.gameObject.GetComponent<BSACylinderBuilder>();
             if (component == null)
                 Debug.Log("Could not find component");
-            cy.Add(component.cylinder);
+            BSAD.cylinders.Add(component.cylinder);
         }
-        BSAD.cylinders = cy;
+
+        //Upload Meshes
+        BSAD.meshes = new List<BSACustomMesh>(meshes.Count);
+        foreach (Transform trn in meshes)
+        {
+            BSAMeshBuilder component = trn.gameObject.GetComponent<BSAMeshBuilder>();
+            if (component == null)
+                Debug.Log("Could not find component");
+            BSAD.meshes.Add(component.bsa_mesh);
+        }
 
         //---------------------------------------
 
