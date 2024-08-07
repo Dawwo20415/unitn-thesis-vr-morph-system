@@ -20,7 +20,7 @@ public class BSAMeshBuilder : MonoBehaviour
 
         tmp.name = mesh_name;
         tmp.offset = CalcPositionOffset();
-        tmp.rot_offset = Quaternion.identity;
+        tmp.rot_offset = transform.rotation;
 
         tmp.vertices = CalculateVertices();
         tmp.triangles = mesh.triangles;
@@ -31,7 +31,7 @@ public class BSAMeshBuilder : MonoBehaviour
 
     public void SetAnchors(Animator animator, List<HumanBodyBones> hbb_anchors)
     {
-        anchors = hbb_anchors;
+        anchors = new List<HumanBodyBones>(hbb_anchors);
         anchors_trn = new List<Transform>(hbb_anchors.Count);
         foreach (HumanBodyBones hbb in hbb_anchors)
         {

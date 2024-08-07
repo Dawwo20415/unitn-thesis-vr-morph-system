@@ -14,6 +14,8 @@ public class BSABuilderComponent : MonoBehaviour
     public int test;
 
     [Space] [Header("Normals")]
+    public string normal_name;
+    public HumanBodyBones normal_anchor;
     [SerializeField] private List<Transform> normals;
 
     [Space] [Header("Custom Meshes")]
@@ -68,14 +70,15 @@ public class BSABuilderComponent : MonoBehaviour
     {
         GameObject parent = findAggregatorObject("Normals");
 
-        GameObject obj = new GameObject("Plane Normal");
+        GameObject obj = new GameObject(normal_name);
         obj.transform.position = transform.position;
         obj.transform.rotation *= Quaternion.Euler(90, 0, 0);
         obj.transform.parent = parent.transform;
 
-        obj.AddComponent<SceneVectorDisplay>();
-        SceneVectorDisplay component = obj.GetComponent<SceneVectorDisplay>();
+        obj.AddComponent<BSANormalBuilder>();
+        BSANormalBuilder component = obj.GetComponent<BSANormalBuilder>();
         component.scale = 0.1f;
+        component.anchor = animator.GetBoneTransform(normal_anchor);
 
         normals.Add(obj.transform);
         Selection.activeGameObject = obj;
@@ -91,7 +94,7 @@ public class BSABuilderComponent : MonoBehaviour
         Mesh actual = Object.Instantiate(mesh);
         MergeVertices(actual);
         
-        GameObject obj = new GameObject(mesh.name);
+        GameObject obj = new GameObject(mesh_name);
         obj.transform.position = transform.position;
         obj.transform.parent = parent.transform;
 
@@ -151,6 +154,24 @@ public class BSABuilderComponent : MonoBehaviour
             if (component == null)
                 Debug.Log("Could not find component");
             BSAD.meshes.Add(component.bsa_mesh);
+        }
+
+        //Upload Normals
+        BSAD.normals = new List<BSANormal>(normals.Count);
+        foreach (Transform trn in normals)
+        {
+            BSANormalBuilder component = trn.gameObject.GetComponent<BSANormalBuilder>();
+            if (component == null)
+                Debug.Log("Could not find component");
+
+            BSAD.normals.Add(component.bsa_normal);
+        }
+
+        //Upload Proportional Weights
+        BSAD.body_proportion_weights = new List<float>((int)HumanBodyBones.LastBone);
+        for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+        {
+            BSAD.body_proportion_weights.Add(CalculatePath(animator, (HumanBodyBones)i));
         }
 
         //---------------------------------------
@@ -234,5 +255,33 @@ public class BSABuilderComponent : MonoBehaviour
         }
 
         return p;
+    }
+
+    private float CalculatePath(Animator animator, HumanBodyBones start)
+    {
+        float length = 0.0f;
+
+        Transform trn = animator.GetBoneTransform(start);
+        HumanBodyBones target = HumanBodyBonesWeightPath.GetDestination(start);
+        Transform dest = animator.GetBoneTransform(target);
+
+        if (trn == dest || trn == null)
+            return 1.0f;
+
+        while (trn != dest)
+        {
+            if (trn.parent == null)
+                throw new UnityException("HumanBodyBones path recursion encountered an object without a parent before reaching destination bone!");
+
+            length += GetDistance(trn, trn.parent);
+            trn = trn.parent;
+        }
+
+        return length;
+    }
+
+    private float GetDistance(Transform a, Transform b)
+    {
+        return Mathf.Abs((a.position - b.position).magnitude);
     }
 }
