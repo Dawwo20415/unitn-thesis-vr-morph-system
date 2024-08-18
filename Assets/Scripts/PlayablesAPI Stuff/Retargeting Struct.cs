@@ -2,29 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public struct AvatarRetargetingComponents
-{
-    public Quaternion localA;
-    public Quaternion localB;
-    public Quaternion fromAtoB;
-
-    public AvatarRetargetingComponents(Quaternion q1, Quaternion q2, Quaternion q3)
-    {
-        localA = q1;
-        localB = q2;
-        fromAtoB = q3;
-    }
-
-    public AvatarRetargetingComponents(Quaternion q)
-    {
-        localA = q;
-        localB = q;
-        fromAtoB = q;
-    }
-
-    public static AvatarRetargetingComponents identity { get => new AvatarRetargetingComponents(Quaternion.identity); }
-}
-
 public struct VExtension
 {
     public static Vector3 FrameChildToParent(Vector3 pPosition, Quaternion pRotation, Vector3 cPosition)

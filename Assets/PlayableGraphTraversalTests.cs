@@ -52,7 +52,6 @@ public class PlayableBehaviourEmpty : PlayableBehaviour
     }
 }
 
-
 [RequireComponent(typeof(Animator))]
 public class PlayableGraphTraversalTests : MonoBehaviour
 {
@@ -65,13 +64,16 @@ public class PlayableGraphTraversalTests : MonoBehaviour
         animator = GetComponent<Animator>();
         graph = PlayableGraph.Create("Traversal Test_" + UnityEngine.Random.Range(0.0f, 1.0f));
 
+        /*
         ScriptPlayable<PlayableBehaviourTest> test_script_playable = ScriptPlayable<PlayableBehaviourTest>.Create(graph);
         ScriptPlayable<PlayableBehaviourEmpty> empty_script_playable = ScriptPlayable<PlayableBehaviourEmpty>.Create(graph);
 
-        AnimationPlayableOutput script_output = AnimationPlayableOutput.Create(graph, "animation output 1", animator);
         ScriptPlayableOutput script_output_2 = ScriptPlayableOutput.Create(graph, "script output 2");
+        AnimationPlayableOutput script_output = AnimationPlayableOutput.Create(graph, "animation output 1", animator);
         //script_output_2.SetUserData(this);
         //script_output_2.SetReferenceObject(animator);
+
+        
 
         test_script_playable.SetOutputCount(2);
         test_script_playable.SetInputCount(1);
@@ -80,10 +82,11 @@ public class PlayableGraphTraversalTests : MonoBehaviour
         graph.Connect(test_script_playable, 1, empty_script_playable, 0);
         empty_script_playable.SetInputWeight(0, 1.0f);
 
-        script_output.SetSourcePlayable(empty_script_playable);
         script_output_2.SetSourcePlayable(test_script_playable, 0);
+        script_output.SetSourcePlayable(empty_script_playable);
+        */
 
-        
+
 
         graph.Play();
     }
