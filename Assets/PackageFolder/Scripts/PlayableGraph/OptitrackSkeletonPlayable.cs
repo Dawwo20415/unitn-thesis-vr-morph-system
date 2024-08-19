@@ -2,57 +2,49 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
-using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.Animations;
+using Unity.Collections.LowLevel.Unsafe;
 
-public struct OptitrackSkeletonPlayable : IAnimationJob
+public struct OptitrackSkeletonJob : IAnimationJob
 {
     private PlayableOptitrackStreamingClient m_client;
     private OptitrackSkeletonDefinition m_skeletonDefinition;
-    private Dictionary<Int32, int> m_id2HumanBodyBones;
+    private Dictionary<Int32, int> m_id2StreamHandle;
     private NativeArray<TransformStreamHandle> m_handles;
 
-    public void Setup(Animator animator, PlayableOptitrackStreamingClient client, OptitrackSkeletonDefinition skeletonDefinition, Dictionary<int,GameObject> guide)
+    public void Setup(Animator animator, PlayableOptitrackStreamingClient client, OptitrackSkeletonDefinition skeletonDefinition, Dictionary<Int32, int> guide)
     {
         m_client = client;
         m_skeletonDefinition = skeletonDefinition;
-        OptitrackId2HumanBodyBones(guide, animator);
-        BindSkeleton(animator);
+        BindSkeleton(animator, guide);
     }
 
-    private void BindSkeleton(Animator animator)
+    public void RebindSkeleton(Animator animator, Dictionary<Int32, int> table)
     {
-        m_handles = new NativeArray<TransformStreamHandle>((int)HumanBodyBones.LastBone, Allocator.Persistent);
-
-        for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
-        {
-            m_handles[i] = animator.BindStreamTransform(animator.GetBoneTransform((HumanBodyBones)i));
-        }
+        m_handles.Dispose();
+        BindSkeleton(animator, table);
     }
 
-    private Dictionary<int, int> OptitrackId2HumanBodyBones(Dictionary<int, GameObject> guide, Animator animator)
+    private void BindSkeleton(Animator animator, Dictionary<Int32, int> table)
     {
-        Dictionary<int, int> translation = new Dictionary<int, int>(guide.Count);
+        m_handles = new NativeArray<TransformStreamHandle>(table.Count, Allocator.Persistent);
+        m_id2StreamHandle = new Dictionary<Int32, int>(table.Count);
 
-        foreach ((int key, GameObject obj) in guide)
+        int k = 0;
+        foreach ((Int32 id, int hbb) in table)
         {
-            for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
-            {
-                if (animator.GetBoneTransform((HumanBodyBones)i) == obj.transform)
-                {
-                    translation[key] = i;
-                    break;
-                }
-            }
+            Transform trn = animator.GetBoneTransform((HumanBodyBones)hbb);
+            m_handles[k] = animator.BindStreamTransform(trn);
+            m_id2StreamHandle[id] = k;
+            k++;
         }
-
-        return translation;
     }
 
     public void ProcessRootMotion(AnimationStream stream) { }
     public void ProcessAnimation(AnimationStream stream)
     {
+
         OptitrackSkeletonState skelState = m_client.GetLatestSkeletonState(m_skeletonDefinition.Id);
         if (skelState != null)
         {
@@ -77,11 +69,20 @@ public struct OptitrackSkeletonPlayable : IAnimationJob
 
                 if (foundPose)
                 {
-                    int index = m_id2HumanBodyBones[boneId];
-                    m_handles[index].SetLocalRotation(stream, bonePose.Orientation);
-                    m_handles[index].SetLocalPosition(stream, bonePose.Position);
+                    int index = -1;
+                    m_id2StreamHandle.TryGetValue(boneId, out index);
+                    if (index != -1)
+                    {
+                        m_handles[index].SetLocalRotation(stream, bonePose.Orientation);
+                        m_handles[index].SetLocalPosition(stream, bonePose.Position);
+                    }  
                 }
             }
         }
+    }
+
+    public void Dispose()
+    {
+        m_handles.Dispose();
     }
 }

@@ -29,7 +29,7 @@ public struct AvatarRetargetingComponents
     public static AvatarRetargetingComponents identity { get => new AvatarRetargetingComponents(Quaternion.identity); }
 }
 
-public struct AvatarRetargetingPlayable : IAnimationJob
+public struct AvatarRetargetingJob : IAnimationJob
 {
     private NativeArray<TransformStreamHandle> m_handles;
     private NativeArray<AvatarRetargetingComponents> m_components;
@@ -120,5 +120,11 @@ public struct AvatarRetargetingPlayable : IAnimationJob
 
             m_handles[i].SetLocalRotation(stream, m_components[i].localB * b);
         }
+    }
+
+    public void Dispose()
+    {
+        m_components.Dispose();
+        m_handles.Dispose();
     }
 }

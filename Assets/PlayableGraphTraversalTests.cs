@@ -57,6 +57,11 @@ public class PlayableGraphTraversalTests : MonoBehaviour
 {
     private Animator animator;
     private PlayableGraph graph;
+    private OptitrackGraphHandler m_handler;
+
+    public PlayableOptitrackStreamingClient client;
+    public string skeleton_name;
+    public Transform target_root;
 
     // Update is called once per frame
     void Start()
@@ -86,9 +91,17 @@ public class PlayableGraphTraversalTests : MonoBehaviour
         script_output.SetSourcePlayable(empty_script_playable);
         */
 
-
+        m_handler = new OptitrackGraphHandler(graph, client, skeleton_name, animator, target_root, true);
+        AnimationPlayableOutput out1 = AnimationPlayableOutput.Create(graph, skeleton_name + " Output", animator);
+        PlayableGraphUtility.ConnectOutput(m_handler.retargeted, out1);
+        //PlayableGraphUtility.ConnectOutput(, out1);
 
         graph.Play();
+    }
+
+    private void Update()
+    {
+        m_handler.Rebind(animator);
     }
 
     private void OnDestroy()
