@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Collections;
 using UnityEngine.Playables;
 using UnityEngine.Animations;
 using UnityEngine;
@@ -16,13 +17,16 @@ public class OptitrackGraphHandler
     private Dictionary<Int32, int> m_id2HBB;
     private Dictionary<string, string> m_cachedMecanimBoneNameMap = new Dictionary<string, string>();
 
+    private NativeArray<Quaternion> m_sharedRotations;
+    private NativeArray<Vector3> m_sharedPositions;
+
     //OPTITRACK AVATAR
     private GameObject m_rootObject;
     private Animator m_optitrackAvatarAnimator;
     private Avatar m_srcAvatar;
         
         //PLAYABLES
-        OptitrackSkeletonJob m_optitrackAnimatorJob;
+        OptitrackDirectSkeletonJob m_optitrackAnimatorJob;
         AnimationScriptPlayable m_optitrackAnimationPlayable;
         AnimationPlayableOutput m_optitrackPlayableOutput;
 
@@ -40,9 +44,13 @@ public class OptitrackGraphHandler
             m_skeletonName = skeleton_name;
             InitOptitrack(debug, debug);
 
+            List<HumanBodyBones> common_bones = CountCommonBones(m_optitrackAvatarAnimator, target_animator);
+            m_sharedRotations = new NativeArray<Quaternion>(common_bones.Count, Allocator.Persistent);
+            m_sharedPositions = new NativeArray<Vector3>(common_bones.Count, Allocator.Persistent);
+
             m_id2HBB = OptitrackId2HumanBodyBones(m_boneObjectMap, m_optitrackAvatarAnimator);
             InstanceOptitrackAvatarGraphPlayables(graph, m_id2HBB);
-            InstanceTargetAvatarGraphPlayables(graph, m_id2HBB, target_animator, target_root);
+            InstanceTargetAvatarGraphPlayables(graph, m_id2HBB, common_bones, target_animator, target_root);
         } catch (UnityException e)
         {
             Debug.LogError(e);
@@ -52,24 +60,21 @@ public class OptitrackGraphHandler
     ~OptitrackGraphHandler()
     {
         m_optitrackAnimatorJob.Dispose();
-        m_targetAnimatorJob.Dispose();
         m_retargetingJob.Dispose();
+        m_sharedRotations.Dispose();
+        m_sharedPositions.Dispose();
     }
 
     public void Rebind(Animator target_animator)
     {
-        m_optitrackAnimatorJob = m_optitrackAnimationPlayable.GetJobData<OptitrackSkeletonJob>();
+        m_optitrackAnimatorJob = m_optitrackAnimationPlayable.GetJobData<OptitrackDirectSkeletonJob>();
         m_optitrackAnimatorJob.RebindSkeleton(m_optitrackAvatarAnimator, m_id2HBB);
         m_optitrackAnimationPlayable.SetJobData(m_optitrackAnimatorJob);
-
-        m_targetAnimatorJob = m_targetAnimationPlayable.GetJobData<OptitrackSkeletonJob>();
-        m_targetAnimatorJob.RebindSkeleton(target_animator, m_id2HBB);
-        m_targetAnimationPlayable.SetJobData(m_targetAnimatorJob);
     }
 
     private void InstanceOptitrackAvatarGraphPlayables(PlayableGraph graph, Dictionary<Int32, int> id2HBB)
     {
-        m_optitrackAnimatorJob = new OptitrackSkeletonJob();
+        m_optitrackAnimatorJob = new OptitrackDirectSkeletonJob();
         m_optitrackAnimatorJob.Setup(m_optitrackAvatarAnimator, m_client, m_skeletonDef, id2HBB);
         m_optitrackAnimationPlayable = AnimationScriptPlayable.Create(graph, m_optitrackAnimatorJob);
 
@@ -77,14 +82,14 @@ public class OptitrackGraphHandler
         PlayableGraphUtility.ConnectOutput(m_optitrackAnimationPlayable, m_optitrackPlayableOutput);
     }
 
-    private void InstanceTargetAvatarGraphPlayables(PlayableGraph graph, Dictionary<Int32, int> id2HBB, Animator target_animator, Transform target_root)
+    private void InstanceTargetAvatarGraphPlayables(PlayableGraph graph, Dictionary<Int32, int> id2HBB, List<HumanBodyBones> common_bones, Animator target_animator, Transform target_root)
     {
         m_targetAnimatorJob = new OptitrackSkeletonJob();
-        m_targetAnimatorJob.Setup(target_animator, m_client, m_skeletonDef, id2HBB);
+        m_targetAnimatorJob.Setup(m_sharedRotations, m_sharedPositions, target_animator, m_client, m_skeletonDef, common_bones, id2HBB);
         m_targetAnimationPlayable = AnimationScriptPlayable.Create(graph, m_targetAnimatorJob);
 
         m_retargetingJob = new AvatarRetargetingJob();
-        m_retargetingJob.Setup(m_optitrackAvatarAnimator, target_animator, m_rootObject.transform, target_root);
+        m_retargetingJob.Setup(m_sharedRotations, m_sharedPositions, common_bones, m_optitrackAvatarAnimator, target_animator, m_rootObject.transform, target_root);
         m_retargetingPlayable = AnimationScriptPlayable.Create(graph, m_retargetingJob);
 
         PlayableGraphUtility.ConnectNodes(graph, m_targetAnimationPlayable, m_retargetingPlayable);
@@ -496,4 +501,19 @@ public class OptitrackGraphHandler
         return Quaternion.identity;
     }
 
+    private List<HumanBodyBones> CountCommonBones(Animator src, Animator dest)
+    {
+        List<HumanBodyBones> result = new List<HumanBodyBones>();
+
+        for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+        {
+            HumanBodyBones hbb = (HumanBodyBones)i;
+            Transform trnA = src.GetBoneTransform(hbb);
+            Transform trnB = dest.GetBoneTransform(hbb);
+
+            if (trnA && trnB) { result.Add(hbb); }
+        }
+
+        return result;
+    }
 }

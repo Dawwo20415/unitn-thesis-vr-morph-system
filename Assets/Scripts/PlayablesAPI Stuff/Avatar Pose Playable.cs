@@ -96,6 +96,11 @@ public class AvatarRetargetingBehaviour2 : PlayableBehaviour, IHumanBodyBonesSpl
             } else
             {
                 components[i] = FormComponents(source_animator, (HumanBodyBones)i, src_root, destination_animator, (HumanBodyBones)i, dest_root);
+                if (i == 12 && false)
+                {
+                    Debug.Log("#" + i + " Original Retargeting Component" + " (" + ((HumanBodyBones)i).ToString() + ") -> " + components[i].ToString());
+                    Debug.Log("#" + i + " Original Retargeting Component" + " (" + ((HumanBodyBones)i).ToString() + ") -> " + components[i].ToStringExtended());
+                }
             }
         }
     }

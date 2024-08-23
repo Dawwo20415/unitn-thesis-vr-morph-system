@@ -48,7 +48,7 @@ public class OptitrackRetargetingAvatar : MonoBehaviour
         animator = GetComponent<Animator>();
         avatar = animator.avatar;
 
-        graph = PlayableGraph.Create("Optitrack Test2_" + UnityEngine.Random.Range(0.0f, 1.0f));
+        graph = PlayableGraph.Create("Optitrack Test2222_" + UnityEngine.Random.Range(0.0f, 1.0f));
 
         try
         {
@@ -59,9 +59,8 @@ public class OptitrackRetargetingAvatar : MonoBehaviour
             this.enabled = false;
             return;
         }
-
+#if false
         egocetric = new EgocentricSelfContact(optitrackGraph.animator, animator, graph, material, capsule_mesh, capsule_thickness, calMeshes, new List<HumanBodyBones>() { HumanBodyBones.LeftHand }, egoDebug);
-        
         
         {
             IKPipelineHand = new IKTargetPipeline(HumanBodyBones.LeftHand);
@@ -149,6 +148,11 @@ public class OptitrackRetargetingAvatar : MonoBehaviour
         }
 #else
         AnimationGraphUtility.ConnectOutput(playableIKGraph.output, avatarOutput);
+#endif
+
+#else 
+        avatarOutput = AnimationPlayableOutput.Create(graph, "Avatar Output", animator);
+        AnimationGraphUtility.ConnectOutput(optitrackGraph.retargeted, avatarOutput);
 #endif
         graph.Play();
     }

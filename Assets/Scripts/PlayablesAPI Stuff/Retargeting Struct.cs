@@ -40,12 +40,12 @@ public struct QExtension
 
     public static string Print(Quaternion q)
     {
-        return "(q)[" + q.x + "," + q.y + "," + q.z + "," + q.w + "]";
+        return "[" + q.x + "," + q.y + "," + q.z + "," + q.w + "]";
     }
 
     public static string PrintEuler(Quaternion q)
     {
-        return "(q)[" + q.eulerAngles.x + "," + q.eulerAngles.y + "," + q.eulerAngles.z + "]";
+        return "[" + q.eulerAngles.x + "," + q.eulerAngles.y + "," + q.eulerAngles.z + "]";
     }
 
     public static Quaternion StackToParent(Transform obj, Transform root, bool include_root)

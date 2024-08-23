@@ -1,10 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Animations;
-using static UnityEngine.InputSystem.OnScreen.OnScreenStick;
 
 public struct AvatarRetargetingComponents
 {
@@ -27,47 +24,53 @@ public struct AvatarRetargetingComponents
     }
 
     public static AvatarRetargetingComponents identity { get => new AvatarRetargetingComponents(Quaternion.identity); }
+
+    public override string ToString()
+    {
+        return "Local A: " + QExtension.PrintEuler(localA) + " | Local B: " + QExtension.PrintEuler(localB) + " | A to B: " + QExtension.PrintEuler(fromAtoB);
+    }
+
+    public string ToStringExtended()
+    {
+        return "Local A: " + QExtension.Print(localA) + " | Local B: " + QExtension.Print(localB) + " | A to B: " + QExtension.Print(fromAtoB);
+    }
 }
 
 public struct AvatarRetargetingJob : IAnimationJob
 {
+    [ReadOnly] private NativeArray<Quaternion> m_sharedRotations;
+    [ReadOnly] private NativeArray<Vector3> m_sharedPositions;
     private NativeArray<TransformStreamHandle> m_handles;
     private NativeArray<AvatarRetargetingComponents> m_components;
+    private int m_size;
 
-    public void Setup(Animator source_animator, Animator destination_animator, Transform src_root, Transform dest_root)
+    public void Setup(NativeArray<Quaternion> sharedQ, NativeArray<Vector3> sharedV, List<HumanBodyBones> common_bones, Animator source_animator, Animator destination_animator, Transform src_root, Transform dest_root)
     {
-        BindSkeleton(destination_animator);
-        CalculateTransitions(source_animator, destination_animator, src_root, dest_root);
+        m_sharedRotations = sharedQ;
+        m_sharedPositions = sharedV;
+        m_size = common_bones.Count;
+        BindSkeleton(ref common_bones, destination_animator);
+        CalculateTransitions(ref common_bones, source_animator, destination_animator, src_root, dest_root);
     }
 
-    private void CalculateTransitions(Animator source_animator, Animator destination_animator, 
+    private void CalculateTransitions(ref List<HumanBodyBones> common_bones, Animator source_animator, Animator destination_animator, 
                                       Transform src_root,       Transform dest_root)
     {
-        m_components = new NativeArray<AvatarRetargetingComponents>((int)HumanBodyBones.LastBone, Allocator.Persistent);
+        m_components = new NativeArray<AvatarRetargetingComponents>(common_bones.Count, Allocator.Persistent);
 
-        Dictionary<int, int> source_hbb = MecanimHumanoidExtension.HumanBodyBones2AvatarSkeleton(source_animator);
-        Dictionary<int, int> dest_hbb = MecanimHumanoidExtension.HumanBodyBones2AvatarSkeleton(destination_animator);
-
-        for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+        for (int i = 0; i < common_bones.Count; i++)
         {
-            if (source_hbb[i] == -1 || dest_hbb[i] == -1)
-            {
-                m_components[i] = AvatarRetargetingComponents.identity;
-            }
-            else
-            {
-                m_components[i] = FormComponents(source_animator, (HumanBodyBones)i, src_root, 
-                                                 destination_animator, (HumanBodyBones)i, dest_root);
-            }
+            m_components[i] = FormComponents(common_bones[i], source_animator, src_root, 
+                                                 destination_animator, dest_root);
         }
     }
-    private AvatarRetargetingComponents FormComponents(Animator src_anim, HumanBodyBones src, Transform src_root, Animator dest_anim, HumanBodyBones dest, Transform dest_root)
+    private AvatarRetargetingComponents FormComponents(HumanBodyBones bone, Animator src_anim, Transform src_root, Animator dest_anim, Transform dest_root)
     {
-        Quaternion src_local = GetBoneFromTransform(src_anim.avatar.humanDescription, src_anim.GetBoneTransform(src)).rotation;
-        Quaternion dest_local = GetBoneFromTransform(dest_anim.avatar.humanDescription, dest_anim.GetBoneTransform(dest)).rotation;
+        Quaternion src_local = GetBoneFromTransform(src_anim.avatar.humanDescription, src_anim.GetBoneTransform(bone)).rotation;
+        Quaternion dest_local = GetBoneFromTransform(dest_anim.avatar.humanDescription, dest_anim.GetBoneTransform(bone)).rotation;
 
-        Quaternion fromRootToSrc = StackToParentAnimator(src_anim, src, src_root);
-        Quaternion fromRootToDest = StackToParentAnimator(dest_anim, dest, dest_root);
+        Quaternion fromRootToSrc = StackToParentAnimator(src_anim, bone, src_root);
+        Quaternion fromRootToDest = StackToParentAnimator(dest_anim, bone, dest_root);
 
         Quaternion fromSrctoDest = QExtension.FromTo(fromRootToSrc, fromRootToDest);
 
@@ -99,26 +102,25 @@ public struct AvatarRetargetingJob : IAnimationJob
         Debug.Log("Have not found the bone");
         return new SkeletonBone();
     }
-
-    private void BindSkeleton(Animator animator)
+    private void BindSkeleton(ref List<HumanBodyBones> common_bones, Animator animator)
     {
-        m_handles = new NativeArray<TransformStreamHandle>((int)HumanBodyBones.LastBone, Allocator.Persistent);
+        m_handles = new NativeArray<TransformStreamHandle>(common_bones.Count, Allocator.Persistent);
 
-        for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+        for (int i = 0; i < common_bones.Count; i++)
         {
-            m_handles[i] = animator.BindStreamTransform(animator.GetBoneTransform((HumanBodyBones)i));
+            m_handles[i] = animator.BindStreamTransform(animator.GetBoneTransform(common_bones[i]));
         }
     }
 
     public void ProcessRootMotion(AnimationStream stream) { }
     public void ProcessAnimation(AnimationStream stream)
     {
-        for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+        for (int i = 0; i < m_size; i++)
         {
-            Quaternion a = m_handles[i].GetLocalRotation(stream);
+            Quaternion a = m_sharedRotations[i];
             Quaternion b = QExtension.ChangeFrame(Quaternion.Inverse(m_components[i].localA) * a, m_components[i].fromAtoB);
-
             m_handles[i].SetLocalRotation(stream, m_components[i].localB * b);
+            m_handles[i].SetLocalPosition(stream, m_sharedPositions[i]);
         }
     }
 
