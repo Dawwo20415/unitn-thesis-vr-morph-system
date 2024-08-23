@@ -96,6 +96,20 @@ public class PlayableGraphTraversalTests : MonoBehaviour
         PlayableGraphUtility.ConnectOutput(m_handler.retargeted, out1);
         //PlayableGraphUtility.ConnectOutput(, out1);
 
+#if false
+
+        N Chains of bones
+        M Bones of that chain that need to be retargeted
+        1 Node that applies all the (N*M) retargetings
+        
+        X Nodes for displacing targets
+        
+        1 Node for IK
+
+
+
+#endif
+
         graph.Play();
     }
 
