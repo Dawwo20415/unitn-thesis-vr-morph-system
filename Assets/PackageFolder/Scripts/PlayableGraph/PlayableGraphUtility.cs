@@ -28,11 +28,18 @@ public static class PlayableGraphUtility
         return true;
     }
 
-    public static bool ConnectOutput(Playable src_node, PlayableOutput dest_output)
+    public static bool ConnectOutput(Playable src_node, PlayableOutput dest_output, int index = -1)
     {
-        int src_index = FirstFreeOutput(src_node);
-
-        if (src_index == -1) { src_index = src_node.GetOutputCount(); src_node.SetOutputCount(src_index + 1); }
+        int src_index = 0;
+        if (index == -1)
+        {
+            src_index = FirstFreeOutput(src_node);
+            if (src_index == -1) { src_index = src_node.GetOutputCount(); src_node.SetOutputCount(src_index + 1); }
+        } else
+        {
+            src_node.SetOutputCount(index + 1);
+            src_index = index;
+        }
 
         dest_output.SetSourcePlayable(src_node, src_index);
         dest_output.SetWeight(1.0f);

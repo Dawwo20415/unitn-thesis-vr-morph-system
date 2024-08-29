@@ -5,11 +5,16 @@ using UnityEngine.Playables;
 
 public class EgocentricPlayableOutput
 {
-    private ScriptPlayableOutput m_playable;
+    public ScriptPlayableOutput output { get => m_playable; }
 
-    public EgocentricPlayableOutput(PlayableGraph graph)
+    private ScriptPlayableOutput m_playable;
+    private TestEgocentricOutput m_userData;
+
+    public EgocentricPlayableOutput(PlayableGraph graph, TestEgocentricOutput ref_object)
     {
         m_playable = ScriptPlayableOutput.Create(graph, "EgocentricPlayableOutput");
+        m_userData = ref_object;
+        m_playable.SetUserData(m_userData);
     }
 
     ~EgocentricPlayableOutput()
