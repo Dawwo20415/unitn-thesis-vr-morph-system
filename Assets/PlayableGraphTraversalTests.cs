@@ -27,7 +27,7 @@ public class PlayableGraphTraversalTests : MonoBehaviour
         m_egoHandler = new EgocentricGraphHandler(graph, this.gameObject, m_handler.retargeted);
 
         AnimationPlayableOutput out1 = AnimationPlayableOutput.Create(graph, skeleton_name + " Output", animator);
-        PlayableGraphUtility.ConnectOutput(m_egoHandler.lastInPath, out1, 1);
+        PlayableGraphUtility.ConnectOutput(m_egoHandler.lastInPath, out1);
 
 #if false
 

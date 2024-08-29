@@ -28,6 +28,6 @@ public class EgocentricGraphHandler
     private void BuildGraph(PlayableGraph graph, Playable connection)
     {
         PlayableGraphUtility.ConnectNodes(graph, connection, m_IKChain);
-        PlayableGraphUtility.ConnectOutput(m_IKChain, m_egocentricOutput.output);
+        PlayableGraphUtility.ConnectOutput(m_IKChain, m_egocentricOutput.output, 1);
     }
 }
