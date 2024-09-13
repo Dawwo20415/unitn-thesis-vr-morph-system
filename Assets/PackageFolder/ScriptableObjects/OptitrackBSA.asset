@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1acdf51a51a69c74392b152d99b9951b, type: 3}
-  m_Name: TestBSA
+  m_Name: OptitrackBSA
   m_EditorClassIdentifier: 
   cylinders:
   - name: Left Arm
@@ -49,7 +49,7 @@ MonoBehaviour:
   - name: Torso
     offset: {x: 0, y: 0.10068357, z: -0.035417303}
     rot_offset: {x: -0.0924575, y: -0, z: -0, w: 0.9957167}
-    anchors: 000000000b0000000c0000000700000008000000
+    anchors: 000000000b0000000c000000
     vertices:
     - {x: -0.1, y: -0.268489, z: 0.15203427}
     - {x: 0.1, y: -0.268489, z: 0.15203427}
@@ -79,7 +79,7 @@ MonoBehaviour:
   - name: Skull
     offset: {x: 0, y: -0.02529955, z: -0.012319656}
     rot_offset: {x: -0.9983318, y: 0, z: 0, w: 0.057738297}
-    anchors: 0a00000017000000
+    anchors: 0a000000
     vertices:
     - {x: -0.05, y: 0.15073717, z: -0.032841425}
     - {x: 0.05, y: 0.15073717, z: -0.032841425}

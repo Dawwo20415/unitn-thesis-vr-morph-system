@@ -105,11 +105,19 @@ public class BSABuilderComponent : MonoBehaviour
         builder.vertices = new List<Transform>(actual.vertexCount);
         builder.SetAnchors(animator, mesh_anchors);
 
+        Vector3 average = Vector3.zero;
+        foreach (Vector3 vec in actual.vertices)
+        {
+            average += vec;
+        }
+
+        average = average / actual.vertices.Length;
+
         int i = 0;
         foreach (Vector3 vec in actual.vertices)
         {
             GameObject vert = new GameObject("Vertex #" + i);
-            vert.transform.position = obj.transform.position + vec;
+            vert.transform.position = obj.transform.position + vec - average;
             vert.transform.parent = obj.transform;
 
             builder.vertices.Add(vert.transform);

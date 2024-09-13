@@ -84,8 +84,6 @@ public class EgocentricRayCasterDestination : MonoBehaviour
             counter++;
         }
 
-        //obj.transform.position = weighted_sum;
-        //return weighted_sum / weight;
         obj.transform.position = weighted_sum;
         return weighted_sum / counter;
     }

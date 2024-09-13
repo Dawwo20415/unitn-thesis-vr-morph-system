@@ -59,14 +59,15 @@ public class ObjectBoneFollow : MonoBehaviour
     {
         points = point_list;
 
+        transform.localPosition = position;
+        transform.localScale = scale;
+
         Vector3 midpoint = getMidpoint();
-        midpoint_offset = midpoint - position;
+        midpoint_offset = midpoint - transform.position;
         rotation_offset = QExtension.Fix(rotation);
         SetReferences(midpoint);
 
-        transform.position = position;
-        transform.localScale = scale;
-        transform.rotation = getRotation(midpoint) * rotation_offset;
+        transform.localRotation = getRotation(midpoint) * rotation_offset;
 
         if (references.Count < 1)
         {

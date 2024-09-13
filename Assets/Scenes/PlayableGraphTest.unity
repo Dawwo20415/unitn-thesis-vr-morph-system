@@ -318,7 +318,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7070782261884665372, guid: 4b50253634cfb83438fab88357c6d2a3, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 7070782261884665372, guid: 4b50253634cfb83438fab88357c6d2a3, type: 3}
       propertyPath: m_LocalPosition.y
@@ -389,6 +389,8 @@ MonoBehaviour:
   client: {fileID: 742226685}
   skeleton_name: Scheletro
   target_root: {fileID: 64229646}
+  source_BSAD: {fileID: 11400000, guid: 8b244a2616d81d0428ddfc8ffcb5dbc1, type: 2}
+  dest_BSAD: {fileID: 11400000, guid: 4a7c8aeb51a1ed145b08ea7e66cecac6, type: 2}
 --- !u!114 &1679252961
 MonoBehaviour:
   m_ObjectHideFlags: 0

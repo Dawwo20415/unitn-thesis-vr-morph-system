@@ -2,30 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[System.Serializable]
-public struct BSACoordinates
-{
-    //Normalized weight of the displacement vector
-    public float weight;
-    //Normalized vector from Surface Projection to Joint
-    public Vector3 displacement;
-    //Barycentric/Cylindrical coordinates of the joint projected on mesh
-    public Vector2 surfaceProjection;
 
-    public BSACoordinates(float i)
-    {
-        weight = i;
-        displacement = new Vector3(i, i, i);
-        surfaceProjection = new Vector2(i, i);
-    }
-
-    public BSACoordinates(Vector2 sp, Vector3 d, float w)
-    {
-        weight = w;
-        displacement = d;
-        surfaceProjection = sp;
-    }
-}
 
 public class EgocentricRayCasterWrapper : MonoBehaviour
 {

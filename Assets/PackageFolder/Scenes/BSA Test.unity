@@ -1314,13 +1314,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1615747371154454550}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aecb8dfa047ee81468500883b930f7d3, type: 3}
+  m_Script: {fileID: 11500000, guid: fbe7b83e320bb994c92b1214548bd2a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BSA_def: {fileID: 11400000, guid: 4a7c8aeb51a1ed145b08ea7e66cecac6, type: 2}
-  mat: {fileID: 2100000, guid: 979aef027a1c86c42a15ce35fce366fa, type: 2}
-  animator: {fileID: 145110197851906050}
-  cyMesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+  BSAD: {fileID: 11400000, guid: 4a7c8aeb51a1ed145b08ea7e66cecac6, type: 2}
+  material: {fileID: 2100000, guid: 7632678931fb0f34cb3d81b319e6fd15, type: 2}
+  cyl_mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &3833634156153856073
 GameObject:
   m_ObjectHideFlags: 0

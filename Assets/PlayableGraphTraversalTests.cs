@@ -17,6 +17,10 @@ public class PlayableGraphTraversalTests : MonoBehaviour
     public string skeleton_name;
     public Transform target_root;
 
+    [Header("BSADs")]
+    public BodySurfaceApproximationDefinition source_BSAD;
+    public BodySurfaceApproximationDefinition dest_BSAD;
+
     // Update is called once per frame
     void Start()
     {
@@ -24,7 +28,7 @@ public class PlayableGraphTraversalTests : MonoBehaviour
         graph = PlayableGraph.Create("Traversal Test_" + UnityEngine.Random.Range(0.0f, 1.0f));
 
         m_handler = new OptitrackGraphHandler(graph, client, skeleton_name, animator, target_root, true);
-        m_egoHandler = new EgocentricGraphHandler(graph, this.gameObject, m_handler.retargeted);
+        m_egoHandler = new EgocentricGraphHandler(graph, m_handler.avatar, source_BSAD, this.gameObject, dest_BSAD, m_handler.retargeted);
 
         AnimationPlayableOutput out1 = AnimationPlayableOutput.Create(graph, skeleton_name + " Output", animator);
         PlayableGraphUtility.ConnectOutput(m_egoHandler.lastInPath, out1);

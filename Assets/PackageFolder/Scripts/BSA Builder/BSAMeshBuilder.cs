@@ -11,7 +11,7 @@ public class BSAMeshBuilder : MonoBehaviour
     [HideInInspector]
     public List<Transform> vertices;
     public List<HumanBodyBones> anchors;
-    private List<Transform> anchors_trn;
+    public List<Transform> anchors_trn;
     private List<Vector3> vertices_positions;
 
     public BSACustomMesh GenerateBSACustomMesh()
@@ -43,9 +43,18 @@ public class BSAMeshBuilder : MonoBehaviour
     {
         Vector3[] vert = new Vector3[mesh.vertexCount];
 
+        Vector3 vert_sum = Vector3.zero;
+
         for (int i = 0; i < mesh.vertexCount; i++)
         {
-            vert[i] = vertices[i].position;
+            vert_sum += vertices[i].position;
+        }
+
+        vert_sum = vert_sum / mesh.vertexCount;
+
+        for (int i = 0; i < mesh.vertexCount; i++)
+        {
+            vert[i] = vertices[i].position - vert_sum;
         }
 
         return vert;

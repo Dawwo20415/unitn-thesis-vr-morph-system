@@ -175,7 +175,25 @@ public static class BSAProjectionOperators
         weight = bsa.weight;
 
         return (position, weight);
-    } 
+    }
+    #endregion
+
+    #region Cylinder
+    public static (Vector3, float) CylinderReversal(Vector3 a, Vector3 b, float radius, BSACoordinates bsa, float bone_weight, Vector3 anchor)
+    {
+        Vector3 AB = b - a;
+        Vector3 AH = anchor - a;
+
+        Vector3 reference_direction = Vector3.Cross(AH, AB).normalized;
+
+        Vector3 direction = Quaternion.AngleAxis(bsa.surfaceProjection.y, AB) * reference_direction;
+        Vector3 toSurface = direction * radius;
+        Vector3 displacement = direction * bsa.displacement.magnitude * bone_weight;
+
+        Vector3 proj_point = AB * bsa.surfaceProjection.x;
+
+        return (a + proj_point + toSurface + displacement, bsa.weight);
+    }
     #endregion
 
     #endregion

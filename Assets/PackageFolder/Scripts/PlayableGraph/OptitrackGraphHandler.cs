@@ -8,6 +8,7 @@ using UnityEngine;
 public class OptitrackGraphHandler
 {
     public AnimationScriptPlayable retargeted { get => m_retargetingPlayable; }
+    public GameObject avatar { get => m_rootObject; }
 
     //OPTITRACK DATA
     private PlayableOptitrackStreamingClient m_client;
