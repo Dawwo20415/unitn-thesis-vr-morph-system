@@ -28,7 +28,7 @@ public class PlayableGraphTraversalTests : MonoBehaviour
         graph = PlayableGraph.Create("Traversal Test_" + UnityEngine.Random.Range(0.0f, 1.0f));
 
         m_handler = new OptitrackGraphHandler(graph, client, skeleton_name, animator, target_root, true);
-        m_egoHandler = new EgocentricGraphHandler(graph, m_handler.avatar, source_BSAD, this.gameObject, dest_BSAD, m_handler.retargeted);
+        m_egoHandler = new EgocentricGraphHandler(graph, m_handler.avatar, source_BSAD, this.gameObject, dest_BSAD, m_handler.retargeted, animator);
 
         AnimationPlayableOutput out1 = AnimationPlayableOutput.Create(graph, skeleton_name + " Output", animator);
         PlayableGraphUtility.ConnectOutput(m_egoHandler.lastInPath, out1);

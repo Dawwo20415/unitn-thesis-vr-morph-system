@@ -20,10 +20,10 @@ public class EgocentricProjectionBehaviour : PlayableBehaviour
         if (!playerData.GetType().Equals(typeof(TestEgocentricOutput))) { return; }
 
         TestEgocentricOutput output = (TestEgocentricOutput)playerData;
-
+        Vector3 previous = output.GetTarget(HumanBodyBones.LeftHand);
         Vector3 result = output.Calculate(HumanBodyBones.LeftHand);
         output.SetTarget(HumanBodyBones.LeftHand, result);
 
-        //Debug.Log("Process Frame");
+        //Debug.Log("Egocentric Process Frame | Previous: " + previous + " Result: " + result);
     }
 }

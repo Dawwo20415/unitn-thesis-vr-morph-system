@@ -28,6 +28,30 @@ public static class BSAProjectionOperators
         return new Vector2(w1, w2);
     }
 
+    public static Vector2 V3toBarycentric(Vector3 a, Vector3 b, Vector3 c, Vector3 p, ref List<Vector3> lines)
+    {
+        // Baycentric Coordiante solver from "Christer Ericson's Real-Time Collision Detection"
+        Vector3 v0 = b - a, v1 = c - a, v2 = p - a;
+        float d00 = Vector3.Dot(v0, v0);
+        float d01 = Vector3.Dot(v0, v1);
+        float d11 = Vector3.Dot(v1, v1);
+        float d20 = Vector3.Dot(v2, v0);
+        float d21 = Vector3.Dot(v2, v1);
+
+        float denom = d00 * d11 - d01 * d01;
+        float w1 = (d11 * d20 - d01 * d21) / denom;
+        float w2 = (d00 * d21 - d01 * d20) / denom;
+
+        {
+            lines.Add(a);
+            lines.Add(a + v0 * w1);
+            lines.Add(a + v0 * w1);
+            lines.Add(a + (v0 * w1) + (v1 * w2));
+        }
+
+        return new Vector2(w1, w2);
+    }
+
     public static Vector3 ProjectPointOnTriangle(Vector3 a, Vector3 b, Vector3 c, Vector3 p)
     {
         Vector3 face_normal = Vector3.Cross(b - a, c - a).normalized;
@@ -80,6 +104,27 @@ public static class BSAProjectionOperators
             result.weight = 2.0f;
         result.surfaceProjection = barycentric_projection;
 
+        return result;
+    }
+
+    public static BSACoordinates MeshRaycast(Vector3 a, Vector3 b, Vector3 c, Vector3 p, float displacement_weight, out Vector3 debug, ref List<Vector3> lines)
+    {
+        BSACoordinates result = new BSACoordinates();
+
+        Vector3 projection_point = ProjectPointOnTriangle(a, b, c, p);
+        Vector3 displacement_vector = projection_point - p;
+        Vector2 barycentric_projection = V3toBarycentric(a, b, c, projection_point, ref lines);
+
+        float dis = MeshLengthFactor(a, b, c, p, barycentric_projection, displacement_vector.magnitude);
+
+        result.displacement = displacement_vector / displacement_weight;
+        if (dis != 0.0f)
+            result.weight = 1 / dis;
+        else
+            result.weight = 2.0f;
+        result.surfaceProjection = barycentric_projection;
+
+        debug = projection_point;
         return result;
     }
     #endregion

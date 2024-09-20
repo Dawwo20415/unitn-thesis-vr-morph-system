@@ -15,8 +15,14 @@ public class BSAComponent : MonoBehaviour
     private List<BSACoordinates> m_Coordinates;
     private Animator m_animator;
 
+    private List<Vector3> m_DebugList;
+    private List<Vector3> m_DebugListMesh;
+
     private void Start()
     {
+        m_DebugList = new List<Vector3>();
+        m_DebugListMesh = new List<Vector3>();
+
         m_animator = GetComponent<Animator>();
         m_Coordinates = new List<BSACoordinates>(BSAD.coordinateSpan);
         m_BSAR = new BodySurfaceApproximationRuntime(BSAD);
@@ -109,13 +115,23 @@ public class BSAComponent : MonoBehaviour
                 previous_id = tris.id;
             }
 
+            {
+                m_DebugList.Add(position);
+            }
+
             Vector3 p1 = trn.TransformPoint(tris.a);
             Vector3 p2 = trn.TransformPoint(tris.b);
             Vector3 p3 = trn.TransformPoint(tris.c);
 
-            BSACoordinates bsac = BSAProjectionOperators.MeshRaycast(p1, p2, p3, position, proportional_weight);
+            Vector3 debug_tmp;
+            BSACoordinates bsac = BSAProjectionOperators.MeshRaycast(p1, p2, p3, position, proportional_weight, out debug_tmp, ref m_DebugListMesh);
             m_Coordinates.Add(bsac);
             total_weight_sum += bsac.weight;
+
+            {
+                m_DebugList.Add(debug_tmp);
+            }
+
             counter++;
         }
 
@@ -143,6 +159,17 @@ public class BSAComponent : MonoBehaviour
         Debug.Log("Direct|[Counter/ListCount](" + counter + "/" + m_Coordinates.Count + ")");
 
         return m_Coordinates;
+    }
+
+    public List<BSACoordinates> Project(HumanBodyBones hbb, ref List<Vector3> debug_proj, ref List<Vector3> debug_onMesh)
+    {
+        m_DebugList.Clear();
+        m_DebugListMesh.Clear();
+
+        List<BSACoordinates> tmp = Project(hbb);
+        debug_proj = m_DebugList;
+        debug_onMesh = m_DebugListMesh;
+        return tmp;
     }
 
     public Vector3 ReverseProject(HumanBodyBones hbb, List<BSACoordinates> coord)

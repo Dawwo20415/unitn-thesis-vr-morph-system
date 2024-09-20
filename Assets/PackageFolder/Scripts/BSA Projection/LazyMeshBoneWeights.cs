@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//TODO: better check the 3 point follow!
 public class LazyMeshBoneWeights : MonoBehaviour
 {
     private enum Mode
@@ -31,6 +32,8 @@ public class LazyMeshBoneWeights : MonoBehaviour
         transform.position = getMidpoint() - position_offset;
         transform.rotation = rotation_offset;
 
+        SetReferences(getMidpoint());
+
         if (points.Count == 1) { mode = Mode.OnePoint; }
         else if (points.Count == 2) { mode = Mode.TwoPoints; }
         else { mode = Mode.ThreePoints; }
@@ -46,8 +49,6 @@ public class LazyMeshBoneWeights : MonoBehaviour
 
         transform.rotation = rot;
         transform.position = midpoint - (rot * midpoint_offset);
-
-
     }
 
     private Quaternion getRotation(Vector3 midpoint)
@@ -58,7 +59,7 @@ public class LazyMeshBoneWeights : MonoBehaviour
         {
             rotation = points[0].rotation;
         }
-        /*else if (mode == Mode.ThreePoints)
+        else if (mode == Mode.ThreePoints)
         {
             Vector3 A = midpoint + references[0];
             Vector3 B = midpoint + references[1];
@@ -81,7 +82,7 @@ public class LazyMeshBoneWeights : MonoBehaviour
             Quaternion rotation2 = Quaternion.FromToRotation(rotation1 * AB, nAB);
 
             rotation = rotation2 * rotation1;
-        }*/
+        }
 
         return rotation;
     }
@@ -98,5 +99,14 @@ public class LazyMeshBoneWeights : MonoBehaviour
         midpoint /= points.Count;
 
         return midpoint;
+    }
+
+    void SetReferences(Vector3 midpoint)
+    {
+        references = new List<Vector3>();
+        for (int i = 0; i < points.Count; i++)
+        {
+            references.Add(points[i].position - midpoint);
+        }
     }
 }
