@@ -2,8 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
-using static EgocentricRayCasterSource;
-using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
 
 public static class BSAProjectionOperators
 {
@@ -28,7 +26,7 @@ public static class BSAProjectionOperators
         return new Vector2(w1, w2);
     }
 
-    public static Vector2 V3toBarycentric(Vector3 a, Vector3 b, Vector3 c, Vector3 p, ref List<Vector3> lines)
+    public static Vector2 V3toBarycentric(Vector3 a, Vector3 b, Vector3 c, Vector3 p, out DebugLine line_a, out DebugLine line_b)
     {
         // Baycentric Coordiante solver from "Christer Ericson's Real-Time Collision Detection"
         Vector3 v0 = b - a, v1 = c - a, v2 = p - a;
@@ -43,10 +41,8 @@ public static class BSAProjectionOperators
         float w2 = (d00 * d21 - d01 * d20) / denom;
 
         {
-            lines.Add(a);
-            lines.Add(a + v0 * w1);
-            lines.Add(a + v0 * w1);
-            lines.Add(a + (v0 * w1) + (v1 * w2));
+            line_a = new DebugLine(a, a + v0 * w1, 1.0f);
+            line_b = new DebugLine(a + v0 * w1, a + (v0 * w1) + (v1 * w2), 1.0f);
         }
 
         return new Vector2(w1, w2);
@@ -107,13 +103,13 @@ public static class BSAProjectionOperators
         return result;
     }
 
-    public static BSACoordinates MeshRaycast(Vector3 a, Vector3 b, Vector3 c, Vector3 p, float displacement_weight, out Vector3 debug, ref List<Vector3> lines)
+    public static BSACoordinates MeshRaycast(Vector3 a, Vector3 b, Vector3 c, Vector3 p, float displacement_weight, out BSACLines debug_lines)
     {
         BSACoordinates result = new BSACoordinates();
 
         Vector3 projection_point = ProjectPointOnTriangle(a, b, c, p);
         Vector3 displacement_vector = projection_point - p;
-        Vector2 barycentric_projection = V3toBarycentric(a, b, c, projection_point, ref lines);
+        Vector2 barycentric_projection = V3toBarycentric(a, b, c, projection_point, out debug_lines.faceCA, out debug_lines.faceCB);
 
         float dis = MeshLengthFactor(a, b, c, p, barycentric_projection, displacement_vector.magnitude);
 
@@ -124,7 +120,7 @@ public static class BSAProjectionOperators
             result.weight = 2.0f;
         result.surfaceProjection = barycentric_projection;
 
-        debug = projection_point;
+        debug_lines.projection = new DebugLine(p, projection_point, 1.0f);
         return result;
     }
     #endregion
@@ -178,6 +174,47 @@ public static class BSAProjectionOperators
             result.weight = 1 / adjusted;
         else
             result.weight = 2.0f;
+
+        return result;
+    }
+
+    public static BSACoordinates CylinderRaycast(Vector3 a, Vector3 b, float radius, Vector3 p, float displacement_weight, Vector3 anchor, out BSACLines debug_lines)
+    {
+        BSACoordinates result = new BSACoordinates();
+
+        Vector3 AB = b - a;
+        Vector3 AP = p - a;
+        Vector3 AH = anchor - a;
+
+        Vector3 reference_direction = Vector3.Cross(AH, AB).normalized;
+
+        float ABAPdot = Vector3.Dot(AB.normalized, AP);
+
+        Vector3 projection_on_line = a + (AB.normalized * ABAPdot);
+
+        Vector3 JP = p - projection_on_line;
+        Vector3 inJP = JP.normalized * radius;
+        float angle_between = Vector3.SignedAngle(reference_direction, inJP, AB);
+
+        float distance = JP.magnitude - radius;
+        Vector3 displacement = JP.normalized * distance;
+
+        float dist = ABAPdot / AB.magnitude;
+        result.surfaceProjection = new Vector2(dist, angle_between);
+        result.displacement = displacement / displacement_weight;
+
+        float adjusted = CylinderLengthFactor(a, b, p, dist);
+
+        if (adjusted != 0.0f)
+            result.weight = 1 / adjusted;
+        else
+            result.weight = 2.0f;
+
+        {
+            debug_lines.projection = new DebugLine(p, inJP, 1.0f);
+            debug_lines.faceCA = new DebugLine(a, projection_on_line, 1.0f);
+            debug_lines.faceCB = new DebugLine(projection_on_line, inJP, 1.0f);
+        }
 
         return result;
     }

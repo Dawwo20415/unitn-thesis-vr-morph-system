@@ -27,30 +27,34 @@ public struct DefineTargets : IAnimationJob
 {
     NativeArray<Vector3> m_Targets;
     NativeArray<TransformStreamHandle> m_Handles;
+    NativeArray<int> m_Indexes;
 
-    public void Setup(NativeArray<Vector3> array, Animator animator)
+    public void Setup(NativeArray<Vector3> array, Animator animator, List<HumanBodyBones> bones)
     {
         m_Targets = array;
         m_Handles = new NativeArray<TransformStreamHandle>(3, Allocator.Persistent);
+        m_Indexes = new NativeArray<int>(bones.Count, Allocator.Persistent);
 
+        for (int i = 0; i < bones.Count; i++)
         {
-            m_Handles[0] = animator.BindStreamTransform(animator.GetBoneTransform(HumanBodyBones.LeftShoulder));
-            m_Handles[1] = animator.BindStreamTransform(animator.GetBoneTransform(HumanBodyBones.LeftUpperArm));
-            m_Handles[2] = animator.BindStreamTransform(animator.GetBoneTransform(HumanBodyBones.LeftLowerArm));
+            m_Indexes[i] = ((int)(bones[i]));
+            m_Handles[i] = animator.BindStreamTransform(animator.GetBoneTransform(bones[i]));
         }
     }
 
     public void ProcessRootMotion(AnimationStream stream) { }
     public void ProcessAnimation(AnimationStream stream)
     {
-        m_Targets[(int)HumanBodyBones.LeftShoulder] = m_Handles[0].GetPosition(stream);
-        m_Targets[(int)HumanBodyBones.LeftUpperArm] = m_Handles[1].GetPosition(stream);
-        m_Targets[(int)HumanBodyBones.LeftLowerArm] = m_Handles[2].GetPosition(stream);
+        for (int i = 0; i < m_Indexes.Length; i++)
+        {
+            m_Targets[m_Indexes[i]] = m_Handles[i].GetPosition(stream);
+        }
     }
 
     public void Dispose()
     {
         m_Handles.Dispose();
+        m_Indexes.Dispose();
     }
 }
 

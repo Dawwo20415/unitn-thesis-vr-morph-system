@@ -13,9 +13,8 @@ public class TestEgocentricOutput : MonoBehaviour
 {
     public NativeArray<Vector3> targets { get => m_TargetsArray; }
 
-    private List<Vector3> m_DebugSourceLines;
-    private List<Vector3> m_DebugSourceOnMesh;
-    private List<Vector3> m_DebugDestLines;
+    private EgocentricProjectionDebug source_debug;
+    private EgocentricProjectionDebug destin_debug;
 
     private List<IKChain2> m_chains;
     private IKChain chain;
@@ -26,9 +25,8 @@ public class TestEgocentricOutput : MonoBehaviour
 
     public void InstanceTargets()
     {
-        m_DebugDestLines = new List<Vector3>();
-        m_DebugSourceLines = new List<Vector3>();
-        m_DebugSourceOnMesh = new List<Vector3>();
+        source_debug = new EgocentricProjectionDebug(m_SourceBSA.BSAD.coordinateSpan);
+        destin_debug = new EgocentricProjectionDebug(m_DestBSA.BSAD.coordinateSpan);
 
         m_TargetsArray = new NativeArray<Vector3>((int)HumanBodyBones.LastBone, Allocator.Persistent);
         for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
@@ -45,9 +43,8 @@ public class TestEgocentricOutput : MonoBehaviour
 
     public Vector3 Calculate(HumanBodyBones hbb)
     {
-        m_DebugSourceLines.Clear();
-        List<BSACoordinates> coords = m_SourceBSA.Project(hbb, ref m_DebugSourceLines, ref m_DebugSourceOnMesh);
-        return m_DestBSA.ReverseProject(hbb, coords);
+        List<BSACoordinates> coords = m_SourceBSA.Project(hbb, ref source_debug);
+        return m_DestBSA.ReverseProject(hbb, coords, ref destin_debug);
     }
 
     public void SetTarget(HumanBodyBones hbb, Vector3 position)
@@ -79,10 +76,7 @@ public class TestEgocentricOutput : MonoBehaviour
             Gizmos.DrawWireSphere(pos, 0.05f);
         }
 
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawLineList(m_DebugSourceLines.ToArray());
-
-        Gizmos.color = Color.black;
-        Gizmos.DrawLineList(m_DebugSourceOnMesh.ToArray());
+        source_debug.OnGizmoDraw(true, true);
+        destin_debug.OnGizmoDraw(true, true);
     }
 }
