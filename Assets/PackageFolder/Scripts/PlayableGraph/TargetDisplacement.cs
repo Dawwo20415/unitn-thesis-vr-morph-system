@@ -68,8 +68,12 @@ public class TargetDisplacementBehaviour : PlayableBehaviour
         for (int i = 0; i < m_Chain.Count; i++)
         {
             Vector3 target = output.GetTarget(m_Chain[i]);
+            Vector3 pre = target;
             target = m_Ops[i].Operation(target);
+            Vector3 post = target;
             output.SetTarget(m_Chain[i], target);
+            if (m_Chain[i] == HumanBodyBones.RightHand)
+                Debug.Log(m_Chain[i].ToString() + " displacement from " + pre + " to " + post + " | Subsequent GetTarget " + output.GetTarget(m_Chain[i]));
         }
     }
 }

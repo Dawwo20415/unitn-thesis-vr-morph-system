@@ -140,7 +140,7 @@ public class EgocentricProjectionDebug
             if (lines.weight > 0.9f)
             {
                 debug_list += "(" + i + ")";
-                Debug.Log(i);
+                //Debug.Log(i);
             }
 
             debug_list += lines.weight + ",";

@@ -56,14 +56,14 @@ public class AvatarChainsHandler
 
         for (int i = 0; i < chain.Count; i++)
         {
-            ops[i] = new EmptyDisplacement();
+            ops.Add(new EmptyDisplacement());
 
             if (i == 0 && end_effector_is_egocentric)
             {
-                ego[i] = true;
+                ego.Add(true);
             } else
             {
-                ego[i] = false;
+                ego.Add(false);
             }
         }
 

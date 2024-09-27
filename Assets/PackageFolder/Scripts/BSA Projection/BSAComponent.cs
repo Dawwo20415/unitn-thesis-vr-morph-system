@@ -160,7 +160,7 @@ public class BSAComponent : MonoBehaviour
             m_Coordinates[i] = tmp;
         }
 
-        Debug.Log("Direct|[Counter/ListCount](" + counter + "/" + m_Coordinates.Count + ")");
+        Debug.Log(hbb.ToString() + "|Direct|[Counter/ListCount](" + counter + "/" + m_Coordinates.Count + ")");
 
         return m_Coordinates;
     }
@@ -238,7 +238,7 @@ public class BSAComponent : MonoBehaviour
             t++;
         }
 
-        Debug.Log("Reverse|[Counter/ListCount](" + t + "/" + coord.Count + ")");
+        Debug.Log(hbb.ToString() + "|Reverse|[Counter/ListCount](" + t + "/" + coord.Count + ")");
 
         return weighted_sum / t;
     }
