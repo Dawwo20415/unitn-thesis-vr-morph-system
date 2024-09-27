@@ -37,6 +37,7 @@ public struct BSACustomMesh
     public List<HumanBodyBones> anchors;
     public Vector3[] vertices;
     public int[] triangles;
+    public List<HumanBodyBones> mask;
 }
 
 [System.Serializable]
@@ -105,6 +106,7 @@ public struct BSACoordinates
 public class BodySurfaceApproximationDefinition : ScriptableObject
 {
     public int coordinateSpan { get => CalculateSpan(); }
+    public int boneCoordinateSpan(HumanBodyBones hbb) { return CalculateSpan(hbb); }
 
     public List<BSACylinder> cylinders;
     public List<BSACustomMesh> meshes;
@@ -129,10 +131,45 @@ public class BodySurfaceApproximationDefinition : ScriptableObject
         }
     }
 
+    public IEnumerable<Triangle> meshTris(HumanBodyBones hbb)
+    {
+        Triangle result; int k = 0;
+        foreach (BSACustomMesh mesh in meshes)
+        {
+            if (mesh.anchors.Contains(hbb))
+            {
+                continue;
+            }
+
+            for (int i = 0; i < mesh.triangles.Length / 3; i++)
+            {
+                result.a = mesh.vertices[mesh.triangles[(3 * i)]];
+                result.b = mesh.vertices[mesh.triangles[(3 * i) + 1]];
+                result.c = mesh.vertices[mesh.triangles[(3 * i) + 2]];
+                result.id = k;
+
+                yield return result;
+            }
+            k++;
+        }
+    }
+
     public IEnumerable<BSACylinder> cylindersDef()
     {
         foreach (BSACylinder cyl in cylinders)
         {
+            yield return cyl;
+        }
+    }
+
+    public IEnumerable<BSACylinder> cylindersDef(HumanBodyBones hbb)
+    {
+        foreach (BSACylinder cyl in cylinders)
+        {
+            if (cyl.start == hbb || cyl.end == hbb)
+            {
+                continue;
+            }
             yield return cyl;
         }
     }
@@ -147,6 +184,23 @@ public class BodySurfaceApproximationDefinition : ScriptableObject
         }
 
         size += cylinders.Count;
+
+        return size;
+    }
+
+    private int CalculateSpan(HumanBodyBones hbb)
+    {
+        int size = 0;
+
+        foreach (Triangle tris in meshTris(hbb))
+        {
+            size++;
+        }
+
+        foreach (BSACylinder cy in cylindersDef(hbb))
+        {
+            size++;
+        }
 
         return size;
     }

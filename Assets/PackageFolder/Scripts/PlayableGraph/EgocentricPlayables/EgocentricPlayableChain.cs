@@ -32,7 +32,7 @@ public struct DefineTargets : IAnimationJob
     public void Setup(NativeArray<Vector3> array, Animator animator, List<HumanBodyBones> bones)
     {
         m_Targets = array;
-        m_Handles = new NativeArray<TransformStreamHandle>(3, Allocator.Persistent);
+        m_Handles = new NativeArray<TransformStreamHandle>(bones.Count, Allocator.Persistent);
         m_Indexes = new NativeArray<int>(bones.Count, Allocator.Persistent);
 
         for (int i = 0; i < bones.Count; i++)

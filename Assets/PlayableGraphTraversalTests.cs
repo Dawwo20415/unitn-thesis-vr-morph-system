@@ -36,17 +36,19 @@ public class PlayableGraphTraversalTests : MonoBehaviour
 
         m_chainHandler = new AvatarChainsHandler();
         m_chainHandler.AddChain(
-            new List<HumanBodyBones>         { HumanBodyBones.LeftShoulder, HumanBodyBones.LeftUpperArm, HumanBodyBones.LeftLowerArm, HumanBodyBones.LeftHand },
-            new List<IDisplacementOperation> { new EmptyDisplacement(),     new EmptyDisplacement(),     new EmptyDisplacement(),     new EmptyDisplacement() },
-            new List<bool>                   { false,                       false,                       false,                       true});
+            new List<HumanBodyBones>         { HumanBodyBones.LeftHand, HumanBodyBones.LeftLowerArm, HumanBodyBones.LeftUpperArm, HumanBodyBones.LeftShoulder },
+            new List<IDisplacementOperation> { new EmptyDisplacement(), new EmptyDisplacement(),     new EmptyDisplacement(),     new EmptyDisplacement() },
+            new List<bool>                   { true,                    false,                       false,                       false});
 
         //OR
         //m_chainHandler.AddChain(new List<HumanBodyBones> { HumanBodyBones.LeftShoulder, HumanBodyBones.LeftUpperArm, HumanBodyBones.LeftLowerArm, HumanBodyBones.LeftHand }, true);
 
-        ////m_egoHandler = new EgocentricGraphHandler(graph, m_handler.avatar, source_BSAD, this.gameObject, dest_BSAD, m_handler.retargeted, animator);
+        m_egoHandler = new EgocentricGraphHandler(graph, m_handler.avatar, source_BSAD, this.gameObject, dest_BSAD, m_chainHandler, animator);
 
+        m_egoHandler.ConnectGraph(graph, m_handler.retargeted);
         AnimationPlayableOutput out1 = AnimationPlayableOutput.Create(graph, skeleton_name + " Output", animator);
-        ////PlayableGraphUtility.ConnectOutput(m_egoHandler.lastInPath, out1);
+
+        PlayableGraphUtility.ConnectOutput(m_egoHandler.lastInPath, out1);
 
 #if false
 

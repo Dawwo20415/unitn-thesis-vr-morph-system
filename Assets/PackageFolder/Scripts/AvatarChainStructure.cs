@@ -28,7 +28,7 @@ public class AvatarChainStructure
 
         for (int i = 0; i < m_Chain.Count; i++)
         {
-            value[i] = (int)(m_Chain[i]);
+            value.Add((int)(m_Chain[i]));
         }
 
         return value;
@@ -58,7 +58,7 @@ public class AvatarChainsHandler
         {
             ops[i] = new EmptyDisplacement();
 
-            if (i == (chain.Count - 1) && end_effector_is_egocentric)
+            if (i == 0 && end_effector_is_egocentric)
             {
                 ego[i] = true;
             } else

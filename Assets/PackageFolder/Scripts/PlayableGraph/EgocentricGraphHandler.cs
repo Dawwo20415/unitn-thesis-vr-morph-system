@@ -6,7 +6,7 @@ using UnityEngine.Animations;
 
 public class EgocentricGraphHandler
 {
-    //public Playable lastInPath { get => m_IKPlayable; }
+    public Playable lastInPath { get => m_endPlayable; }
 
     private BSAComponent m_sourceBSA;
     private BSAComponent m_destBSA;
@@ -24,42 +24,20 @@ public class EgocentricGraphHandler
 
     private List<EgocentricIKJob> m_IKJobs;
     private List<AnimationScriptPlayable> m_IKPlayables;
-    
 
-    /*
-    public EgocentricGraphHandler(PlayableGraph graph, GameObject source, BodySurfaceApproximationDefinition source_BSAD, GameObject avatar, BodySurfaceApproximationDefinition avatar_BSAD, Playable connection, Animator animator)
-    {
-        SetupAvatarBSA(source, source_BSAD, avatar, avatar_BSAD);
-
-        m_referenceObject = avatar.AddComponent<TestEgocentricOutput>();
-        m_referenceObject.InstanceTargets();
-        m_referenceObject.SetBSAComponents(m_sourceBSA, m_destBSA);
-
-        m_egocentricOutput = new EgocentricPlayableOutput(graph, m_referenceObject);
-        m_projPlayable = ScriptPlayable<EgocentricProjectionBehaviour>.Create(graph);
-
-        m_TargetsJob = new DefineTargets();
-        List<HumanBodyBones> chain = new List<HumanBodyBones> { HumanBodyBones.LeftShoulder, HumanBodyBones.LeftUpperArm, HumanBodyBones.LeftLowerArm, HumanBodyBones.LeftHand };
-        m_TargetsJob.Setup(m_referenceObject.targets, animator, chain);
-        m_SetTargetsPlayable = AnimationScriptPlayable.Create(graph, m_TargetsJob);
-
-        m_IKJob = new EgocentricIKJob();
-        List<int> indexes = new List<int> { (int)HumanBodyBones.LeftHand, (int)HumanBodyBones.LeftLowerArm, (int)HumanBodyBones.LeftUpperArm, (int)HumanBodyBones.LeftShoulder };
-        m_IKJob.setup(animator, chain, m_referenceObject.targets, indexes);
-        m_IKPlayable = AnimationScriptPlayable.Create(graph, m_IKJob);
-
-        BuildGraph(graph, connection);
-    }
-    */
+    private Playable m_startPlayable;
+    private Playable m_endPlayable;
+    private Playable m_outputConnectionPlayable;
 
     public EgocentricGraphHandler(PlayableGraph graph, GameObject source, BodySurfaceApproximationDefinition source_BSAD, GameObject avatar, BodySurfaceApproximationDefinition avatar_BSAD, AvatarChainsHandler handler, Animator animator)
     {
         SetupAvatarBSA(source, source_BSAD, avatar, avatar_BSAD);
+        InstanceLists();
 
         //SETUP REFERENCE DATA OBJECT
         m_referenceObject = avatar.AddComponent<TestEgocentricOutput>();
-        m_referenceObject.InstanceTargets();
         m_referenceObject.SetBSAComponents(m_sourceBSA, m_destBSA);
+        m_referenceObject.InstanceTargets();
 
         //SETUP CHAINS
         m_chainHandler = handler;
@@ -70,12 +48,21 @@ public class EgocentricGraphHandler
         }
 
         m_egocentricOutput = new EgocentricPlayableOutput(graph, m_referenceObject);
+
+        PlayableGraphUtility.ConnectOutput(m_outputConnectionPlayable, m_egocentricOutput.output, 1);
     }
 
     ~EgocentricGraphHandler()
     {
-        //m_IKJob.Dispose();
-        //m_TargetsJob.Dispose();
+        foreach (EgocentricIKJob job in m_IKJobs)
+        {
+            job.Dispose();
+        }
+
+        foreach (DefineTargets job in m_TargetsJobs)
+        {
+            job.Dispose();
+        }
     }
 
     private void InstanceLists()
@@ -108,11 +95,23 @@ public class EgocentricGraphHandler
         m_SetTargetPlayables.Add(target_playable);
 
         //INSERT EGOCENTRIC
+        List<ScriptPlayable<EgocentricProjectionBehaviour>> egoPlayables = new List<ScriptPlayable<EgocentricProjectionBehaviour>>();
+        for (int i = 0; i < structure.egocentric.Count; i++)
+        {
+            if (structure.egocentric[i])
+            {
+                EgocentricProjectionBehaviour behaviour = new EgocentricProjectionBehaviour();
+                behaviour.Setup(structure.chain[i]);
+                ScriptPlayable<EgocentricProjectionBehaviour> playable = ScriptPlayable<EgocentricProjectionBehaviour>.Create(graph, behaviour);
+                m_projPlayables.Add(playable);
+                egoPlayables.Add(playable);
+            }
+        }
         foreach (bool is_ego in structure.egocentric)
         {
             if (is_ego)
             {
-                m_projPlayables.Add(ScriptPlayable<EgocentricProjectionBehaviour>.Create(graph));
+                
             }
         }
 
@@ -130,10 +129,38 @@ public class EgocentricGraphHandler
 
         m_IKJobs.Add(ik_job);
         m_IKPlayables.Add(ik_playable);
+
+        //CONNECT PLAYABLES
+        if (m_startPlayable.IsNull())
+        {
+            m_startPlayable = target_playable;
+        } else
+        {
+            PlayableGraphUtility.ConnectNodes(graph, m_endPlayable, target_playable);
+        }
+
+        if (egoPlayables.Count == 0)
+        {
+            PlayableGraphUtility.ConnectNodes(graph, target_playable, displacement_playable);
+        } else
+        {
+            Playable previous = target_playable;
+            foreach (Playable playable in egoPlayables)
+            {
+                PlayableGraphUtility.ConnectNodes(graph, previous, playable);
+                previous = playable;
+            }
+            PlayableGraphUtility.ConnectNodes(graph, previous, displacement_playable);
+        }
+        
+        PlayableGraphUtility.ConnectNodes(graph, displacement_playable, ik_playable);
+
+        m_endPlayable = ik_playable;
+        m_outputConnectionPlayable = displacement_playable;
     }
 
-    public void BuildGraph(PlayableGraph graph, Playable connection)
+    public void ConnectGraph(PlayableGraph graph, Playable connection)
     {
-        //REBUILD
+        PlayableGraphUtility.ConnectNodes(graph, connection, m_startPlayable);
     }
 }

@@ -121,6 +121,7 @@ public static class BSAProjectionOperators
         result.surfaceProjection = barycentric_projection;
 
         debug_lines.projection = new DebugLine(p, projection_point, 1.0f);
+        debug_lines.weight = 1.0f;
         return result;
     }
     #endregion
@@ -214,6 +215,7 @@ public static class BSAProjectionOperators
             debug_lines.projection = new DebugLine(p, inJP, 1.0f);
             debug_lines.faceCA = new DebugLine(a, projection_on_line, 1.0f);
             debug_lines.faceCB = new DebugLine(projection_on_line, inJP, 1.0f);
+            debug_lines.weight = 1.0f;
         }
 
         return result;
@@ -258,6 +260,43 @@ public static class BSAProjectionOperators
 
         return (position, weight);
     }
+
+    public static (Vector3, float) MeshReversal(Vector3 a, Vector3 b, Vector3 c, BSACoordinates bsa, float bone_weight, out BSACLines debug_lines)
+    {
+        Vector3 position; float weight;
+        DebugLine lineA, lineB;
+
+        //position = ConvertToGlobalSpaceTriangle(a, b, c, coordinate);
+        //
+        Vector3 onPlane = BarycentricToV3(a, b, c, bsa.surfaceProjection, out lineA, out lineB);
+        Vector3 projection = TransferedDisplacementVector(a, b, c, bsa.displacement, bone_weight);
+
+        position = onPlane + projection;
+        //
+
+        weight = bsa.weight;
+
+        {
+            debug_lines.projection = new DebugLine(position, onPlane);
+            debug_lines.faceCA = lineA;
+            debug_lines.faceCB = lineB;
+            debug_lines.weight = bsa.weight;
+        }
+
+        return (position, weight);
+    }
+
+    public static Vector3 BarycentricToV3(Vector3 a, Vector3 b, Vector3 c, Vector2 coord, out DebugLine lineA, out DebugLine lineB)
+    {
+        Vector3 v0 = b - a, v1 = c - a;
+
+        {
+            lineA = new DebugLine(a, a + (v0 * coord.x));
+            lineB = new DebugLine(a + (v0 * coord.x), a + (v0 * coord.x) + (v1 * coord.y));
+        }
+
+        return a + (v0 * coord.x) + (v1 * coord.y);
+    }
     #endregion
 
     #region Cylinder
@@ -273,6 +312,29 @@ public static class BSAProjectionOperators
         Vector3 displacement = direction * bsa.displacement.magnitude * bone_weight;
 
         Vector3 proj_point = AB * bsa.surfaceProjection.x;
+
+        return (a + proj_point + toSurface + displacement, bsa.weight);
+    }
+
+    public static (Vector3, float) CylinderReversal(Vector3 a, Vector3 b, float radius, BSACoordinates bsa, float bone_weight, Vector3 anchor, out BSACLines debug_lines)
+    {
+        Vector3 AB = b - a;
+        Vector3 AH = anchor - a;
+
+        Vector3 reference_direction = Vector3.Cross(AH, AB).normalized;
+
+        Vector3 direction = Quaternion.AngleAxis(bsa.surfaceProjection.y, AB) * reference_direction;
+        Vector3 toSurface = direction * radius;
+        Vector3 displacement = direction * bsa.displacement.magnitude * bone_weight;
+
+        Vector3 proj_point = AB * bsa.surfaceProjection.x;
+
+        {
+            debug_lines.projection = new DebugLine(a + proj_point + toSurface + displacement, a + proj_point + toSurface);
+            debug_lines.faceCA = new DebugLine(a, a + proj_point);
+            debug_lines.faceCB = new DebugLine(a + proj_point, a + proj_point + toSurface);
+            debug_lines.weight = bsa.weight;
+        }
 
         return (a + proj_point + toSurface + displacement, bsa.weight);
     }

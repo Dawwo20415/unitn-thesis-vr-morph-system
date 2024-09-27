@@ -105,7 +105,7 @@ public class BSAComponent : MonoBehaviour
         //PROJECT ON EACH MESH FACE
         int previous_id = 0;
         Transform trn = m_BSAR.meshes[0].transform;
-        foreach (Triangle tris in BSAD.meshTris())
+        foreach (Triangle tris in BSAD.meshTris(hbb))
         {
             BSACLines debug_lines = new BSACLines();
 
@@ -125,9 +125,7 @@ public class BSAComponent : MonoBehaviour
 
             {
                 debug_lines.SetWeight(bsac.weight);
-                m_EPD.AddProjection(debug_lines.projection);
-                m_EPD.AddComponent(debug_lines.faceCA);
-                m_EPD.AddComponent(debug_lines.faceCB);
+                m_EPD.Add(debug_lines);
             }
 
             counter++;
@@ -135,7 +133,7 @@ public class BSAComponent : MonoBehaviour
 
         //PROJECT ON EACH CYLINDER
         Vector3 anchor_position = m_animator.GetBoneTransform(HumanBodyBones.Hips).transform.position;
-        foreach (BSACylinder cyl in BSAD.cylindersDef())
+        foreach (BSACylinder cyl in BSAD.cylindersDef(hbb))
         {
             BSACLines debug_lines = new BSACLines();
 
@@ -148,9 +146,7 @@ public class BSAComponent : MonoBehaviour
 
             {
                 debug_lines.SetWeight(bsac.weight);
-                m_EPD.AddProjection(debug_lines.projection);
-                m_EPD.AddComponent(debug_lines.faceCA);
-                m_EPD.AddComponent(debug_lines.faceCB);
+                m_EPD.Add(debug_lines);
             }
 
             counter++;
@@ -171,7 +167,7 @@ public class BSAComponent : MonoBehaviour
 
     public List<BSACoordinates> Project(HumanBodyBones hbb, ref EgocentricProjectionDebug epd)
     {
-        m_EPD.Clear();
+        m_EPD.Reload(BSAD.boneCoordinateSpan(hbb));
 
         List<BSACoordinates> tmp = Project(hbb);
 
@@ -192,8 +188,9 @@ public class BSAComponent : MonoBehaviour
         //MESH REVERSAL
         int previous_id = 0;
         Transform trn = m_BSAR.meshes[0].transform;
-        foreach (Triangle tris in BSAD.meshTris())
+        foreach (Triangle tris in BSAD.meshTris(hbb))
         {
+            BSACLines debug_lines = new BSACLines();
             Vector3 pos; float w;
             
             if (tris.id != previous_id)
@@ -206,25 +203,38 @@ public class BSAComponent : MonoBehaviour
             Vector3 p2 = trn.TransformPoint(tris.b);
             Vector3 p3 = trn.TransformPoint(tris.c);
 
-            (pos, w) = BSAProjectionOperators.MeshReversal(p1, p2, p3, coord[t], proportional_weight);
+            (pos, w) = BSAProjectionOperators.MeshReversal(p1, p2, p3, coord[t], proportional_weight, out debug_lines);
             weighted_sum += pos;
             weight += w;
+
+            {
+                debug_lines.SetWeight(coord[t].weight);
+                m_EPD.Add(debug_lines);
+            }
+
             t++;
         }
 
         //CYLINDERS REVERSAL
         Vector3 anchor_position = m_animator.GetBoneTransform(HumanBodyBones.Hips).transform.position;
-        foreach (BSACylinder cyl in BSAD.cylindersDef())
+        foreach (BSACylinder cyl in BSAD.cylindersDef(hbb))
         {
             Vector3 pos; float w;
+            BSACLines debug_lines = new BSACLines();
 
             Vector3 a = m_animator.GetBoneTransform(cyl.start).position;
             Vector3 b = m_animator.GetBoneTransform(cyl.end).position;
 
-            (pos, w) = BSAProjectionOperators.CylinderReversal(a, b, cyl.radius, coord[t], proportional_weight, anchor_position);
+            (pos, w) = BSAProjectionOperators.CylinderReversal(a, b, cyl.radius, coord[t], proportional_weight, anchor_position, out debug_lines);
 
             weighted_sum += pos;
             weight += w;
+
+            {
+                debug_lines.SetWeight(coord[t].weight);
+                m_EPD.Add(debug_lines);
+            }
+
             t++;
         }
 
@@ -235,7 +245,7 @@ public class BSAComponent : MonoBehaviour
 
     public Vector3 ReverseProject(HumanBodyBones hbb, List<BSACoordinates> coord, ref EgocentricProjectionDebug epd)
     {
-        m_EPD.Clear();
+        m_EPD.Reload(BSAD.boneCoordinateSpan(hbb));
 
         Vector3 tmp = ReverseProject(hbb, coord);
 
