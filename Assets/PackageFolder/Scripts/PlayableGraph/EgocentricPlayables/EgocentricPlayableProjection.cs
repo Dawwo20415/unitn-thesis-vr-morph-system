@@ -20,9 +20,7 @@ public class EgocentricProjectionBehaviour : PlayableBehaviour
         TestEgocentricOutput output = (TestEgocentricOutput)playerData;
         Vector3 previous = output.GetTarget(m_bone);
         Vector3 result = output.Calculate(m_bone);
-        Debug.Log("Bone " + m_bone.ToString() + " pre calculation: " + previous + " after calculation: " + result);
+        Debug.Log("PlayableBehaviour | Setp #2 (Egocentric + " + m_bone.ToString() + ")| Previous:" + previous + " After:" + result);
         output.SetTarget(HumanBodyBones.LeftHand, result);
-
-        //Debug.Log("Egocentric Process Frame | Previous: " + previous + " Result: " + result);
     }
 }

@@ -43,7 +43,7 @@ public class PlayableGraphTraversalTests : MonoBehaviour
         //OR
         //m_chainHandler.AddChain(new List<HumanBodyBones> { HumanBodyBones.LeftShoulder, HumanBodyBones.LeftUpperArm, HumanBodyBones.LeftLowerArm, HumanBodyBones.LeftHand }, true);
 
-        m_egoHandler = new EgocentricGraphHandler(graph, m_handler.avatar, source_BSAD, this.gameObject, dest_BSAD, m_chainHandler, animator);
+        //m_egoHandler = new EgocentricGraphHandler(graph, m_handler.avatar, source_BSAD, this.gameObject, dest_BSAD, m_chainHandler, animator);
 
         m_egoHandler.ConnectGraph(graph, m_handler.retargeted);
         AnimationPlayableOutput out1 = AnimationPlayableOutput.Create(graph, skeleton_name + " Output", animator);

@@ -29,10 +29,17 @@ public class EgocentricGraphHandler
     private Playable m_endPlayable;
     private Playable m_outputConnectionPlayable;
 
+    //WIP
+    private AnimationPlayableOutput m_testPlayableOutput;
+    public Playable firstInSecondStream;
+
     public EgocentricGraphHandler(PlayableGraph graph, GameObject source, BodySurfaceApproximationDefinition source_BSAD, GameObject avatar, BodySurfaceApproximationDefinition avatar_BSAD, AvatarChainsHandler handler, Animator animator)
     {
         SetupAvatarBSA(source, source_BSAD, avatar, avatar_BSAD);
         InstanceLists();
+
+        //SETUP SECOND ANIMATION OUTPUT
+        m_testPlayableOutput = AnimationPlayableOutput.Create(graph, "Optitrack direct output", animator);
 
         //SETUP REFERENCE DATA OBJECT
         m_referenceObject = avatar.AddComponent<TestEgocentricOutput>();
@@ -49,7 +56,7 @@ public class EgocentricGraphHandler
 
         m_egocentricOutput = new EgocentricPlayableOutput(graph, m_referenceObject);
 
-        PlayableGraphUtility.ConnectOutput(m_outputConnectionPlayable, m_egocentricOutput.output, 1);
+        PlayableGraphUtility.ConnectOutput(m_outputConnectionPlayable, m_egocentricOutput.output);
     }
 
     ~EgocentricGraphHandler()
@@ -107,13 +114,6 @@ public class EgocentricGraphHandler
                 egoPlayables.Add(playable);
             }
         }
-        foreach (bool is_ego in structure.egocentric)
-        {
-            if (is_ego)
-            {
-                
-            }
-        }
 
         //INSERT DISPLACEMENTS
         TargetDisplacementBehaviour target_behaviour = new TargetDisplacementBehaviour();
@@ -123,14 +123,15 @@ public class EgocentricGraphHandler
         m_dispPlayables.Add(displacement_playable);
 
         //INSERT IK PLAYABLE
-        EgocentricIKJob ik_job = new EgocentricIKJob();
-        ik_job.setup(animator, structure.chain, output.targets, structure.chain_indexes);
-        AnimationScriptPlayable ik_playable = AnimationScriptPlayable.Create(graph, ik_job);
+        //EgocentricIKJob ik_job = new EgocentricIKJob();
+        //ik_job.setup(animator, structure.chain, output.targets, structure.chain_indexes);
+        //AnimationScriptPlayable ik_playable = AnimationScriptPlayable.Create(graph, ik_job);
 
-        m_IKJobs.Add(ik_job);
-        m_IKPlayables.Add(ik_playable);
+        //m_IKJobs.Add(ik_job);
+        //m_IKPlayables.Add(ik_playable);
 
         //CONNECT PLAYABLES
+#if false
         if (m_startPlayable.IsNull())
         {
             m_startPlayable = target_playable;
@@ -152,15 +153,103 @@ public class EgocentricGraphHandler
             }
             PlayableGraphUtility.ConnectNodes(graph, previous, displacement_playable);
         }
-        
         PlayableGraphUtility.ConnectNodes(graph, displacement_playable, ik_playable);
+#else
 
-        m_endPlayable = ik_playable;
+        Playable previous = egoPlayables[0];
+        for (int i = 1; i < egoPlayables.Count; i++)
+        {
+            PlayableGraphUtility.ConnectNodes(graph, previous, egoPlayables[i]);
+            previous = egoPlayables[i];
+        }
+        PlayableGraphUtility.ConnectNodes(graph, previous, displacement_playable);
+        //PlayableGraphUtility.ConnectOutput(displacement_playable, m_testPlayableOutput);
+#endif
+
+        //target_playable.SetOutputCount(2);
+        //ik_playable.SetInputCount(1);
+        //PlayableGraphUtility.ConnectNodesI(graph, target_playable, ik_playable, 1, 0);
+        //firstInSecondStream = ik_playable;
+        //m_endPlayable = ik_playable;
         m_outputConnectionPlayable = displacement_playable;
     }
 
     public void ConnectGraph(PlayableGraph graph, Playable connection)
     {
-        PlayableGraphUtility.ConnectNodes(graph, connection, m_startPlayable);
+        Playable previous = connection;
+        //OTHER OUT
+        for (int i = 0; i < m_SetTargetPlayables.Count; i++)
+        {
+            PlayableGraphUtility.ConnectNodes(graph, previous, m_SetTargetPlayables[i]);
+            previous = m_SetTargetPlayables[i];
+        }
+
+        PlayableGraphUtility.ConnectOutput(previous, m_testPlayableOutput);
+
+        //MAIN OUT
+        //PlayableGraphUtility.ConnectNodes(graph, connection, m_startPlayable);
+    }
+}
+
+public class EgocentricHandler
+{
+    private BSAComponent m_sourceBSA;
+    private BSAComponent m_destBSA;
+
+    private TestEgocentricOutput m_referenceObject;
+    private AvatarChainsHandler m_chainHandler;
+
+    private AvatarTargetsComponent m_tComponent;
+
+    public EgocentricHandler(GameObject source, BodySurfaceApproximationDefinition source_BSAD, GameObject avatar, BodySurfaceApproximationDefinition avatar_BSAD, AvatarChainsHandler handler)
+    {
+        SetupAvatarBSA(source, source_BSAD, avatar, avatar_BSAD);
+
+        //SETUP REFERENCE DATA OBJECT
+        m_referenceObject = avatar.AddComponent<TestEgocentricOutput>();
+        m_referenceObject.SetBSAComponents(m_sourceBSA, m_destBSA);
+        m_referenceObject.InstanceTargets();
+
+        //TARGETS
+        m_tComponent = avatar.AddComponent<AvatarTargetsComponent>();
+        m_tComponent.InstanceTargets();
+
+        //SETUP CHAINS
+        m_chainHandler = handler;
+
+        foreach (AvatarChainStructure structure in m_chainHandler.chains())
+        {
+            for (int i = 0; i < structure.chain.Count; i++)
+            {
+                if (structure.egocentric[i])
+                {
+                    m_tComponent.RegisterEgocentricBone((int)structure.chain[i], structure.ops[i]);
+                } else
+                {
+                    m_tComponent.RegisterBone((int)structure.chain[i], structure.ops[i]);
+                }
+            }
+        }
+    }
+
+    private void SetupAvatarBSA(GameObject source, BodySurfaceApproximationDefinition source_BSAD, GameObject dest, BodySurfaceApproximationDefinition dest_BSAD)
+    {
+        m_sourceBSA = source.AddComponent<BSAComponent>();
+        m_sourceBSA.BSAD = source_BSAD;
+
+        m_destBSA = dest.AddComponent<BSAComponent>();
+        m_destBSA.BSAD = dest_BSAD;
+    }
+
+    public void Project(HumanBodyBones hbb)
+    {
+        Vector3 previous = m_referenceObject.GetTarget(hbb);
+        Vector3 result = m_referenceObject.Calculate(hbb);
+    }
+
+    public void Targets(Animator animator)
+    {
+        m_tComponent.SetTargets(animator);
+        m_tComponent.CompoundOperations();
     }
 }

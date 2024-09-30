@@ -57,8 +57,8 @@ public struct EgocentricIKJob : IAnimationJob
     public void ProcessRootMotion(AnimationStream stream) { }
     public void ProcessAnimation(AnimationStream stream)
     {
-        Debug.Log("Doing Egocentric IK with end effector position " + m_Targets[m_Indexes[0]]);
         Vector3 goal = m_Targets[m_Indexes[0]];
+        Debug.Log("Animation Job | Step #4 (Inverse Kinematic) | EE Target:" + goal);
 
         //Debug.Log("Targets Array Length: " + m_Targets.Length);
 

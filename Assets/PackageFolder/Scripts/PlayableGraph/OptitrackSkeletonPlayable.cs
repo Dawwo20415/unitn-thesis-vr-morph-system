@@ -45,6 +45,7 @@ public struct OptitrackSkeletonJob : IAnimationJob
     public void ProcessRootMotion(AnimationStream stream) { }
     public void ProcessAnimation(AnimationStream stream)
     {
+        Debug.Log("AnimationJob | Step #0.1 (Optitrack Input)");
 
         OptitrackSkeletonState skelState = m_client.GetLatestSkeletonState(m_skeletonDefinition.Id);
         if (skelState != null)

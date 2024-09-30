@@ -47,15 +47,15 @@ public class TestEgocentricOutput : MonoBehaviour
 
     public void SetTarget(HumanBodyBones hbb, Vector3 position)
     {
-        if (hbb == HumanBodyBones.RightHand)
-            Debug.Log("Setting Target for bone " + hbb.ToString() + " to " + position);
+        //if (hbb == HumanBodyBones.RightHand)
+            //Debug.Log("Setting Target for bone " + hbb.ToString() + " to " + position);
         m_TargetsArray[(int)hbb] = position;
     }
 
     public Vector3 GetTarget(HumanBodyBones hbb)
     {
-        if (hbb == HumanBodyBones.RightHand)
-            Debug.Log("Getting Target for bone " + hbb.ToString() + " to " + m_TargetsArray[(int)hbb]);
+        //if (hbb == HumanBodyBones.RightHand)
+            //Debug.Log("Getting Target for bone " + hbb.ToString() + " to " + m_TargetsArray[(int)hbb]);
         return m_TargetsArray[(int)hbb];
     }
 
@@ -66,25 +66,6 @@ public class TestEgocentricOutput : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.blue;
-        //foreach (Vector3 pos in m_TargetsArray)
-        //{
-        //    Gizmos.DrawWireSphere(pos, 0.05f);
-        //}
-        for (int i = 0; i < m_TargetsArray.Length; i++)
-        {
-            if (i == (int)HumanBodyBones.RightHand)
-            {
-                Gizmos.color = Color.red;
-                Gizmos.DrawWireSphere(m_TargetsArray[i], 0.05f);
-                Debug.Log("Drawing " + HumanBodyBones.RightHand.ToString() + " target at position " + m_TargetsArray[i]);
-                Gizmos.color = Color.blue;
-            } else
-            {
-                Gizmos.DrawWireSphere(m_TargetsArray[i], 0.05f);
-            }
-        }
-
         source_debug.OnGizmoDraw(true, true);
         destin_debug.OnGizmoDraw(true, true);
     }

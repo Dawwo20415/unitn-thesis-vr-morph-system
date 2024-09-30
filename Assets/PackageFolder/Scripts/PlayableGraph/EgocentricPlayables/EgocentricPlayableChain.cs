@@ -31,6 +31,7 @@ public struct DefineTargets : IAnimationJob
 
     public void Setup(NativeArray<Vector3> array, Animator animator, List<HumanBodyBones> bones)
     {
+        Debug.Log("Setup DefineTargets");
         m_Targets = array;
         m_Handles = new NativeArray<TransformStreamHandle>(bones.Count, Allocator.Persistent);
         m_Indexes = new NativeArray<int>(bones.Count, Allocator.Persistent);
@@ -45,9 +46,14 @@ public struct DefineTargets : IAnimationJob
     public void ProcessRootMotion(AnimationStream stream) { }
     public void ProcessAnimation(AnimationStream stream)
     {
+        Debug.Log("Step #1");
         for (int i = 0; i < m_Indexes.Length; i++)
         {
-            m_Targets[m_Indexes[i]] = m_Handles[i].GetPosition(stream);
+            Vector3 vec = m_Handles[i].GetPosition(stream);
+            m_Targets[m_Indexes[i]] = vec;
+
+            if (m_Indexes[i] == (int)HumanBodyBones.RightHand)
+                Debug.Log("Animation Job | Setp #1 (Setting Targets) | Setting at " + vec);
         }
     }
 
