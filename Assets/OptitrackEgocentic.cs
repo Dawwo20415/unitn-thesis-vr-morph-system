@@ -22,11 +22,9 @@ public class OptitrackEgocentic : MonoBehaviour
     public BodySurfaceApproximationDefinition dest_BSAD;
 
     private AvatarChainsHandler m_chainHandler;
-    private EgocentricGraphHandler m_egocentricGraphHandler;
-
 
     //WIP
-    EgocentricHandler egocentricHandler;
+    EgocentricRetargeting egocentricRetargeting;
 
     // Start is called before the first frame update
     void Start()
@@ -40,20 +38,16 @@ public class OptitrackEgocentic : MonoBehaviour
         PlayableGraphUtility.ConnectOutput(m_handler.retargeted, output);
 
         m_chainHandler = new AvatarChainsHandler();
-        //m_chainHandler.AddChain(
-        //new List<HumanBodyBones> { HumanBodyBones.RightHand, HumanBodyBones.RightLowerArm, HumanBodyBones.RightUpperArm, HumanBodyBones.RightShoulder }, true);
 
         m_chainHandler.AddChain(
         new List<HumanBodyBones>         { HumanBodyBones.RightHand, HumanBodyBones.RightLowerArm, HumanBodyBones.RightUpperArm, HumanBodyBones.RightShoulder },
-        new List<IDisplacementOperation> { new ScalarDisplacement(new Vector3(0.0f, 0.2f, 0.0f)), new EmptyDisplacement(), new EmptyDisplacement(), new EmptyDisplacement() },
+        new List<IDisplacementOperation> { new EmptyDisplacement(), new EmptyDisplacement(), new EmptyDisplacement(), new EmptyDisplacement() },
         new List<bool>                   { true, false, false, false });
 
-        egocentricHandler = new EgocentricHandler(m_handler.avatar, source_BSAD, this.gameObject, dest_BSAD, m_chainHandler);
+        //m_chainHandler.AddChain(
+        //new List<HumanBodyBones> { HumanBodyBones.LeftHand, HumanBodyBones.LeftLowerArm, HumanBodyBones.LeftUpperArm, HumanBodyBones.LeftShoulder }, true);
 
-        //m_egocentricGraphHandler = new EgocentricGraphHandler(graph, m_handler.avatar, source_BSAD, this.gameObject, dest_BSAD, m_chainHandler, animator);
-
-        //m_egocentricGraphHandler.ConnectGraph(graph, m_handler.retargeted);
-        //PlayableGraphUtility.ConnectOutput(m_egocentricGraphHandler.lastInPath, output);
+        egocentricRetargeting = new EgocentricRetargeting(m_handler.avatar, source_BSAD, this.gameObject, dest_BSAD, m_chainHandler, animator);
 
         graph.Play();
     }
@@ -61,14 +55,12 @@ public class OptitrackEgocentic : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //Debug.Log("NEW FRAME ------------------------------------" + UnityEngine.Random.Range(0.0f, 1.0f));
         m_handler.Rebind(animator);
     }
 
     private void LateUpdate()
     {
-        egocentricHandler.Targets(animator);
-        egocentricHandler.Project(HumanBodyBones.RightHand);
+        egocentricRetargeting.Retarget(animator);
     }
 
     private void OnDestroy()

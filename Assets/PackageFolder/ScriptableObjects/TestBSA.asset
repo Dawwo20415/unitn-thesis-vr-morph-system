@@ -112,15 +112,19 @@ MonoBehaviour:
   - name: Left Palm
     pos_offset: {x: -0.05267197, y: -0.011513114, z: -0.0011379234}
     rot_offset: {x: 0.49528193, y: -0.4885713, z: -0.52518135, w: 0.49008018}
+    anchor: 17
   - name: Right Palm
     pos_offset: {x: 0.052666664, y: -0.011517167, z: -0.0011377484}
     rot_offset: {x: 0.4900853, y: -0.5251803, z: 0.4885675, w: -0.49528158}
+    anchor: 18
   - name: Left Sole
     pos_offset: {x: -0.012762733, y: -0.08939557, z: 0.059861764}
     rot_offset: {x: -0.7061993, y: -0.035814572, z: -0.035814565, w: 0.7061993}
+    anchor: 5
   - name: Right Sole
     pos_offset: {x: 0.012763016, y: -0.08939551, z: 0.05986179}
     rot_offset: {x: 0.70619935, y: -0.035814565, z: 0.035814572, w: 0.70619935}
+    anchor: 6
   body_proportion_weights:
   - 1
   - 1

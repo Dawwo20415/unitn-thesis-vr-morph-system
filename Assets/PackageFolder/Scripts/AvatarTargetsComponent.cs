@@ -43,6 +43,16 @@ public class AvatarTargetsComponent : MonoBehaviour
         }
     }
 
+    public Vector3 GetTargetPosition(HumanBodyBones hbb)
+    {
+        return m_targets[(int)hbb];
+    }
+
+    public void SetTargetPosition(HumanBodyBones hbb, Vector3 position)
+    {
+        m_targets[(int)hbb] = position;
+    }
+
     public void RegisterBone(int bone, IDisplacementOperation op)
     {
         m_standard_indexes.Add(new DispCorrespondance(bone, op));

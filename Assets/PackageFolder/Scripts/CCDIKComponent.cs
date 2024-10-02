@@ -7,6 +7,7 @@ using UnityEngine.Animations;
 
 public class CCDIKComponent : MonoBehaviour
 {
+    [SerializeField]
     private List<Transform> m_Bones;
 
     private float m_SqrDistError = 0.01f;
@@ -19,7 +20,7 @@ public class CCDIKComponent : MonoBehaviour
 
         for (int i = 0; i < bones.Count; i++)
         {
-            m_Bones[i] = animator.GetBoneTransform(bones[i]);
+            m_Bones.Add(animator.GetBoneTransform(bones[i]));
         }
 
         m_ChainLength = bones.Count;

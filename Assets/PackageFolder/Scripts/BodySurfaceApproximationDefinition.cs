@@ -47,6 +47,7 @@ public struct BSANormal
     public Vector3 pos_offset;
     //Uses Transform.forward as the actual vector to rotate
     public Quaternion rot_offset;
+    public HumanBodyBones anchor;
 }
 
 public static class HumanBodyBonesWeightPath

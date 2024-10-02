@@ -93,6 +93,57 @@ public class BSAComponent : MonoBehaviour
         }
     }
 
+    public (Vector3, float) CastForCloasest(HumanBodyBones hbb)
+    {
+        Vector3 position = m_animator.GetBoneTransform(hbb).position;
+        Vector3 normal = Vector3.one;
+        float min_distance = 100.0f;
+
+        int previous_id = 0;
+        Transform trn = m_BSAR.meshes[0].transform;
+        foreach (Triangle tris in BSAD.meshTris(hbb))
+        {
+            if (tris.id != previous_id)
+            {
+                trn = m_BSAR.meshes[tris.id].transform;
+                previous_id = tris.id;
+            }
+
+            Vector3 p1 = trn.TransformPoint(tris.a);
+            Vector3 p2 = trn.TransformPoint(tris.b);
+            Vector3 p3 = trn.TransformPoint(tris.c);
+
+            Vector3 midpoint = (p1 + p2 + p3) / 3;
+
+            if (Mathf.Abs((midpoint - position).magnitude) < min_distance)
+            {
+                min_distance = Mathf.Abs((midpoint - position).magnitude);
+                normal = Vector3.Cross(p2 - p1, p3 - p1);
+            }
+        }
+
+        foreach (BSACylinder cyl in BSAD.cylindersDef(hbb))
+        {
+            Vector3 a = m_animator.GetBoneTransform(cyl.start).position;
+            Vector3 b = m_animator.GetBoneTransform(cyl.end).position;
+
+            Vector3 AB = b - a;
+            Vector3 AP = position - a;
+
+            float ABAPdot = Vector3.Dot(AB.normalized, AP);
+
+            Vector3 projection_on_line = a + (AB.normalized * ABAPdot);
+
+            if (ABAPdot > 0 && Mathf.Abs((position - projection_on_line).magnitude) < min_distance)
+            {
+                min_distance = Mathf.Abs((position - projection_on_line).magnitude);
+                normal = (position - projection_on_line).normalized;
+            }
+        }
+
+        return (normal, min_distance);
+    }
+
     public List<BSACoordinates> Project(HumanBodyBones hbb)
     {
         m_Coordinates.Clear();

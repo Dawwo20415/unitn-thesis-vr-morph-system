@@ -115,7 +115,6 @@ public struct AvatarRetargetingJob : IAnimationJob
     public void ProcessRootMotion(AnimationStream stream) { }
     public void ProcessAnimation(AnimationStream stream)
     {
-        Debug.Log("Animation Job | Step #0.2 (Avatar Retargeting)");
         for (int i = 0; i < m_size; i++)
         {
             Quaternion a = m_sharedRotations[i];

@@ -37,6 +37,7 @@ public class AvatarChainStructure
 
 public class AvatarChainsHandler
 {
+    public int length { get => m_Chains.Count; }
     private List<AvatarChainStructure> m_Chains;
 
     public AvatarChainsHandler()
